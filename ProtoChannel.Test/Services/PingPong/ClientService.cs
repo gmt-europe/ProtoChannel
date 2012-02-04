@@ -20,7 +20,7 @@ namespace ProtoChannel.Test.Services.PingPong
 
         public Pong Ping(Ping message)
         {
-            return EndPing(BeginPing(message));
+            return SendMessage<Pong>(message);
         }
 
         public IAsyncResult BeginPing(Ping message)

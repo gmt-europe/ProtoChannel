@@ -40,6 +40,15 @@ namespace ProtoChannel
             return maxProtocol;
         }
 
+        protected T SendMessage<T>(object message)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected void SendMessage(object message)
+        {
+        }
+
         protected IAsyncResult BeginSendMessage(object message)
         {
             throw new NotImplementedException();

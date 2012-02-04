@@ -16,6 +16,7 @@ namespace ProtoChannel
         private bool _disposed;
         private readonly Dictionary<ProtoHostConnection<T>, T> _connections = new Dictionary<ProtoHostConnection<T>, T>();
         private readonly object _syncRoot = new object();
+        private readonly Service _service;
 
         public IPEndPoint LocalEndPoint { get; set; }
 
@@ -43,6 +44,8 @@ namespace ProtoChannel
 
         public ProtoHost(IPEndPoint localEndPoint, ProtoHostConfiguration configuration)
         {
+            _service = ServiceRegistry.GetServiceRegistration(typeof(T));
+
             LocalEndPoint = localEndPoint;
 
             Configuration = configuration ?? new ProtoHostConfiguration();
