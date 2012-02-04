@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace ProtoChannel.Test.ChannelSetup
 {
     [TestFixture]
-    internal class ProtocolNumberExchange
+    internal class ProtocolNumberExchange : FixtureBase
     {
         [Test]
         public void DefaultProtocolNumber()

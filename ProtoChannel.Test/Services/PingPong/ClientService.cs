@@ -23,9 +23,9 @@ namespace ProtoChannel.Test.Services.PingPong
             return SendMessage<Pong>(message);
         }
 
-        public IAsyncResult BeginPing(Ping message)
+        public void BeginPing(Ping message, AsyncCallback callback, object asyncState)
         {
-            return BeginSendMessage(message);
+            BeginSendMessage(message, typeof(Pong), callback, asyncState);
         }
 
         public Pong EndPing(IAsyncResult asyncResult)

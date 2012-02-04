@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Security;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
@@ -12,11 +13,11 @@ namespace ProtoChannel
     {
         private bool _frozen;
         private bool _secure;
-        private X509Certificate _certificate;
         private RemoteCertificateValidationCallback _validationCallback;
         private int _maxMessageSize;
         private int _maxStreamSize;
         private string _targetHost;
+        private Assembly _serviceAssembly;
 
         public ProtoClientConfiguration()
         {
@@ -78,6 +79,17 @@ namespace ProtoChannel
                 VerifyNotFrozen();
 
                 _maxStreamSize = value;
+            }
+        }
+
+        public Assembly ServiceAssembly
+        {
+            get { return _serviceAssembly; }
+            set
+            {
+                VerifyNotFrozen();
+
+                _serviceAssembly = value;
             }
         }
 

@@ -15,6 +15,11 @@ namespace ProtoChannel
         InvalidStreamData = 5,
         InvalidStreamPackageType = 6,
         InvalidProtocolHeader = 7,
-        InvalidProtocol = 8
+        InvalidProtocol = 8,
+        InvalidMessageKind,
+        InvalidMessageType,
+        ExpectedIsOneWay,
+        ExpectedRequest,
+        UnexpectedMessageType
     }
 }

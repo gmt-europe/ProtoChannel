@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Security;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
@@ -18,6 +19,7 @@ namespace ProtoChannel
         private int _maxStreamSize;
         private int _minimumProtocolNumber;
         private int _maximumProtocolNumber;
+        private Assembly _serviceAssembly;
 
         public ProtoHostConfiguration()
         {
@@ -101,6 +103,17 @@ namespace ProtoChannel
                 VerifyNotFrozen();
 
                 _maximumProtocolNumber = value;
+            }
+        }
+
+        public Assembly ServiceAssembly
+        {
+            get { return _serviceAssembly; }
+            set
+            {
+                VerifyNotFrozen();
+
+                _serviceAssembly = value;
             }
         }
 

@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using ProtoBuf.Meta;
 using ProtoChannel.Util;
 
 namespace ProtoChannel
@@ -14,6 +15,7 @@ namespace ProtoChannel
     {
         private readonly ProtoClient _client;
         private State _state;
+        private PendingMessageManager _messageManager = new PendingMessageManager();
 
         public ProtoClientConnection(ProtoClient client, TcpClient tcpClient)
             : base(tcpClient)
@@ -113,12 +115,9 @@ namespace ProtoChannel
         {
             // Receive the handshake request.
 
-            Messages.HandshakeRequest request;
-
-            using (var stream = new SubStream(ReceiveBuffer, package.Size))
-            {
-                request = ProtoBuf.Serializer.Deserialize<Messages.HandshakeRequest>(stream);
-            }
+            var request = (Messages.HandshakeRequest)TypeModel.Deserialize(
+                ReceiveBuffer, null, typeof(Messages.HandshakeRequest), (int)package.Length
+            );
 
             // Ask the client which protocol we're going to connect with.
 
@@ -131,11 +130,11 @@ namespace ProtoChannel
 
             // Push our response
 
-            long messageStart = BeginSendPackage();
+            long packageStart = BeginSendPackage();
 
             ProtoBuf.Serializer.Serialize(SendBuffer, handshake);
 
-            EndSendPackage(PackageType.Handshake, messageStart);
+            EndSendPackage(PackageType.Handshake, packageStart);
 
             _state = State.Connected;
 
@@ -149,6 +148,104 @@ namespace ProtoChannel
         private bool DummyValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             return true;
+        }
+
+        protected override void ProcessMessage(MessageKind kind, uint type, uint length, uint associationId)
+        {
+            if (kind == MessageKind.Response)
+                ProcessResponseMessage(type, length, associationId);
+            else
+                ProcessRequestMessage(type, length, associationId, kind == MessageKind.OneWay);
+        }
+
+        private void ProcessRequestMessage(uint type, uint length, uint associationId, bool isOneWay)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void ProcessResponseMessage(uint type, uint length, uint associationId)
+        {
+            var pendingMessage = _messageManager.RemovePendingMessage(associationId);
+
+            if (type != pendingMessage.MessageType.Id)
+            {
+                pendingMessage.SetAsFailed(
+                    new ProtoChannelException("Response was of an unexpected message type"), false
+                );
+
+                SendError(ProtocolError.UnexpectedMessageType);
+                return;
+            }
+
+            object message = _client.ServiceAssembly.TypeModel.Deserialize(
+                ReceiveBuffer, null, pendingMessage.MessageType.Type, (int)length
+            );
+
+            pendingMessage.SetAsCompleted(message, false);
+        }
+
+        public IAsyncResult BeginSendMessage(object message, Type responseType, AsyncCallback callback, object asyncState)
+        {
+            if (message == null)
+                throw new ArgumentNullException("message");
+
+            ServiceMessage messageType;
+
+            if (!_client.ServiceAssembly.MessagesByType.TryGetValue(message.GetType(), out messageType))
+                throw new ProtoChannelException(String.Format("Message type '{0}' is not a valid message type", message.GetType()));
+
+            ServiceMessage responseMessageType = null;
+
+            if (responseType != null)
+            {
+                if (!_client.ServiceAssembly.MessagesByType.TryGetValue(responseType, out responseMessageType))
+                    throw new ProtoChannelException(String.Format("Message type '{0}' is not a valid message type", responseMessageType));
+            }
+
+            long packageStart = BeginSendPackage();
+
+            // Write the header.
+
+            uint header = (uint)MessageKind.Request | (uint)messageType.Id << 2;
+
+            var buffer = BitConverter.GetBytes(header);
+
+            ByteUtil.ConvertNetwork(buffer);
+
+            SendBuffer.Write(buffer, 1, buffer.Length - 1);
+
+            // Write the association ID.
+
+            var pendingMessage = _messageManager.GetPendingMessage(responseMessageType, callback, asyncState);
+
+            buffer = BitConverter.GetBytes((ushort)pendingMessage.AssociationId);
+
+            ByteUtil.ConvertNetwork(buffer);
+
+            SendBuffer.Write(buffer, 0, buffer.Length);
+
+            // Write the message.
+
+            ProtoBuf.Serializer.NonGeneric.Serialize(SendBuffer, message);
+
+            // Send the message.
+
+            EndSendPackage(PackageType.Message, packageStart);
+
+            return pendingMessage;
+        }
+
+        public object EndSendMessage(IAsyncResult asyncResult)
+        {
+            if (asyncResult == null)
+                throw new ArgumentNullException("asyncResult");
+
+            return ((PendingMessage)asyncResult).EndInvoke();
+        }
+
+        public void PostMessage(object message)
+        {
+            throw new NotImplementedException();
         }
 
         private enum State

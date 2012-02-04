@@ -2,104 +2,66 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using ProtoBuf.Meta;
 
 namespace ProtoChannel
 {
     internal static class ServiceRegistry
     {
         private static readonly object _syncRoot = new object();
-        private static readonly Dictionary<Type, Service> _registrations = new Dictionary<Type, Service>();
-        private static readonly Dictionary<Type, ServiceMessage> _messages = new Dictionary<Type, ServiceMessage>();
+        private static readonly Dictionary<Assembly, ServiceAssembly> _assemblies = new Dictionary<Assembly, ServiceAssembly>();
 
-        public static Service GetServiceRegistration(Type serviceType)
+        public static ServiceAssembly GetAssemblyRegistration(Assembly assembly)
         {
-            if (serviceType == null)
-                throw new ArgumentNullException("serviceType");
+            if (assembly == null)
+                throw new ArgumentNullException("assembly");
 
             lock (_syncRoot)
             {
-                Service service;
+                ServiceAssembly registration;
 
-                if (!_registrations.TryGetValue(serviceType, out service))
+                if (!_assemblies.TryGetValue(assembly, out registration))
                 {
-                    service = CreateServiceRegistration(serviceType);
+                    registration = CreateAssemblyRegistration(assembly);
 
-                    _registrations.Add(serviceType, service);
+                    _assemblies.Add(assembly, registration);
                 }
 
-                return service;
+                return registration;
             }
         }
 
-        private static Service CreateServiceRegistration(Type serviceType)
+        private static ServiceAssembly CreateAssemblyRegistration(Assembly assembly)
         {
-            var methods = new ServiceMethodCollection();
-            var messages = new ServiceMessageCollection();
+            var messagesById = new ServiceMessageByIdCollection();
+            var messagesByType = new ServiceMessageByTypeCollection();
+            var typeModel = RuntimeTypeModel.Create();
 
-            foreach (var method in serviceType.GetMethods())
+            foreach (var type in assembly.GetTypes())
             {
-                var methodAttributes = method.GetCustomAttributes(typeof(ProtoMethodAttribute), true);
+                var messageAttributes = type.GetCustomAttributes(typeof(ProtoMessageAttribute), true);
 
-                if (methodAttributes.Length == 0)
+                if (messageAttributes.Length == 0)
                     continue;
 
-                Debug.Assert(methodAttributes.Length == 1);
+                Debug.Assert(messageAttributes.Length == 1);
 
-                var methodAttribute = (ProtoMethodAttribute)methodAttributes[0];
+                var messageAttribute = (ProtoMessageAttribute)messageAttributes[0];
 
-                var serviceMethod = new ServiceMethod(method, methodAttribute);
+                var message = new ServiceMessage(messageAttribute, type);
 
-                if (methods.Contains(serviceMethod.Request))
-                    throw new ProtoChannelException(String.Format("Invalid service contract '{0}'; multiple ProtoMethod's found for message type '{1}'", serviceType, serviceMethod.Request.Type));
+                messagesById.Add(message);
+                messagesByType.Add(message);
 
-                if (!messages.Contains(serviceMethod.Request.Id))
-                    messages.Add(serviceMethod.Request);
-
-                if (serviceMethod.Response != null && !messages.Contains(serviceMethod.Response.Id))
-                    messages.Add(serviceMethod.Response);
-
-                methods.Add(serviceMethod);
+                typeModel.Add(type, true);
             }
 
-            if (methods.Count == 0)
-                throw new ProtoChannelException(String.Format("Invalid service contract '{0}'; contract does not specify any handlers", serviceType));
+            if (messagesById.Count == 0)
+                throw new ProtoChannelException(String.Format("Assembly '{0}' does not contain any messages", assembly));
 
-            return new Service(serviceType, methods, messages);
-        }
-
-        public static ServiceMessage GetMessageRegistration(Type messageType)
-        {
-            if (messageType == null)
-                throw new ArgumentNullException("messageType");
-
-            lock (_syncRoot)
-            {
-                ServiceMessage message;
-
-                if (!_messages.TryGetValue(messageType, out message))
-                {
-                    message = CreateMessageRegistration(messageType);
-
-                    _messages.Add(messageType, message);
-                }
-
-                return message;
-            }
-        }
-
-        private static ServiceMessage CreateMessageRegistration(Type messageType)
-        {
-            var messageAttributes = messageType.GetCustomAttributes(typeof(ProtoMessageAttribute), true);
-
-            if (messageAttributes.Length == 0)
-                throw new ProtoChannelException(String.Format("Type '{0}' does not specify the ProtoMessage attribute", messageType));
-
-            Debug.Assert(messageAttributes.Length == 1);
-
-            var messageAttribute = (ProtoMessageAttribute)messageAttributes[0];
-
-            return new ServiceMessage(messageAttribute, messageType);
+            return new ServiceAssembly(assembly, typeModel, messagesById, messagesByType);
         }
     }
 }

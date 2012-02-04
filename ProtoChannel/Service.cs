@@ -14,18 +14,18 @@ namespace ProtoChannel
 
         public IKeyedCollection<int, ServiceMessage> Messages { get; private set; }
 
-        public Service(Type serviceType, ServiceMethodCollection methods, ServiceMessageCollection messages)
+        public Service(Type serviceType, ServiceMethodCollection methods, ServiceMessageByIdCollection messagesById)
         {
             if (serviceType == null)
                 throw new ArgumentNullException("serviceType");
             if (methods == null)
                 throw new ArgumentNullException("methods");
-            if (messages == null)
-                throw new ArgumentNullException("messages");
+            if (messagesById == null)
+                throw new ArgumentNullException("messagesById");
 
             Type = serviceType;
             Methods = new ReadOnlyKeyedCollection<ServiceMessage, ServiceMethod>(methods);
-            Messages = new ReadOnlyKeyedCollection<int, ServiceMessage>(messages);
+            Messages = new ReadOnlyKeyedCollection<int, ServiceMessage>(messagesById);
         }
     }
 }

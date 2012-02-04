@@ -9,16 +9,14 @@ using ProtoChannel.Test.Services.PingPong;
 namespace ProtoChannel.Test.ChannelSetup
 {
     [TestFixture]
-    internal class BasicConnection
+    internal class BasicConnection : FixtureBase
     {
         [Test]
         public void Connect()
         {
             using (var host = new ProtoHost<ServerService>(new IPEndPoint(IPAddress.Loopback, 0)))
+            using (new ClientService(host.LocalEndPoint))
             {
-                using (new ClientService(host.LocalEndPoint))
-                {
-                }
             }
         }
     }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using ProtoBuf.Meta;
 using ProtoChannel.Util;
 
 namespace ProtoChannel
@@ -26,6 +27,18 @@ namespace ProtoChannel
         protected Stream Stream { get; set; }
 
         protected TcpClient TcpClient { get; private set; }
+
+        public static RuntimeTypeModel TypeModel { get; private set; }
+
+        static ProtoConnection()
+        {
+            TypeModel = RuntimeTypeModel.Create();
+
+            TypeModel.Add(typeof(Messages.Error), true);
+            TypeModel.Add(typeof(Messages.HandshakeRequest), true);
+            TypeModel.Add(typeof(Messages.HandshakeResponse), true);
+            TypeModel.Add(typeof(Messages.StartStream), true);
+        }
 
         protected ProtoConnection(TcpClient tcpClient)
         {
@@ -150,10 +163,14 @@ namespace ProtoChannel
                 _pendingPackage = new PendingPackage((PackageType)(header & 0x7), header >> 3);
             }
 
-            if (ReceiveBuffer.Length - ReceiveBuffer.Position < _pendingPackage.Value.Size)
+            if (ReceiveBuffer.Length - ReceiveBuffer.Position < _pendingPackage.Value.Length)
                 return false;
 
-            ProcessPackage(_pendingPackage.Value);
+            var pendingPackage = _pendingPackage.Value;
+
+            _pendingPackage = null;
+
+            ProcessPackage(pendingPackage);
 
             return ReceiveBuffer.Length > ReceiveBuffer.Position;
         }
@@ -166,6 +183,14 @@ namespace ProtoChannel
                     ProcessErrorPackage(package);
                     break;
 
+                case PackageType.NoOp:
+                    // No-op's are just dropped.
+                    break;
+
+                case PackageType.Message:
+                    ProcessMessagePackage(package);
+                    break;
+
                 default:
                     throw new NotImplementedException();
             }
@@ -173,15 +198,72 @@ namespace ProtoChannel
 
         private void ProcessErrorPackage(PendingPackage package)
         {
-            Messages.Error error;
-
-            using (var stream = new SubStream(ReceiveBuffer, package.Size))
-            {
-                error = ProtoBuf.Serializer.Deserialize<Messages.Error>(stream);
-            }
+            var error = (Messages.Error)TypeModel.Deserialize(
+                ReceiveBuffer, null, typeof(Messages.Error), (int)package.Length
+            );
 
             throw new ProtoChannelException(String.Format("Protocol exception '{0}'", (ProtocolError)error.ErrorNumber));
         }
+
+        private void ProcessMessagePackage(PendingPackage package)
+        {
+            // We need at least three bytes for a valid message.
+
+            if (package.Length < 3)
+            {
+                SendError(ProtocolError.InvalidPackageLength);
+                return;
+            }
+
+            uint length = package.Length - 3;
+
+            byte[] buffer = new byte[4];
+
+            buffer[0] = 0;
+
+            ReceiveBuffer.Read(buffer, 1, buffer.Length - 1);
+
+            ByteUtil.ConvertNetwork(buffer);
+
+            uint header = BitConverter.ToUInt32(buffer, 0);
+
+            uint messageKindNumber = header & 0x3;
+            uint messageType = header >> 2;
+
+            // Validate the message kind.
+
+            if (messageKindNumber == 3)
+            {
+                SendError(ProtocolError.InvalidMessageKind);
+                return;
+            }
+
+            var messageKind = (MessageKind)messageKindNumber;
+            uint associationId = 0;
+
+            if (messageKind != MessageKind.OneWay)
+            {
+                // Verify that there is an association ID in the request.
+
+                if (package.Length < 5)
+                {
+                    SendError(ProtocolError.InvalidPackageLength);
+                    return;
+                }
+
+                length -= 2;
+
+                ReceiveBuffer.Read(buffer, 0, 2);
+
+                ByteUtil.ConvertNetwork(buffer, 0, 2);
+
+                associationId = BitConverter.ToUInt16(buffer, 0);
+            }
+
+            ProcessMessage(messageKind, messageType, length, associationId);
+        }
+
+        protected abstract void ProcessMessage(MessageKind kind, uint type, uint length, uint associationId);
 
         protected long BeginSendPackage()
         {
@@ -197,15 +279,15 @@ namespace ProtoChannel
             return position;
         }
 
-        protected void EndSendPackage(PackageType packageType, long messageStart)
+        protected void EndSendPackage(PackageType packageType, long packageStart)
         {
             Debug.Assert(SendBuffer.Length == SendBuffer.Position);
 
             long position = SendBuffer.Position;
 
-            SendBuffer.Position = messageStart;
+            SendBuffer.Position = packageStart;
 
-            long messageLength = position - messageStart - 3;
+            long messageLength = position - packageStart - 3;
 
             uint messageHeader = (uint)messageLength << 3 | (uint)packageType;
 
@@ -323,14 +405,14 @@ namespace ProtoChannel
 
         protected void SendError(ProtocolError error)
         {
-            long messageStart = BeginSendPackage();
+            long packageStart = BeginSendPackage();
 
             ProtoBuf.Serializer.Serialize(SendBuffer, new Messages.Error
             {
                 ErrorNumber = (uint)error
             });
 
-            EndSendPackage(PackageType.Error, messageStart);
+            EndSendPackage(PackageType.Error, packageStart);
         }
 
         private void VerifyNotDisposed()
@@ -356,12 +438,12 @@ namespace ProtoChannel
         protected struct PendingPackage
         {
             private readonly PackageType _type;
-            private readonly uint _size;
+            private readonly uint _length;
 
-            public PendingPackage(PackageType type, uint size)
+            public PendingPackage(PackageType type, uint length)
             {
                 _type = type;
-                _size = size;
+                _length = length;
             }
 
             public PackageType Type
@@ -369,9 +451,9 @@ namespace ProtoChannel
                 get { return _type; }
             }
 
-            public uint Size
+            public uint Length
             {
-                get { return _size; }
+                get { return _length; }
             }
         }
     }

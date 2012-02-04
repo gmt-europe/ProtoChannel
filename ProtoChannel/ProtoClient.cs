@@ -16,6 +16,8 @@ namespace ProtoChannel
 
         public ProtoClientConfiguration Configuration { get; private set; }
 
+        internal ServiceAssembly ServiceAssembly { get; private set; }
+
         public ProtoClient(IPEndPoint remoteEndPoint)
             : this(remoteEndPoint, null)
         {
@@ -27,6 +29,10 @@ namespace ProtoChannel
 
             Configuration = configuration ?? new ProtoClientConfiguration();
             Configuration.Freeze();
+
+            ServiceAssembly = ServiceRegistry.GetAssemblyRegistration(
+                Configuration.ServiceAssembly ?? GetType().Assembly
+            );
 
             var client = new TcpClient();
 
@@ -42,29 +48,32 @@ namespace ProtoChannel
 
         protected T SendMessage<T>(object message)
         {
-            throw new NotImplementedException();
+            return (T)_connection.EndSendMessage(_connection.BeginSendMessage(message, typeof(T), null, null));
         }
 
         protected void SendMessage(object message)
         {
-        }
-
-        protected IAsyncResult BeginSendMessage(object message)
-        {
-            throw new NotImplementedException();
+            _connection.EndSendMessage(_connection.BeginSendMessage(message, null, null, null));
         }
 
         protected T EndSendMessage<T>(IAsyncResult asyncResult)
         {
-            throw new NotImplementedException();
+            return (T)_connection.EndSendMessage(asyncResult);
+        }
+
+        protected void BeginSendMessage(object message, Type responseType, AsyncCallback callback, object asyncState)
+        {
+            _connection.BeginSendMessage(message, responseType, callback, asyncState);
         }
 
         protected void EndSendMessage(IAsyncResult asyncResult)
         {
+            _connection.EndSendMessage(asyncResult);
         }
 
-        protected void Post(object message)
+        protected void PostMessage(object message)
         {
+            _connection.PostMessage(message);
         }
 
         public void Dispose()

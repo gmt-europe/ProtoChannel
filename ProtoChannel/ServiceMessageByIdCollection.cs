@@ -6,7 +6,7 @@ using ProtoChannel.Util;
 
 namespace ProtoChannel
 {
-    internal class ServiceMessageCollection : KeyedCollection<int, ServiceMessage>
+    internal class ServiceMessageByIdCollection : KeyedCollection<int, ServiceMessage>
     {
         protected override int GetKeyForItem(ServiceMessage item)
         {

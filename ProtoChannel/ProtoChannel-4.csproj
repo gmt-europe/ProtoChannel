@@ -51,6 +51,8 @@
     <Compile Include="Messages\HandshakeResponse.cs" />
     <Compile Include="Messages\StartStream.cs" />
     <Compile Include="PackageType.cs" />
+    <Compile Include="PendingMessage.cs" />
+    <Compile Include="PendingMessageManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProtoChannelException.cs" />
     <Compile Include="ProtoClient.cs" />
@@ -63,13 +65,24 @@
     <Compile Include="ProtoHostConnection.cs" />
     <Compile Include="ProtoMessageAttribute.cs" />
     <Compile Include="ProtoMethodAttribute.cs" />
+    <Compile Include="Service.cs" />
+    <Compile Include="ServiceAssembly.cs" />
+    <Compile Include="ServiceMessage.cs" />
+    <Compile Include="ServiceMessageByIdCollection.cs" />
+    <Compile Include="ServiceMessageByTypeCollection.cs" />
+    <Compile Include="ServiceMethod.cs" />
+    <Compile Include="ServiceMethodCollection.cs" />
+    <Compile Include="ServiceRegistry.cs" />
     <Compile Include="StreamPackageType.cs" />
     <Compile Include="UnhandledExceptionEventHandler.cs" />
+    <Compile Include="Util\AsyncResultImpl.cs" />
     <Compile Include="Util\ByteUtil.cs" />
+    <Compile Include="Util\IKeyedCollection.cs" />
+    <Compile Include="Util\KeyedCollection.cs" />
+    <Compile Include="Util\ReadOnlyKeyedCollection.cs" />
     <Compile Include="Util\RingMemoryBufferManager.cs" />
     <Compile Include="Util\RingMemoryPage.cs" />
     <Compile Include="Util\RingMemoryStream.cs" />
-    <Compile Include="Util\SubStream.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

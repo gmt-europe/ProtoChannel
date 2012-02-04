@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="ChannelSetup\BasicConnection.cs" />
     <Compile Include="ChannelSetup\ProtocolNumberExchange.cs" />
+    <Compile Include="FixtureBase.cs" />
     <Compile Include="MessageExchange\MessageExchangeFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\PingPong\ClientService.cs" />
@@ -55,7 +56,7 @@
     <Compile Include="Services\PingPong\ServerService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProtoChannel-4\ProtoChannel-4.csproj">
+    <ProjectReference Include="..\ProtoChannel\ProtoChannel-4.csproj">
       <Project>{B43F28DC-926B-4B95-AF13-83F74F7BCC5A}</Project>
       <Name>ProtoChannel-4</Name>
     </ProjectReference>

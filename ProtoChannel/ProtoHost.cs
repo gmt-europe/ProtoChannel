@@ -16,13 +16,16 @@ namespace ProtoChannel
         private bool _disposed;
         private readonly Dictionary<ProtoHostConnection<T>, T> _connections = new Dictionary<ProtoHostConnection<T>, T>();
         private readonly object _syncRoot = new object();
-        private readonly Service _service;
 
         public IPEndPoint LocalEndPoint { get; set; }
 
         public ProtoHostConfiguration Configuration { get; private set; }
 
         public UnhandledExceptionEventHandler UnhandledException;
+
+        internal ServiceAssembly ServiceAssembly { get; private set; }
+
+        internal Service Service { get; private set; }
 
         protected virtual void OnUnhandledException(UnhandledExceptionEventArgs e)
         {
@@ -44,12 +47,16 @@ namespace ProtoChannel
 
         public ProtoHost(IPEndPoint localEndPoint, ProtoHostConfiguration configuration)
         {
-            _service = ServiceRegistry.GetServiceRegistration(typeof(T));
-
             LocalEndPoint = localEndPoint;
 
             Configuration = configuration ?? new ProtoHostConfiguration();
             Configuration.Freeze();
+
+            ServiceAssembly = ServiceRegistry.GetAssemblyRegistration(
+                Configuration.ServiceAssembly ?? typeof(T).Assembly
+            );
+
+            Service = ServiceAssembly.GetServiceRegistration(typeof(T));
 
             Start();
         }
@@ -127,13 +134,17 @@ namespace ProtoChannel
             }
         }
 
-        internal void RaiseClientConnected(ProtoHostConnection<T> connection, int protocolNumber)
+        internal T RaiseClientConnected(ProtoHostConnection<T> connection, int protocolNumber)
         {
             lock (_syncRoot)
             {
                 Debug.Assert(_connections.ContainsKey(connection) && _connections[connection] == null);
 
-                _connections[connection] = CreateService(protocolNumber);
+                var client = CreateService(protocolNumber);
+
+                _connections[connection] = client;
+
+                return client;
             }
         }
 

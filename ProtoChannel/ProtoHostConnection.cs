@@ -8,7 +8,9 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using ProtoChannel.Util;
+using ProtoBuf.Meta;
 
 namespace ProtoChannel
 {
@@ -16,8 +18,10 @@ namespace ProtoChannel
         where T : class, new()
     {
         private readonly ProtoHost<T> _host;
+        private readonly object _clientSyncRoot = new object();
         private State _state;
         private SslStream _sslStream;
+        private T _client;
 
         public ProtoHostConnection(ProtoHost<T> host, TcpClient tcpClient)
             : base(tcpClient)
@@ -150,11 +154,11 @@ namespace ProtoChannel
                 ProtocolMax = (uint)_host.Configuration.MaximumProtocolNumber
             };
 
-            long messageStart = BeginSendPackage();
+            long packageStart = BeginSendPackage();
 
             ProtoBuf.Serializer.Serialize(SendBuffer, handshake);
 
-            EndSendPackage(PackageType.Handshake, messageStart);
+            EndSendPackage(PackageType.Handshake, packageStart);
 
             _state = State.Connected;
         }
@@ -199,12 +203,9 @@ namespace ProtoChannel
         {
             // Receive the handshake response.
 
-            Messages.HandshakeResponse response;
-
-            using (var stream = new SubStream(ReceiveBuffer, package.Size))
-            {
-                response = ProtoBuf.Serializer.Deserialize<Messages.HandshakeResponse>(stream);
-            }
+            var response = (Messages.HandshakeResponse)TypeModel.Deserialize(
+                ReceiveBuffer, null, typeof(Messages.HandshakeResponse), (int)package.Length
+            );
 
             // Validate the protocol number.
 
@@ -221,8 +222,110 @@ namespace ProtoChannel
                 // Else, we've got a valid connection and can proceed with
                 // creating the service client.
 
-                _host.RaiseClientConnected(this, protocolNumber);
+                _client = _host.RaiseClientConnected(this, protocolNumber);
             }
+        }
+
+        protected override void ProcessMessage(MessageKind kind, uint type, uint length, uint associationId)
+        {
+            if (kind == MessageKind.Response)
+                ProcessResponseMessage(type, length, associationId);
+            else
+                ProcessRequestMessage(type, length, associationId, kind == MessageKind.OneWay);
+        }
+
+        private void ProcessRequestMessage(uint type, uint length, uint associationId, bool isOneWay)
+        {
+            // Validate the request and find the method.
+
+            ServiceMessage messageType;
+
+            if (!_host.Service.Messages.TryGetValue((int)type, out messageType))
+            {
+                SendError(ProtocolError.InvalidMessageType);
+                return;
+            }
+
+            ServiceMethod method;
+
+            if (!_host.Service.Methods.TryGetValue(messageType, out method))
+            {
+                SendError(ProtocolError.InvalidMessageType);
+                return;
+            }
+
+            if (method.IsOneWay != isOneWay)
+            {
+                SendError(method.IsOneWay ? ProtocolError.ExpectedIsOneWay : ProtocolError.ExpectedRequest);
+                return;
+            }
+
+            // Parse the message.
+
+            var message = _host.ServiceAssembly.TypeModel.Deserialize(
+                ReceiveBuffer, null, messageType.Type, (int)length
+            );
+
+            // Start processing the message.
+
+            ThreadPool.QueueUserWorkItem(
+                p => ExecuteMessage((PendingMessage)p),
+                new PendingMessage(message, isOneWay, associationId, method)
+            );
+        }
+
+        private void ExecuteMessage(PendingMessage message)
+        {
+            try
+            {
+                object result;
+
+                lock (_clientSyncRoot)
+                {
+                    result = message.Method.Method.Invoke(_client, new[] { message.Message });
+                }
+
+                if (!message.IsOneWay)
+                    SendResponse(message, result);
+            }
+            catch (Exception ex)
+            {
+                _host.RaiseUnhandledException(this, ex);
+            }
+        }
+
+        private void SendResponse(PendingMessage message, object result)
+        {
+            long packageStart = BeginSendPackage();
+
+            // Write the header.
+
+            uint header = (uint)MessageKind.Response | (uint)message.Method.Response.Id << 2;
+
+            byte[] buffer = BitConverter.GetBytes(header);
+
+            ByteUtil.ConvertNetwork(buffer);
+
+            SendBuffer.Write(buffer, 1, buffer.Length - 1);
+
+            // Write the association ID.
+
+            buffer = BitConverter.GetBytes((ushort)message.AssociationId);
+
+            ByteUtil.ConvertNetwork(buffer);
+
+            SendBuffer.Write(buffer, 0, buffer.Length);
+
+            // Write the message.
+
+            ProtoBuf.Serializer.NonGeneric.Serialize(SendBuffer, result);
+
+            EndSendPackage(PackageType.Message, packageStart);
+        }
+
+        private void ProcessResponseMessage(uint type, uint length, uint associationId)
+        {
+            throw new NotImplementedException();
         }
 
         private enum State
@@ -231,6 +334,47 @@ namespace ProtoChannel
             ReceivingProlog,
             ReceivingHandshake,
             Connected
+        }
+
+        private class PendingMessage
+        {
+            private readonly object _message;
+            private readonly bool _isOneWay;
+            private readonly uint _associationId;
+            private readonly ServiceMethod _method;
+
+            public PendingMessage(object message, bool isOneWay, uint associationId, ServiceMethod method)
+            {
+                if (message == null)
+                    throw new ArgumentNullException("message");
+                if (method == null)
+                    throw new ArgumentNullException("method");
+
+                _message = message;
+                _isOneWay = isOneWay;
+                _associationId = associationId;
+                _method = method;
+            }
+
+            public object Message
+            {
+                get { return _message; }
+            }
+
+            public bool IsOneWay
+            {
+                get { return _isOneWay; }
+            }
+
+            public uint AssociationId
+            {
+                get { return _associationId; }
+            }
+
+            public ServiceMethod Method
+            {
+                get { return _method; }
+            }
         }
     }
 }
