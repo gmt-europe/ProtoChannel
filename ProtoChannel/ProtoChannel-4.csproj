@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{B43F28DC-926B-4B95-AF13-83F74F7BCC5A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ProtoChannel</RootNamespace>
+    <AssemblyName>ProtoChannel-4</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;_NET_4</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;_NET_4</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="protobuf-net">
+      <HintPath>..\Libraries\Protobuf-Net\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Constants.cs" />
+    <Compile Include="MessageKind.cs" />
+    <Compile Include="Messages\Error.cs" />
+    <Compile Include="Messages\HandshakeRequest.cs" />
+    <Compile Include="Messages\HandshakeResponse.cs" />
+    <Compile Include="Messages\StartStream.cs" />
+    <Compile Include="PackageType.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProtoChannelException.cs" />
+    <Compile Include="ProtoClient.cs" />
+    <Compile Include="ProtoClientConfiguration.cs" />
+    <Compile Include="ProtoClientConnection.cs" />
+    <Compile Include="ProtocolError.cs" />
+    <Compile Include="ProtoConnection.cs" />
+    <Compile Include="ProtoHost.cs" />
+    <Compile Include="ProtoHostConfiguration.cs" />
+    <Compile Include="ProtoHostConnection.cs" />
+    <Compile Include="ProtoMessageAttribute.cs" />
+    <Compile Include="ProtoMethodAttribute.cs" />
+    <Compile Include="StreamPackageType.cs" />
+    <Compile Include="UnhandledExceptionEventHandler.cs" />
+    <Compile Include="Util\ByteUtil.cs" />
+    <Compile Include="Util\RingMemoryBufferManager.cs" />
+    <Compile Include="Util\RingMemoryPage.cs" />
+    <Compile Include="Util\RingMemoryStream.cs" />
+    <Compile Include="Util\SubStream.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

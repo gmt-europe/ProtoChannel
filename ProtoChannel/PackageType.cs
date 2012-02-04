@@ -1,0 +1,16 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace ProtoChannel
+{
+    internal enum PackageType
+    {
+        NoOp = 0,
+        Error = 1,
+        Handshake = 2,
+        Message = 3,
+        Stream = 4
+    }
+}
