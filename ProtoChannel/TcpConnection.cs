@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using ProtoBuf.Meta;
 using ProtoChannel.Util;
 
@@ -30,25 +31,13 @@ namespace ProtoChannel
 
         protected long ReadAvailable
         {
-            get
-            {
-                lock (SyncRoot)
-                {
-                    return _receiveStream.Length - _receiveStream.Position;
-                }
-            }
+            get { return _receiveStream.Length - _receiveStream.Position; }
         }
 
         protected long WritePosition
         {
             get { return _sendStream.Position; }
-            set
-            {
-                lock (SyncRoot)
-                {
-                    _sendStream.Position = value;
-                }
-            }
+            set { _sendStream.Position = value; }
         }
 
         protected TcpConnection(TcpClient tcpClient)
@@ -137,10 +126,7 @@ namespace ProtoChannel
             if (buffer == null)
                 throw new ArgumentNullException("buffer");
 
-            lock (SyncRoot)
-            {
-                return _receiveStream.Read(buffer, offset, count);
-            }
+            return _receiveStream.Read(buffer, offset, count);
         }
 
         protected object ReadMessage(RuntimeTypeModel typeModel, Type messageType, int length)
@@ -150,39 +136,33 @@ namespace ProtoChannel
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            lock (SyncRoot)
-            {
-                return typeModel.Deserialize(_receiveStream, null, messageType, length);
-            }
+            return typeModel.Deserialize(_receiveStream, null, messageType, length);
         }
 
         protected void ReadStream(Stream stream, int length)
         {
-            lock (SyncRoot)
+            // We read directly from the back buffers.
+
+            while (length > 0)
             {
-                // We read directly from the back buffers.
+                // Get a page where we can read from.
 
-                while (length > 0)
-                {
-                    // Get a page where we can read from.
+                long pageSize = Math.Min(
+                    _receiveStream.BlockSize - _receiveStream.Position % _receiveStream.BlockSize, // Maximum size to stay on the page
+                    length
+                );
 
-                    long pageSize = Math.Min(
-                        _receiveStream.BlockSize - _receiveStream.Position % _receiveStream.BlockSize, // Maximum size to stay on the page
-                        length
-                    );
+                var page = _receiveStream.GetPage(_receiveStream.Position, pageSize);
 
-                    var page = _receiveStream.GetPage(_receiveStream.Position, pageSize);
+                // Write the page to our stream.
 
-                    // Write the page to our stream.
+                stream.Write(page.Buffer, page.Offset, page.Count);
 
-                    stream.Write(page.Buffer, page.Offset, page.Count);
+                // Move the buffers position.
 
-                    // Move the buffers position.
+                _receiveStream.Position += page.Count;
 
-                    _receiveStream.Position += page.Count;
-
-                    length -= page.Count;
-                }
+                length -= page.Count;
             }
         }
 
@@ -191,10 +171,7 @@ namespace ProtoChannel
             if (buffer == null)
                 throw new ArgumentNullException("buffer");
 
-            lock (SyncRoot)
-            {
-                _sendStream.Write(buffer, offset, count);
-            }
+            _sendStream.Write(buffer, offset, count);
         }
 
         protected void WriteMessage(RuntimeTypeModel typeModel, object message)
@@ -204,10 +181,7 @@ namespace ProtoChannel
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            lock (SyncRoot)
-            {
-                typeModel.Serialize(_sendStream, message);
-            }
+            typeModel.Serialize(_sendStream, message);
         }
 
         protected void WriteStream(Stream stream, long length)
@@ -215,50 +189,44 @@ namespace ProtoChannel
             if (stream == null)
                 throw new ArgumentNullException("stream");
 
-            lock (SyncRoot)
+            while (length > 0)
             {
-                while (length > 0)
-                {
-                    Debug.Assert(_sendStream.Length == _sendStream.Position);
+                Debug.Assert(_sendStream.Length == _sendStream.Position);
 
-                    // We write directly into the back buffers of the send buffer.
+                // We write directly into the back buffers of the send buffer.
 
-                    long pageSize = Math.Min(
-                        _sendStream.BlockSize - _sendStream.Position % _sendStream.BlockSize, // Maximum size to stay on the page
-                        length
-                    );
+                long pageSize = Math.Min(
+                    _sendStream.BlockSize - _sendStream.Position % _sendStream.BlockSize, // Maximum size to stay on the page
+                    length
+                );
 
-                    // Make room for the page.
+                // Make room for the page.
 
-                    _sendStream.SetLength(_sendStream.Length + pageSize);
+                _sendStream.SetLength(_sendStream.Length + pageSize);
 
-                    // Get the page we're using to write the stream data on.
+                // Get the page we're using to write the stream data on.
 
-                    var page = _sendStream.GetPage(_sendStream.Position, pageSize);
+                var page = _sendStream.GetPage(_sendStream.Position, pageSize);
 
-                    int read = stream.Read(page.Buffer, page.Offset, page.Count);
+                int read = stream.Read(page.Buffer, page.Offset, page.Count);
 
-                    Debug.Assert(read == page.Count);
+                Debug.Assert(read == page.Count);
 
-                    // Move the position forward to correspond with the data
-                    // we've just written.
+                // Move the position forward to correspond with the data
+                // we've just written.
 
-                    _sendStream.Position += pageSize;
+                _sendStream.Position += pageSize;
 
-                    length -= page.Count;
-                }
+                length -= page.Count;
             }
         }
 
         protected void Read()
         {
-            lock (SyncRoot)
-            {
-                if (IsAsync)
-                    ReadAsync();
-                else
-                    ReadSync();
-            }
+            if (IsAsync)
+                ReadAsync();
+            else
+                ReadSync();
         }
 
         private void ReadSync()
@@ -340,13 +308,10 @@ namespace ProtoChannel
 
         protected void Send()
         {
-            lock (SyncRoot)
-            {
-                if (IsAsync)
-                    SendAsync();
-                else
-                    SendSync();
-            }
+            if (IsAsync)
+                SendAsync();
+            else
+                SendSync();
         }
 
         private void SendSync()
