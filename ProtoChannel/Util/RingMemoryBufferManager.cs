@@ -54,7 +54,7 @@ namespace ProtoChannel.Util
         private static readonly object _staticSyncLock = new object();
         private static readonly Dictionary<int, RingMemoryBufferManager> _managers = new Dictionary<int, RingMemoryBufferManager>();
 
-        private readonly object _syncLock = new object();
+        private readonly object _syncRoot = new object();
         private readonly Queue<byte[]> _cache = new Queue<byte[]>();
 
         public int BlockSize { get; private set; }
@@ -83,7 +83,7 @@ namespace ProtoChannel.Util
 
         public byte[] GetBlock()
         {
-            lock (_syncLock)
+            lock (_syncRoot)
             {
                 if (_cache.Count > 0)
                     return _cache.Dequeue();
@@ -99,7 +99,7 @@ namespace ProtoChannel.Util
 
             Debug.Assert(block.Length == BlockSize);
 
-            lock (_syncLock)
+            lock (_syncRoot)
             {
                 _cache.Enqueue(block);
             }

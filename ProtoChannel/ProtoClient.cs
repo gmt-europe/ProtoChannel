@@ -66,6 +66,9 @@ namespace ProtoChannel
 
         private static TcpClient CreateClient(IPEndPoint remoteEndPoint)
         {
+            if (remoteEndPoint == null)
+                throw new ArgumentNullException("remoteEndPoint");
+
             var client = new TcpClient();
 
             client.Connect(remoteEndPoint);
@@ -75,6 +78,9 @@ namespace ProtoChannel
 
         private static TcpClient CreateClient(IPAddress address, int port)
         {
+            if (address == null)
+                throw new ArgumentNullException("address");
+
             var client = new TcpClient();
 
             client.Connect(address, port);
@@ -101,17 +107,17 @@ namespace ProtoChannel
 
         protected T SendMessage<T>(object message)
         {
-            return (T)_connection.EndSendMessage(_connection.BeginSendMessage(message, typeof(T), null, null));
+            return (T)ClientConnection.EndSendMessage(_connection.BeginSendMessage(message, typeof(T), null, null));
         }
 
         protected void SendMessage(object message)
         {
-            _connection.EndSendMessage(_connection.BeginSendMessage(message, null, null, null));
+            ClientConnection.EndSendMessage(_connection.BeginSendMessage(message, null, null, null));
         }
 
         protected T EndSendMessage<T>(IAsyncResult asyncResult)
         {
-            return (T)_connection.EndSendMessage(asyncResult);
+            return (T)ClientConnection.EndSendMessage(asyncResult);
         }
 
         protected IAsyncResult BeginSendMessage(object message, Type responseType, AsyncCallback callback, object asyncState)
@@ -121,7 +127,7 @@ namespace ProtoChannel
 
         protected void EndSendMessage(IAsyncResult asyncResult)
         {
-            _connection.EndSendMessage(asyncResult);
+            ClientConnection.EndSendMessage(asyncResult);
         }
 
         protected void PostMessage(object message)

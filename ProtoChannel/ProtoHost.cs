@@ -6,19 +6,38 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Common.Logging;
 
 namespace ProtoChannel
 {
-    public class ProtoHost<T> : IDisposable
-        where T : class, new()
+    public abstract class ProtoHost : IDisposable
     {
-        private TcpListener _listener;
-        private bool _closing;
-        private bool _disposed;
-        private readonly Dictionary<HostConnection<T>, T> _connections = new Dictionary<HostConnection<T>, T>();
+        private static readonly ILog Log = LogManager.GetLogger(typeof(ProtoHost<>));
+
         private readonly object _syncRoot = new object();
+        private TcpListener _listener;
+        private bool _disposed;
+        private readonly Dictionary<HostConnection, object> _connections = new Dictionary<HostConnection, object>();
         private readonly IStreamManager _streamManager;
-        private AutoResetEvent _connectionsChangedEvent = new AutoResetEvent(false);
+        private AutoResetEvent _stateChangedEvent = new AutoResetEvent(false);
+        private ProtoHostState _state;
+
+        public ProtoHostState State
+        {
+            get { return _state; }
+            private set
+            {
+                lock (_syncRoot)
+                {
+                    if (_state != value)
+                    {
+                        _state = value;
+
+                        _stateChangedEvent.Set();
+                    }
+                }
+            }
+        }
 
         public IPEndPoint LocalEndPoint { get; set; }
 
@@ -38,28 +57,23 @@ namespace ProtoChannel
                 ev(this, e);
         }
 
-        protected virtual T CreateService(int protocolNumber)
+        internal ProtoHost(IPEndPoint localEndPoint, Type serviceType, ProtoHostConfiguration configuration)
         {
-            return new T();
-        }
+            if (localEndPoint == null)
+                throw new ArgumentNullException("localEndPoint");
+            if (serviceType == null)
+                throw new ArgumentNullException("serviceType");
 
-        public ProtoHost(IPEndPoint localEndPoint)
-            : this(localEndPoint, null)
-        {
-        }
-
-        public ProtoHost(IPEndPoint localEndPoint, ProtoHostConfiguration configuration)
-        {
             LocalEndPoint = localEndPoint;
 
             Configuration = configuration ?? new ProtoHostConfiguration();
             Configuration.Freeze();
 
             ServiceAssembly = ServiceRegistry.GetAssemblyRegistration(
-                Configuration.ServiceAssembly ?? typeof(T).Assembly
+                Configuration.ServiceAssembly ?? serviceType.Assembly
             );
 
-            Service = ServiceAssembly.GetServiceRegistration(typeof(T));
+            Service = ServiceAssembly.GetServiceRegistration(serviceType);
 
             _streamManager = Configuration.StreamManager ?? new MemoryStreamManager();
 
@@ -68,55 +82,79 @@ namespace ProtoChannel
 
         private void Start()
         {
+            Log.InfoFormat("Setting up host at {0}", LocalEndPoint);
+
+            State = ProtoHostState.Listening;
+
             _listener = new TcpListener(LocalEndPoint);
             _listener.Start();
 
             LocalEndPoint = (IPEndPoint)_listener.LocalEndpoint;
 
             _listener.BeginAcceptTcpClient(AcceptTcpClientCallback, null);
+
+            Log.InfoFormat("Listening for incoming connections at {0}", LocalEndPoint);
         }
 
         private void AcceptTcpClientCallback(IAsyncResult asyncResult)
         {
-            if (_closing)
-                return;
-
-            TcpClient tcpClient;
-
-            try
+            lock (_syncRoot)
             {
-                tcpClient = _listener.EndAcceptTcpClient(asyncResult);
-            }
-            catch
-            {
-                Dispose();
-                return;
-            }
+                // Bail out if we're closing.
 
-            try
-            {
-                var connection = new HostConnection<T>(this, tcpClient, _streamManager);
+                if (State != ProtoHostState.Listening)
+                    return;
 
-                lock (_syncRoot)
+                try
                 {
-                    _connections.Add(connection, null);
+                    var tcpClient = _listener.EndAcceptTcpClient(asyncResult);
 
-                    _connectionsChangedEvent.Set();
+                    try
+                    {
+                        var connection = new HostConnection(this, tcpClient, _streamManager);
+
+                        _connections.Add(connection, null);
+                    }
+                    catch
+                    {
+                        tcpClient.Close();
+
+                        throw;
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Log.Info("Failed to accept TCP client", ex);
+                }
+
+                try
+                {
+                    _listener.BeginAcceptTcpClient(AcceptTcpClientCallback, null);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("BeginAcceptTcpClient failed", ex);
+
+                    Close();
+                }
+            }
+        }
+
+        internal void RaiseUnhandledException(HostConnection connection, Exception exception)
+        {
+            if (connection == null)
+                throw new ArgumentNullException("connection");
+            if (exception == null)
+                throw new ArgumentNullException("exception");
+
+            try
+            {
+                OnUnhandledException(new UnhandledExceptionEventArgs(exception));
             }
             catch (Exception ex)
             {
-                tcpClient.Close();
-
-                OnUnhandledException(new UnhandledExceptionEventArgs(ex));
+                Log.Warn("Exception from UnhandledException event", ex);
             }
-
-            _listener.BeginAcceptTcpClient(AcceptTcpClientCallback, null);
-        }
-
-        internal void RaiseUnhandledException(HostConnection<T> connection, Exception exception)
-        {
-            OnUnhandledException(new UnhandledExceptionEventArgs(exception));
 
             try
             {
@@ -124,13 +162,11 @@ namespace ProtoChannel
             }
             catch (Exception ex)
             {
-                OnUnhandledException(new UnhandledExceptionEventArgs(ex));
+                Log.Warn("Disposing connection failed", ex);
             }
-
-            RemoveConnection(connection);
         }
 
-        internal void RemoveConnection(HostConnection<T> connection)
+        internal void RemoveConnection(HostConnection connection)
         {
             if (connection == null)
                 throw new ArgumentNullException("connection");
@@ -139,21 +175,130 @@ namespace ProtoChannel
             {
                 _connections.Remove(connection);
 
-                _connectionsChangedEvent.Set();
+                // We progress to the closed state when all connections have
+                // been closed.
+
+                if (State == ProtoHostState.Closing && _connections.Count == 0)
+                    State = ProtoHostState.Closed;
             }
         }
 
-        internal T RaiseClientConnected(HostConnection<T> connection, int protocolNumber)
+        internal HostClient RaiseClientConnected(HostConnection connection, int protocolNumber)
         {
+            if (connection == null)
+                throw new ArgumentNullException("connection");
+
             lock (_syncRoot)
             {
                 Debug.Assert(_connections.ContainsKey(connection) && _connections[connection] == null);
 
-                var client = CreateService(protocolNumber);
+                object client = null;
 
-                _connections[connection] = client;
+                try
+                {
+                    client = CreateServiceCore(protocolNumber);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Failed to create service", ex);
+                }
 
-                return client;
+                if (client != null)
+                {
+                    var hostClient = new HostClient(client);
+
+                    _connections[connection] = hostClient;
+
+                    return hostClient;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        internal abstract object CreateServiceCore(int protocolNumber);
+
+        public void Close()
+        {
+            Close(CloseMode.Gracefully, null);
+        }
+
+        public void Close(CloseMode mode)
+        {
+            Close(mode, null);
+        }
+
+        public void Close(CloseMode mode, TimeSpan timeout)
+        {
+            Close(mode, (TimeSpan?)timeout);
+        }
+
+        private void Close(CloseMode mode, TimeSpan? timeout)
+        {
+            var waitLimit =
+                timeout.HasValue
+                ? DateTime.Now + timeout.Value
+                : (DateTime?)null;
+
+            lock (_syncRoot)
+            {
+                if (State == ProtoHostState.Closed)
+                    return;
+
+                if (State == ProtoHostState.Listening)
+                {
+                    _listener.Stop();
+
+                    if (_connections.Count == 0)
+                    {
+                        State = ProtoHostState.Closed;
+                    }
+                    else
+                    {
+                        State = ProtoHostState.Closing;
+
+                        if (mode == CloseMode.Abort)
+                        {
+                            // Create a copy of the collection because disposing
+                            // the connection will remove it from the
+                            // _connections list.
+
+                            var connections = new List<HostConnection>(_connections.Keys);
+
+                            foreach (var connection in connections)
+                            {
+                                connection.Dispose();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Wait until we time out or we moved to a closed state.
+
+            while (true)
+            {
+                lock (_syncRoot)
+                {
+                    if (State == ProtoHostState.Closed)
+                        return;
+                }
+
+                if (waitLimit.HasValue)
+                {
+                    var wait = waitLimit.Value - DateTime.Now;
+
+                    if (wait.Ticks <= 0)
+                        return;
+
+                    _stateChangedEvent.WaitOne(wait);
+                }
+                else
+                {
+                    _stateChangedEvent.WaitOne();
+                }
             }
         }
 
@@ -161,29 +306,47 @@ namespace ProtoChannel
         {
             if (!_disposed)
             {
-                if (!_closing)
-                {
-                    _closing = true;
+                if (State != ProtoHostState.Closed)
+                    Close();
 
+                if (_stateChangedEvent != null)
+                {
+                    _stateChangedEvent.Close();
+                    _stateChangedEvent = null;
+                }
+
+                if (_listener != null)
+                {
                     _listener.Stop();
+                    _listener = null;
                 }
-
-                while (true)
-                {
-                    lock (_syncRoot)
-                    {
-                        if (_connections.Count == 0)
-                            break;
-                    }
-
-                    _connectionsChangedEvent.WaitOne();
-                }
-
-                _connectionsChangedEvent.Close();
-                _connectionsChangedEvent = null;
 
                 _disposed = true;
             }
+        }
+    }
+
+    public class ProtoHost<T> : ProtoHost
+        where T : class
+    {
+        public ProtoHost(IPEndPoint localEndPoint)
+            : this(localEndPoint, null)
+        {
+        }
+
+        public ProtoHost(IPEndPoint localEndPoint, ProtoHostConfiguration configuration)
+            : base(localEndPoint, typeof(T), configuration)
+        {
+        }
+
+        protected virtual T CreateService(int protocolNumber)
+        {
+            return (T)Activator.CreateInstance(typeof(T));
+        }
+
+        internal override object CreateServiceCore(int protocolNumber)
+        {
+            return CreateService(protocolNumber);
         }
     }
 }

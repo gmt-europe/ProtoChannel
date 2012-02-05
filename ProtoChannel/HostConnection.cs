@@ -6,20 +6,20 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using ProtoChannel.Util;
+using System.Threading.Tasks;
 
 namespace ProtoChannel
 {
-    internal class HostConnection<T> : ProtoConnection
-        where T : class, new()
+    internal class HostConnection : ProtoConnection
     {
-        private readonly ProtoHost<T> _host;
-        private readonly object _clientSyncRoot = new object();
+        private readonly ProtoHost _host;
         private State _state;
         private SslStream _sslStream;
-        private T _client;
+        private HostClient _client;
         private bool _disposed;
+        private readonly Queue<PendingMessage> _pendingMessages = new Queue<PendingMessage>();
 
-        public HostConnection(ProtoHost<T> host, TcpClient tcpClient, IStreamManager streamManager)
+        public HostConnection(ProtoHost host, TcpClient tcpClient, IStreamManager streamManager)
             : base(tcpClient, streamManager)
         {
             if (host == null)
@@ -78,11 +78,13 @@ namespace ProtoChannel
 
         protected override bool ProcessInput()
         {
+            // Locked by TcpConnection.
+
             if (_state == State.ReceivingProlog)
             {
                 // Is there enough data in the buffer?
 
-                if (DataAvailable >= 8)
+                if (ReadAvailable >= 8)
                 {
                     byte[] header = new byte[8];
 
@@ -144,6 +146,8 @@ namespace ProtoChannel
 
         protected override void ProcessPackage(PendingPackage package)
         {
+            // Locked by TcpConnection.
+
             switch (_state)
             {
                 case State.Authenticating:
@@ -202,6 +206,14 @@ namespace ProtoChannel
                 // creating the service client.
 
                 _client = _host.RaiseClientConnected(this, protocolNumber);
+
+                // When creating the client failed, we shut down because there's
+                // nothing more to do.
+
+                if (_client == null)
+                {
+                    Dispose();
+                }
             }
         }
 
@@ -247,28 +259,63 @@ namespace ProtoChannel
 
             // Start processing the message.
 
-            ThreadPool.QueueUserWorkItem(
-                p => ExecuteMessage((PendingMessage)p),
-                new PendingMessage(message, isOneWay, associationId, method)
-            );
+            lock (SyncRoot)
+            {
+                _pendingMessages.Enqueue(new PendingMessage(message, isOneWay, associationId, method));
+
+                if (_pendingMessages.Count == 1)
+                {
+#if _NET_2
+                    ThreadPool.QueueUserWorkItem(ExecuteMessages, null);
+#else
+                    Task.Factory.StartNew(ExecuteMessages, null);
+#endif
+                }
+            }
         }
 
-        private void ExecuteMessage(PendingMessage message)
+        private void ExecuteMessages(object unused)
         {
             try
             {
-                object result;
-
-                lock (_clientSyncRoot)
+                while (true)
                 {
-                    using (OperationContext.SetScope(new OperationContext(this)))
+                    PendingMessage pendingMessage;
+
+                    lock (SyncRoot)
                     {
-                        result = message.Method.Method.Invoke(_client, new[] { message.Message });
+                        if (_disposed || _pendingMessages.Count == 0)
+                            return;
+
+                        // Leave the message in the queue to not trigger a new
+                        // ExecuteMessages.
+
+                        pendingMessage = _pendingMessages.Peek();
+                    }
+
+                    object result;
+
+                    lock (_client.SyncRoot)
+                    {
+                        using (OperationContext.SetScope(new OperationContext(this)))
+                        {
+                            result = pendingMessage.Method.Method.Invoke(
+                                _client.Client, new[] { pendingMessage.Message }
+                            );
+                        }
+                    }
+
+                    lock (SyncRoot)
+                    {
+                        if (_disposed)
+                            return;
+
+                        _pendingMessages.Dequeue();
+
+                        if (!pendingMessage.IsOneWay)
+                            SendResponse(pendingMessage, result);
                     }
                 }
-
-                if (!message.IsOneWay)
-                    SendResponse(message, result);
             }
             catch (Exception ex)
             {
@@ -312,17 +359,20 @@ namespace ProtoChannel
 
         protected override void Dispose(bool disposing)
         {
-            if (!_disposed)
+            lock (SyncRoot)
             {
-                if (_sslStream != null)
+                if (!_disposed)
                 {
-                    _sslStream.Dispose();
-                    _sslStream = null;
+                    if (_sslStream != null)
+                    {
+                        _sslStream.Dispose();
+                        _sslStream = null;
+                    }
+
+                    _host.RemoveConnection(this);
+
+                    _disposed = true;
                 }
-
-                _host.RemoveConnection(this);
-
-                _disposed = true;
             }
 
             base.Dispose(disposing);

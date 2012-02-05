@@ -15,11 +15,10 @@ namespace ProtoChannel
 {
     internal abstract class TcpConnection : IDisposable
     {
-        private readonly object _syncRoot = new object();
         private bool _sending;
         private SslStream _sslStream;
-        private readonly RingMemoryStream _receiveStream;
-        private readonly RingMemoryStream _sendStream;
+        private RingMemoryStream _receiveStream;
+        private RingMemoryStream _sendStream;
         private Stream _stream;
         private TcpClient _tcpClient;
 
@@ -27,15 +26,29 @@ namespace ProtoChannel
 
         protected bool IsAsync { get; set; }
 
-        protected long DataAvailable
+        protected object SyncRoot { get; private set; }
+
+        protected long ReadAvailable
         {
-            get { return _receiveStream.Length - _receiveStream.Position; }
+            get
+            {
+                lock (SyncRoot)
+                {
+                    return _receiveStream.Length - _receiveStream.Position;
+                }
+            }
         }
 
         protected long WritePosition
         {
             get { return _sendStream.Position; }
-            set { _sendStream.Position = value; }
+            set
+            {
+                lock (SyncRoot)
+                {
+                    _sendStream.Position = value;
+                }
+            }
         }
 
         protected TcpConnection(TcpClient tcpClient)
@@ -43,11 +56,12 @@ namespace ProtoChannel
             if (tcpClient == null)
                 throw new ArgumentNullException("tcpClient");
 
+            SyncRoot = new object();
+
             _sendStream = new RingMemoryStream(Constants.RingBufferBlockSize);
             _receiveStream = new RingMemoryStream(Constants.RingBufferBlockSize);
 
             _tcpClient = tcpClient;
-
             _tcpClient.Client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
             _stream = _tcpClient.GetStream();
@@ -55,39 +69,62 @@ namespace ProtoChannel
 
         protected void AuthenticateAsClient(RemoteCertificateValidationCallback validationCallback, string targetHost)
         {
-            _sslStream = new SslStream(_stream, false, validationCallback ?? DummyValidationCallback);
+            if (targetHost == null)
+                throw new ArgumentNullException("targetHost");
 
-            _sslStream.AuthenticateAsClient(
-                targetHost,
-                null,
-                SslProtocols.Tls,
-                false /* checkCertificateRevocation */
-            );
+            lock (SyncRoot)
+            {
+                Debug.Assert(_sslStream == null);
+                Debug.Assert(!IsAsync);
 
-            _stream = _sslStream;
+                _sslStream = new SslStream(_stream, false, validationCallback ?? DummyValidationCallback);
+
+                _sslStream.AuthenticateAsClient(
+                    targetHost,
+                    null,
+                    SslProtocols.Tls,
+                    false /* checkCertificateRevocation */
+                );
+
+                _stream = _sslStream;
+            }
         }
 
         protected void BeginAuthenticateAsServer(X509Certificate certificate, RemoteCertificateValidationCallback validationCallback, AsyncCallback callback, object asyncState)
         {
-            _sslStream = new SslStream(_stream, false, validationCallback ?? DummyValidationCallback);
+            if (certificate == null)
+                throw new ArgumentNullException("certificate");
 
-            _stream = null;
+            lock (SyncRoot)
+            {
+                Debug.Assert(_sslStream == null);
+                Debug.Assert(IsAsync);
 
-            _sslStream.BeginAuthenticateAsServer(
-                certificate,
-                false /* clientCertificateRequired */,
-                SslProtocols.Tls,
-                false /* checkCertificateRevocation */,
-                callback,
-                asyncState
-            );
+                _sslStream = new SslStream(_stream, false, validationCallback ?? DummyValidationCallback);
+
+                _stream = null;
+
+                _sslStream.BeginAuthenticateAsServer(
+                    certificate,
+                    false /* clientCertificateRequired */,
+                    SslProtocols.Tls,
+                    false /* checkCertificateRevocation */,
+                    callback,
+                    asyncState
+                );
+            }
         }
 
         protected void EndAuthenticateAsServer(IAsyncResult asyncResult)
         {
-            _sslStream.EndAuthenticateAsServer(asyncResult);
+            lock (SyncRoot)
+            {
+                Debug.Assert(_sslStream != null);
 
-            _stream = _sslStream;
+                _sslStream.EndAuthenticateAsServer(asyncResult);
+
+                _stream = _sslStream;
+            }
         }
 
         private bool DummyValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
@@ -100,7 +137,10 @@ namespace ProtoChannel
             if (buffer == null)
                 throw new ArgumentNullException("buffer");
 
-            return _receiveStream.Read(buffer, offset, count);
+            lock (SyncRoot)
+            {
+                return _receiveStream.Read(buffer, offset, count);
+            }
         }
 
         protected object ReadMessage(RuntimeTypeModel typeModel, Type messageType, int length)
@@ -110,33 +150,39 @@ namespace ProtoChannel
             if (messageType == null)
                 throw new ArgumentNullException("messageType");
 
-            return typeModel.Deserialize(_receiveStream, null, messageType, length);
+            lock (SyncRoot)
+            {
+                return typeModel.Deserialize(_receiveStream, null, messageType, length);
+            }
         }
 
         protected void ReadStream(Stream stream, int length)
         {
-            // We read directly from the back buffers.
-
-            while (length > 0)
+            lock (SyncRoot)
             {
-                // Get a page where we can read from.
+                // We read directly from the back buffers.
 
-                long pageSize = Math.Min(
-                    _receiveStream.BlockSize - _receiveStream.Position % _receiveStream.BlockSize, // Maximum size to stay on the page
-                    length
-                );
+                while (length > 0)
+                {
+                    // Get a page where we can read from.
 
-                var page = _receiveStream.GetPage(_receiveStream.Position, pageSize);
+                    long pageSize = Math.Min(
+                        _receiveStream.BlockSize - _receiveStream.Position % _receiveStream.BlockSize, // Maximum size to stay on the page
+                        length
+                    );
 
-                // Write the page to our stream.
+                    var page = _receiveStream.GetPage(_receiveStream.Position, pageSize);
 
-                stream.Write(page.Buffer, page.Offset, page.Count);
+                    // Write the page to our stream.
 
-                // Move the buffers position.
+                    stream.Write(page.Buffer, page.Offset, page.Count);
 
-                _receiveStream.Position += page.Count;
+                    // Move the buffers position.
 
-                length -= page.Count;
+                    _receiveStream.Position += page.Count;
+
+                    length -= page.Count;
+                }
             }
         }
 
@@ -145,7 +191,10 @@ namespace ProtoChannel
             if (buffer == null)
                 throw new ArgumentNullException("buffer");
 
-            _sendStream.Write(buffer, offset, count);
+            lock (SyncRoot)
+            {
+                _sendStream.Write(buffer, offset, count);
+            }
         }
 
         protected void WriteMessage(RuntimeTypeModel typeModel, object message)
@@ -155,7 +204,10 @@ namespace ProtoChannel
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            typeModel.Serialize(_sendStream, message);
+            lock (SyncRoot)
+            {
+                typeModel.Serialize(_sendStream, message);
+            }
         }
 
         protected void WriteStream(Stream stream, long length)
@@ -163,58 +215,61 @@ namespace ProtoChannel
             if (stream == null)
                 throw new ArgumentNullException("stream");
 
-            while (length > 0)
+            lock (SyncRoot)
             {
-                Debug.Assert(_sendStream.Length == _sendStream.Position);
+                while (length > 0)
+                {
+                    Debug.Assert(_sendStream.Length == _sendStream.Position);
 
-                // We write directly into the back buffers of the send buffer.
+                    // We write directly into the back buffers of the send buffer.
 
-                long pageSize = Math.Min(
-                    _sendStream.BlockSize - _sendStream.Position % _sendStream.BlockSize, // Maximum size to stay on the page
-                    length
-                );
+                    long pageSize = Math.Min(
+                        _sendStream.BlockSize - _sendStream.Position % _sendStream.BlockSize, // Maximum size to stay on the page
+                        length
+                    );
 
-                // Make room for the page.
+                    // Make room for the page.
 
-                _sendStream.SetLength(_sendStream.Length + pageSize);
+                    _sendStream.SetLength(_sendStream.Length + pageSize);
 
-                // Get the page we're using to write the stream data on.
+                    // Get the page we're using to write the stream data on.
 
-                var page = _sendStream.GetPage(_sendStream.Position, pageSize);
+                    var page = _sendStream.GetPage(_sendStream.Position, pageSize);
 
-                int read = stream.Read(page.Buffer, page.Offset, page.Count);
+                    int read = stream.Read(page.Buffer, page.Offset, page.Count);
 
-                Debug.Assert(read == page.Count);
+                    Debug.Assert(read == page.Count);
 
-                // Move the position forward to correspond with the data
-                // we've just written.
+                    // Move the position forward to correspond with the data
+                    // we've just written.
 
-                _sendStream.Position += pageSize;
+                    _sendStream.Position += pageSize;
 
-                length -= page.Count;
+                    length -= page.Count;
+                }
             }
         }
 
         protected void Read()
         {
-            if (IsAsync)
-                ReadAsync();
-            else
-                ReadSync();
+            lock (SyncRoot)
+            {
+                if (IsAsync)
+                    ReadAsync();
+                else
+                    ReadSync();
+            }
         }
 
         private void ReadSync()
         {
-            lock (_syncRoot)
-            {
-                VerifyNotDisposed();
+            VerifyNotDisposed();
 
-                var page = _receiveStream.GetWriteBuffer();
+            var page = _receiveStream.GetWriteBuffer();
 
-                ProcessReceivedData(
-                    _stream.Read(page.Buffer, page.Offset, page.Count)
-                );
-            }
+            ProcessReceivedData(
+                _stream.Read(page.Buffer, page.Offset, page.Count)
+            );
         }
 
         private void ReadAsync()
@@ -229,7 +284,7 @@ namespace ProtoChannel
 
         private void ReadCallback(IAsyncResult asyncResult)
         {
-            lock (_syncRoot)
+            lock (SyncRoot)
             {
                 if (IsDisposed)
                     return;
@@ -285,7 +340,7 @@ namespace ProtoChannel
 
         protected void Send()
         {
-            lock (_syncRoot)
+            lock (SyncRoot)
             {
                 if (IsAsync)
                     SendAsync();
@@ -316,29 +371,28 @@ namespace ProtoChannel
 
         private void ProcessSendRequests()
         {
-            if (_stream == null)
+            if (IsDisposed || _sending)
                 return;
 
-            if (!_sending)
+            if (_sendStream.Head == _sendStream.Length)
+                BeforeSend();
+
+            if (_sendStream.Head != _sendStream.Length)
             {
-                if (_sendStream.Head == _sendStream.Length)
-                    BeforeSend();
+                _sending = true;
 
-                if (_sendStream.Head != _sendStream.Length)
-                {
-                    _sending = true;
+                var page = GetSendPage();
 
-                    var page = GetSendPage();
-
-                    _stream.BeginWrite(
-                        page.Buffer, page.Offset, page.Count, WriteCallback, page
-                    );
-                }
+                _stream.BeginWrite(
+                    page.Buffer, page.Offset, page.Count, WriteCallback, page
+                );
             }
         }
 
         protected virtual void BeforeSend()
         {
+            // Override in child class to send data when there isn't any
+            // other data to send.
         }
 
         private RingMemoryPage GetSendPage()
@@ -376,27 +430,24 @@ namespace ProtoChannel
 
         private void WriteCallback(IAsyncResult asyncResult)
         {
-            lock (_syncRoot)
+            lock (SyncRoot)
             {
                 if (IsDisposed)
                     return;
 
                 _sending = false;
 
-                if (_stream != null)
+                try
                 {
-                    try
-                    {
-                        _stream.EndWrite(asyncResult);
+                    _stream.EndWrite(asyncResult);
 
-                        _sendStream.Head += ((RingMemoryPage)asyncResult.AsyncState).Count;
+                    _sendStream.Head += ((RingMemoryPage)asyncResult.AsyncState).Count;
 
-                        ProcessSendRequests();
-                    }
-                    catch
-                    {
-                        Dispose();
-                    }
+                    ProcessSendRequests();
+                }
+                catch
+                {
+                    Dispose();
                 }
             }
         }
@@ -416,32 +467,47 @@ namespace ProtoChannel
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!IsDisposed)
+            lock (SyncRoot)
             {
-                if (_tcpClient != null)
+                if (!IsDisposed && disposing)
                 {
-                    _tcpClient.Close();
-                    _tcpClient = null;
+                    if (_tcpClient != null)
+                    {
+                        _tcpClient.Close();
+                        _tcpClient = null;
+                    }
+
+                    if (_sslStream != null)
+                    {
+                        _sslStream.Dispose();
+                        _sslStream = null;
+
+                        // When we have an SslStream, _stream is set to the same
+                        // stream.
+
+                        _stream = null;
+                    }
+
+                    if (_stream != null)
+                    {
+                        _stream.Dispose();
+                        _stream = null;
+                    }
+
+                    if (_receiveStream != null)
+                    {
+                        _receiveStream.Dispose();
+                        _receiveStream = null;
+                    }
+
+                    if (_sendStream != null)
+                    {
+                        _sendStream.Dispose();
+                        _sendStream = null;
+                    }
+
+                    IsDisposed = true;
                 }
-
-                if (_sslStream != null)
-                {
-                    _sslStream.Dispose();
-                    _sslStream = null;
-
-                    // When we have an SslStream, _stream is set to the same
-                    // stream.
-
-                    _stream = null;
-                }
-
-                if (_stream != null)
-                {
-                    _stream.Dispose();
-                    _stream = null;
-                }
-
-                IsDisposed = true;
             }
         }
     }

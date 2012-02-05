@@ -41,11 +41,13 @@ namespace ProtoChannel
 
         protected override bool ProcessInput()
         {
+            // Locked by TcpConnection.
+
             if (!_pendingPackage.HasValue)
             {
                 // Is the header in the buffer?
 
-                if (DataAvailable < 3)
+                if (ReadAvailable < 3)
                     return false;
 
                 byte[] buffer = new byte[4];
@@ -63,7 +65,7 @@ namespace ProtoChannel
                 _pendingPackage = new PendingPackage((PackageType)(header & 0x7), header >> 3);
             }
 
-            if (DataAvailable < _pendingPackage.Value.Length)
+            if (ReadAvailable < _pendingPackage.Value.Length)
                 return false;
 
             var pendingPackage = _pendingPackage.Value;
@@ -72,7 +74,7 @@ namespace ProtoChannel
 
             ProcessPackage(pendingPackage);
 
-            return DataAvailable > 0;
+            return ReadAvailable > 0;
         }
 
         protected virtual void ProcessPackage(PendingPackage package)
@@ -346,6 +348,8 @@ namespace ProtoChannel
 
         protected override void BeforeSend()
         {
+            // Locked by TcpConnection.
+
             // If there isn't any data pending, see whether we can send
             // stream data.
 
@@ -353,7 +357,7 @@ namespace ProtoChannel
 
             // If there is nothing to send, we can quit now.
 
-            if (sendRequest != null)
+            if (sendRequest.HasValue)
             {
                 if (sendRequest.Value.IsCompleted)
                     SendStreamEnd(sendRequest.Value);
@@ -413,38 +417,41 @@ namespace ProtoChannel
 
         public uint SendStream(Stream stream, string streamName, string contentType)
         {
-            var associationId = _sendStreamManager.RegisterStream(
-                stream, streamName, contentType
-            );
-
-            // Send the start of the stream.
-
-            long packageStart = BeginSendPackage();
-
-            // Construct the header.
-
-            uint header = (uint)StreamPackageType.StartStream | associationId << 3;
-
-            var buffer = BitConverter.GetBytes(header);
-
-            ByteUtil.ConvertNetwork(buffer);
-
-            Write(buffer, 1, buffer.Length - 1);
-
-            // Write the details of the request.
-
-            WriteMessage(TypeModel, new Messages.StartStream
+            lock (SyncRoot)
             {
-                Length = (uint)stream.Length,
-                StreamName = streamName,
-                ContentType = contentType
-            });
+                var associationId = _sendStreamManager.RegisterStream(
+                    stream, streamName, contentType
+                );
 
-            // Send the package.
+                // Send the start of the stream.
 
-            EndSendPackage(PackageType.Stream, packageStart);
+                long packageStart = BeginSendPackage();
 
-            return associationId;
+                // Construct the header.
+
+                uint header = (uint)StreamPackageType.StartStream | associationId << 3;
+
+                var buffer = BitConverter.GetBytes(header);
+
+                ByteUtil.ConvertNetwork(buffer);
+
+                Write(buffer, 1, buffer.Length - 1);
+
+                // Write the details of the request.
+
+                WriteMessage(TypeModel, new Messages.StartStream
+                {
+                    Length = (uint)stream.Length,
+                    StreamName = streamName,
+                    ContentType = contentType
+                });
+
+                // Send the package.
+
+                EndSendPackage(PackageType.Stream, packageStart);
+
+                return associationId;
+            }
         }
 
         public ProtoStream GetStream(uint streamId)
@@ -454,34 +461,15 @@ namespace ProtoChannel
 
         public IAsyncResult BeginGetStream(uint streamId, AsyncCallback callback, object asyncState)
         {
-            return _receiveStreamManager.BeginGetStream(streamId, callback, asyncState);
+            lock (SyncRoot)
+            {
+                return _receiveStreamManager.BeginGetStream(streamId, callback, asyncState);
+            }
         }
 
         public ProtoStream EndGetStream(IAsyncResult asyncResult)
         {
             return PendingReceiveStream.EndGetStream(asyncResult);
-        }
-
-        protected struct PendingPackage
-        {
-            private readonly PackageType _type;
-            private readonly uint _length;
-
-            public PendingPackage(PackageType type, uint length)
-            {
-                _type = type;
-                _length = length;
-            }
-
-            public PackageType Type
-            {
-                get { return _type; }
-            }
-
-            public uint Length
-            {
-                get { return _length; }
-            }
         }
     }
 }

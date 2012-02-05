@@ -62,8 +62,10 @@ namespace ProtoChannel
             }
         }
 
-        protected override void ProcessPackage(ProtoConnection.PendingPackage package)
+        protected override void ProcessPackage(PendingPackage package)
         {
+            // Locked by TcpConnection.
+
             switch (_state)
             {
                 case State.ReceivingHandshake:
@@ -127,6 +129,8 @@ namespace ProtoChannel
 
         protected override void ProcessMessage(MessageKind kind, uint type, uint length, uint associationId)
         {
+            // Locked by TcpConnection.
+
             if (kind == MessageKind.Response)
                 ProcessResponseMessage(type, length, associationId);
             else
@@ -164,53 +168,56 @@ namespace ProtoChannel
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            ServiceMessage messageType;
-
-            if (!_client.ServiceAssembly.MessagesByType.TryGetValue(message.GetType(), out messageType))
-                throw new ProtoChannelException(String.Format("Message type '{0}' is not a valid message type", message.GetType()));
-
-            ServiceMessage responseMessageType = null;
-
-            if (responseType != null)
+            lock (SyncRoot)
             {
-                if (!_client.ServiceAssembly.MessagesByType.TryGetValue(responseType, out responseMessageType))
-                    throw new ProtoChannelException(String.Format("Message type '{0}' is not a valid message type", responseMessageType));
+                ServiceMessage messageType;
+
+                if (!_client.ServiceAssembly.MessagesByType.TryGetValue(message.GetType(), out messageType))
+                    throw new ProtoChannelException(String.Format("Message type '{0}' is not a valid message type", message.GetType()));
+
+                ServiceMessage responseMessageType = null;
+
+                if (responseType != null)
+                {
+                    if (!_client.ServiceAssembly.MessagesByType.TryGetValue(responseType, out responseMessageType))
+                        throw new ProtoChannelException(String.Format("Message type '{0}' is not a valid message type", responseMessageType));
+                }
+
+                long packageStart = BeginSendPackage();
+
+                // Write the header.
+
+                uint header = (uint)MessageKind.Request | (uint)messageType.Id << 2;
+
+                var buffer = BitConverter.GetBytes(header);
+
+                ByteUtil.ConvertNetwork(buffer);
+
+                Write(buffer, 1, buffer.Length - 1);
+
+                // Write the association ID.
+
+                var pendingMessage = _messageManager.GetPendingMessage(responseMessageType, callback, asyncState);
+
+                buffer = BitConverter.GetBytes((ushort)pendingMessage.AssociationId);
+
+                ByteUtil.ConvertNetwork(buffer);
+
+                Write(buffer, 0, buffer.Length);
+
+                // Write the message.
+
+                WriteMessage(_client.ServiceAssembly.TypeModel, message);
+
+                // Send the message.
+
+                EndSendPackage(PackageType.Message, packageStart);
+
+                return pendingMessage;
             }
-
-            long packageStart = BeginSendPackage();
-
-            // Write the header.
-
-            uint header = (uint)MessageKind.Request | (uint)messageType.Id << 2;
-
-            var buffer = BitConverter.GetBytes(header);
-
-            ByteUtil.ConvertNetwork(buffer);
-
-            Write(buffer, 1, buffer.Length - 1);
-
-            // Write the association ID.
-
-            var pendingMessage = _messageManager.GetPendingMessage(responseMessageType, callback, asyncState);
-
-            buffer = BitConverter.GetBytes((ushort)pendingMessage.AssociationId);
-
-            ByteUtil.ConvertNetwork(buffer);
-
-            Write(buffer, 0, buffer.Length);
-
-            // Write the message.
-
-            WriteMessage(_client.ServiceAssembly.TypeModel, message);
-
-            // Send the message.
-
-            EndSendPackage(PackageType.Message, packageStart);
-
-            return pendingMessage;
         }
 
-        public object EndSendMessage(IAsyncResult asyncResult)
+        public static object EndSendMessage(IAsyncResult asyncResult)
         {
             if (asyncResult == null)
                 throw new ArgumentNullException("asyncResult");
@@ -220,7 +227,10 @@ namespace ProtoChannel
 
         public void PostMessage(object message)
         {
-            throw new NotImplementedException();
+            lock (SyncRoot)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private enum State

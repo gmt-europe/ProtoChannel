@@ -20,8 +20,8 @@ namespace ProtoChannel
 
         public ProtoClientConfiguration()
         {
-            _maxMessageSize = 65536;
-            _maxStreamSize = 4194304;
+            _maxMessageSize = 0x10000;
+            _maxStreamSize = 0x400000;
         }
 
         public bool Secure

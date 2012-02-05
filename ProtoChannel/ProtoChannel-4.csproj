@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Common.Logging">
+      <HintPath>..\Libraries\Common.Logging\Common.Logging.dll</HintPath>
+    </Reference>
     <Reference Include="protobuf-net">
       <HintPath>..\Libraries\Protobuf-Net\protobuf-net.dll</HintPath>
     </Reference>
@@ -44,7 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CloseMode.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="HostClient.cs" />
     <Compile Include="HybridStreamManager.cs" />
     <Compile Include="IProtoConnection.cs" />
     <Compile Include="IStreamManager.cs" />
@@ -58,6 +63,7 @@
     <Compile Include="PackageType.cs" />
     <Compile Include="PendingMessage.cs" />
     <Compile Include="PendingMessageManager.cs" />
+    <Compile Include="PendingPackage.cs" />
     <Compile Include="PendingReceiveStream.cs" />
     <Compile Include="PendingSendStream.cs" />
     <Compile Include="PendingStream.cs" />
@@ -71,6 +77,7 @@
     <Compile Include="ProtoHost.cs" />
     <Compile Include="ProtoHostConfiguration.cs" />
     <Compile Include="HostConnection.cs" />
+    <Compile Include="ProtoHostState.cs" />
     <Compile Include="ProtoMessageAttribute.cs" />
     <Compile Include="ProtoMethodAttribute.cs" />
     <Compile Include="ProtoStream.cs" />

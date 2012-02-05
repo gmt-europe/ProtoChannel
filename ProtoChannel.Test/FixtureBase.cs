@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using Common.Logging;
+using Common.Logging.Simple;
 using TraceListeners;
 
 namespace ProtoChannel.Test
@@ -29,6 +31,10 @@ namespace ProtoChannel.Test
             // an assert fails.
 
             Debug.Listeners.Add(new DebugBreakListener());
+
+            // Setup Common.Logging.
+
+            LogManager.Adapter = new ConsoleOutLoggerFactoryAdapter();
         }
 
         protected X509Certificate2 GetCertificate()
