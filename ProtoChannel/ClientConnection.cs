@@ -10,16 +10,20 @@ namespace ProtoChannel
     internal class ClientConnection : ProtoConnection
     {
         private readonly ProtoClient _client;
+        private readonly string _hostname;
         private State _state;
         private readonly PendingMessageManager _messageManager = new PendingMessageManager();
 
-        public ClientConnection(ProtoClient client, TcpClient tcpClient, IStreamManager streamManager)
+        public ClientConnection(ProtoClient client, TcpClient tcpClient, string hostname, IStreamManager streamManager)
             : base(tcpClient, streamManager)
         {
             if (client == null)
                 throw new ArgumentNullException("client");
+            if (hostname == null)
+                throw new ArgumentNullException("hostname");
 
             _client = client;
+            _hostname = hostname;
 
             Connect();
         }
@@ -30,7 +34,7 @@ namespace ProtoChannel
             {
                 AuthenticateAsClient(
                     _client.Configuration.ValidationCallback,
-                    _client.Configuration.TargetHost ?? _client.RemoteEndPoint.Address.ToString()
+                    _hostname
                 );
             }
 

@@ -13,20 +13,14 @@ namespace ProtoChannel
         private bool _disposed;
         private ClientConnection _connection;
 
-        public IPEndPoint RemoteEndPoint { get; private set; }
-
         public ProtoClientConfiguration Configuration { get; private set; }
 
         internal ServiceAssembly ServiceAssembly { get; private set; }
 
-        public ProtoClient(IPEndPoint remoteEndPoint)
-            : this(remoteEndPoint, null)
+        private ProtoClient(ProtoClientConfiguration configuration, TcpClient tcpClient, string hostname)
         {
-        }
-
-        public ProtoClient(IPEndPoint remoteEndPoint, ProtoClientConfiguration configuration)
-        {
-            RemoteEndPoint = remoteEndPoint;
+            if (hostname == null)
+                throw new ArgumentNullException("hostname");
 
             Configuration = configuration ?? new ProtoClientConfiguration();
             Configuration.Freeze();
@@ -35,13 +29,69 @@ namespace ProtoChannel
                 Configuration.ServiceAssembly ?? GetType().Assembly
             );
 
+            var streamManager = Configuration.StreamManager ?? new MemoryStreamManager();
+
+            _connection = new ClientConnection(this, tcpClient, hostname, streamManager);
+        }
+
+        public ProtoClient(IPEndPoint remoteEndPoint)
+            : this(remoteEndPoint, null)
+        {
+        }
+
+        public ProtoClient(IPEndPoint remoteEndPoint, ProtoClientConfiguration configuration)
+            : this(configuration, CreateClient(remoteEndPoint), remoteEndPoint.Address.ToString())
+        {
+        }
+
+        public ProtoClient(IPAddress address, int port)
+            : this(address, port, null)
+        {
+        }
+
+        public ProtoClient(IPAddress address, int port, ProtoClientConfiguration configuration)
+            : this(configuration, CreateClient(address, port), address.ToString())
+        {
+        }
+
+        public ProtoClient(string hostname, int port)
+            : this(hostname, port, null)
+        {
+        }
+
+        public ProtoClient(string hostname, int port, ProtoClientConfiguration configuration)
+            : this(configuration, CreateClient(hostname, port), hostname)
+        {
+        }
+
+        private static TcpClient CreateClient(IPEndPoint remoteEndPoint)
+        {
             var client = new TcpClient();
 
             client.Connect(remoteEndPoint);
 
-            var streamManager = Configuration.StreamManager ?? new MemoryStreamManager();
+            return client;
+        }
 
-            _connection = new ClientConnection(this, client, streamManager);
+        private static TcpClient CreateClient(IPAddress address, int port)
+        {
+            var client = new TcpClient();
+
+            client.Connect(address, port);
+
+            return client;
+        }
+
+        private static TcpClient CreateClient(string hostname, int port)
+        {
+            if (hostname == null)
+                throw new ArgumentNullException("hostname");
+
+            var client = new TcpClient();
+
+            client.Connect(hostname, port);
+
+            return client;
         }
 
         internal protected virtual int ChooseProtocol(int minProtocol, int maxProtocol)

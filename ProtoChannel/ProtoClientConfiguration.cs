@@ -15,7 +15,6 @@ namespace ProtoChannel
         private RemoteCertificateValidationCallback _validationCallback;
         private int _maxMessageSize;
         private int _maxStreamSize;
-        private string _targetHost;
         private Assembly _serviceAssembly;
         private IStreamManager _streamManager;
 
@@ -33,17 +32,6 @@ namespace ProtoChannel
                 VerifyNotFrozen();
 
                 _secure = value;
-            }
-        }
-
-        public string TargetHost
-        {
-            get { return _targetHost; }
-            set
-            {
-                VerifyNotFrozen();
-
-                _targetHost = value;
             }
         }
 
