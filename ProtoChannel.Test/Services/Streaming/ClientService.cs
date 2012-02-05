@@ -18,9 +18,29 @@ namespace ProtoChannel.Test.Services.Streaming
         {
         }
 
+        public ClientService(IPAddress address, int port)
+            : base(address, port)
+        {
+        }
+
+        public ClientService(IPAddress address, int port, ProtoClientConfiguration configuration)
+            : base(address, port, configuration)
+        {
+        }
+
+        public ClientService(string hostname, int port)
+            : base(hostname, port)
+        {
+        }
+
+        public ClientService(string hostname, int port, ProtoClientConfiguration configuration)
+            : base(hostname, port, configuration)
+        {
+        }
+
         public StreamResponse RequestStream(StreamRequest message)
         {
-            return SendMessage<StreamResponse>(message);
+            return (StreamResponse)EndSendMessage(BeginSendMessage(message, typeof(StreamResponse), null, null));
         }
 
         public IAsyncResult BeginRequestStream(StreamRequest message, AsyncCallback callback, object asyncState)
@@ -30,7 +50,7 @@ namespace ProtoChannel.Test.Services.Streaming
 
         public StreamResponse EndRequestStream(IAsyncResult asyncResult)
         {
-            return EndSendMessage<StreamResponse>(asyncResult);
+            return (StreamResponse)EndSendMessage(asyncResult);
         }
     }
 }

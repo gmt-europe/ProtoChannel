@@ -58,8 +58,10 @@
     <Compile Include="FixtureBase.cs" />
     <Compile Include="MessageExchange\MessageExchangeFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\PingPong\ClientCallbackService.cs" />
     <Compile Include="Services\PingPong\ClientService.cs" />
     <Compile Include="Services\PingPong\Messages.cs" />
+    <Compile Include="Services\PingPong\ServerCallbackService.cs" />
     <Compile Include="Services\PingPong\ServerService.cs" />
     <Compile Include="Services\Streaming\ClientService.cs" />
     <Compile Include="Services\Streaming\Messages.cs" />

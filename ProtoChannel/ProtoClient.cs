@@ -32,6 +32,14 @@ namespace ProtoChannel
             var streamManager = Configuration.StreamManager ?? new MemoryStreamManager();
 
             _connection = new ClientConnection(this, tcpClient, hostname, streamManager);
+
+            if (Configuration.CallbackObject != null)
+            {
+                _connection.Client = new Client(
+                    configuration.CallbackObject,
+                    ServiceAssembly.GetServiceRegistration(Configuration.CallbackObject.GetType())
+                );
+            }
         }
 
         public ProtoClient(IPEndPoint remoteEndPoint)
@@ -105,32 +113,17 @@ namespace ProtoChannel
             return maxProtocol;
         }
 
-        protected T SendMessage<T>(object message)
-        {
-            return (T)ClientConnection.EndSendMessage(_connection.BeginSendMessage(message, typeof(T), null, null));
-        }
-
-        protected void SendMessage(object message)
-        {
-            ClientConnection.EndSendMessage(_connection.BeginSendMessage(message, null, null, null));
-        }
-
-        protected T EndSendMessage<T>(IAsyncResult asyncResult)
-        {
-            return (T)ClientConnection.EndSendMessage(asyncResult);
-        }
-
-        protected IAsyncResult BeginSendMessage(object message, Type responseType, AsyncCallback callback, object asyncState)
+        public IAsyncResult BeginSendMessage(object message, Type responseType, AsyncCallback callback, object asyncState)
         {
             return _connection.BeginSendMessage(message, responseType, callback, asyncState);
         }
 
-        protected void EndSendMessage(IAsyncResult asyncResult)
+        public object EndSendMessage(IAsyncResult asyncResult)
         {
-            ClientConnection.EndSendMessage(asyncResult);
+            return _connection.EndSendMessage(asyncResult);
         }
 
-        protected void PostMessage(object message)
+        public void PostMessage(object message)
         {
             _connection.PostMessage(message);
         }
@@ -138,11 +131,6 @@ namespace ProtoChannel
         public uint SendStream(Stream stream, string streamName, string contentType)
         {
             return _connection.SendStream(stream, streamName, contentType);
-        }
-
-        public ProtoStream GetStream(uint streamId)
-        {
-            return _connection.GetStream(streamId);
         }
 
         public IAsyncResult BeginGetStream(uint streamId, AsyncCallback callback, object asyncState)

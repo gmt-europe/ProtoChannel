@@ -18,9 +18,29 @@ namespace ProtoChannel.Test.Services.PingPong
         {
         }
 
+        public ClientService(IPAddress address, int port)
+            : base(address, port)
+        {
+        }
+
+        public ClientService(IPAddress address, int port, ProtoClientConfiguration configuration)
+            : base(address, port, configuration)
+        {
+        }
+
+        public ClientService(string hostname, int port)
+            : base(hostname, port)
+        {
+        }
+
+        public ClientService(string hostname, int port, ProtoClientConfiguration configuration)
+            : base(hostname, port, configuration)
+        {
+        }
+
         public Pong Ping(Ping message)
         {
-            return SendMessage<Pong>(message);
+            return EndPing(BeginPing(message, null, null));
         }
 
         public IAsyncResult BeginPing(Ping message, AsyncCallback callback, object asyncState)
@@ -30,7 +50,7 @@ namespace ProtoChannel.Test.Services.PingPong
 
         public Pong EndPing(IAsyncResult asyncResult)
         {
-            return EndSendMessage<Pong>(asyncResult);
+            return (Pong)EndSendMessage(asyncResult);
         }
 
         public void OneWayPing(OneWayPing message)

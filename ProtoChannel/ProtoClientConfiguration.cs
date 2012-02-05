@@ -17,6 +17,7 @@ namespace ProtoChannel
         private int _maxStreamSize;
         private Assembly _serviceAssembly;
         private IStreamManager _streamManager;
+        private object _callbackObject;
 
         public ProtoClientConfiguration()
         {
@@ -89,6 +90,17 @@ namespace ProtoChannel
                 VerifyNotFrozen();
 
                 _streamManager = value;
+            }
+        }
+
+        public object CallbackObject
+        {
+            get { return _callbackObject; }
+            set
+            {
+                VerifyNotFrozen();
+
+                _callbackObject = value;
             }
         }
 

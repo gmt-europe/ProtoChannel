@@ -5,18 +5,23 @@ using System.Text;
 
 namespace ProtoChannel
 {
-    internal class HostClient
+    internal class Client
     {
         public object SyncRoot { get; private set; }
 
-        public object Client { get; private set; }
+        public object Instance { get; private set; }
 
-        public HostClient(object client)
+        public Service Service { get; private set; }
+
+        public Client(object client, Service service)
         {
             if (client == null)
                 throw new ArgumentNullException("client");
+            if (service == null)
+                throw new ArgumentNullException("service");
 
-            Client = client;
+            Instance = client;
+            Service = service;
 
             SyncRoot = new object();
         }

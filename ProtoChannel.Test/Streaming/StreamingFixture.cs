@@ -20,7 +20,7 @@ namespace ProtoChannel.Test.Streaming
             {
                 var response = client.RequestStream(new StreamRequest());
 
-                var stream = client.GetStream(response.StreamId);
+                var stream = client.EndGetStream(client.BeginGetStream(response.StreamId, null, null));
 
                 using (var reader = new StreamReader(stream.Stream))
                 {

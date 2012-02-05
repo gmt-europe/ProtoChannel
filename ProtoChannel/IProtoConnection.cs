@@ -10,10 +10,14 @@ namespace ProtoChannel
     {
         uint SendStream(Stream stream, string streamName, string contentType);
 
-        ProtoStream GetStream(uint streamId);
-
         IAsyncResult BeginGetStream(uint streamId, AsyncCallback callback, object asyncState);
 
         ProtoStream EndGetStream(IAsyncResult asyncResult);
+
+        IAsyncResult BeginSendMessage(object message, Type responseType, AsyncCallback callback, object asyncState);
+
+        object EndSendMessage(IAsyncResult asyncResult);
+
+        void PostMessage(object message);
     }
 }

@@ -2,15 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace ProtoChannel.Test.Services.PingPong
 {
-    [ProtoCallbackContract(typeof(ServerCallbackService))]
-    internal class ServerService
+    internal class ClientCallbackService
     {
+        public ManualResetEvent CallbackReceivedEvent { get; private set; }
+
+        public ClientCallbackService()
+        {
+            CallbackReceivedEvent = new ManualResetEvent(false);
+        }
+
         [ProtoMethod]
         public Pong Ping(Ping message)
         {
+            CallbackReceivedEvent.Set();
+
             return new Pong { Payload = message.Payload };
         }
 
@@ -19,10 +28,7 @@ namespace ProtoChannel.Test.Services.PingPong
         {
             Console.WriteLine("One way ping received");
 
-            OperationContext.Current.GetCallbackChannel<ServerCallbackService>().OneWayPing(new OneWayPing
-            {
-                Payload = message.Payload
-            });
+            CallbackReceivedEvent.Set();
         }
     }
 }

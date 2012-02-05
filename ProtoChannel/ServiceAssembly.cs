@@ -92,7 +92,7 @@ namespace ProtoChannel
             if (methods.Count == 0)
                 throw new ProtoChannelException(String.Format("Invalid service contract '{0}'; contract does not specify any handlers", serviceType));
 
-            return new Service(serviceType, methods, messages);
+            return new Service(serviceType, methods, messages, this);
         }
     }
 }

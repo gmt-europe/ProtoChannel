@@ -8,6 +8,8 @@ namespace ProtoChannel
 {
     public class OperationContext
     {
+        private readonly ProtoCallbackChannel _callbackChannel;
+
         [ThreadStatic]
         private static OperationContext _current;
 
@@ -18,12 +20,22 @@ namespace ProtoChannel
             get { return _current; }
         }
 
-        internal OperationContext(IProtoConnection connection)
+        internal OperationContext(IProtoConnection connection, ProtoCallbackChannel callbackChannel)
         {
+            _callbackChannel = callbackChannel;
             if (connection == null)
                 throw new ArgumentNullException("connection");
 
             Connection = connection;
+        }
+
+        public T GetCallbackChannel<T>()
+            where T : ProtoCallbackChannel
+        {
+            if (_callbackChannel == null || !(_callbackChannel is T))
+                throw new ProtoChannelException("Callback channel not available");
+
+            return (T)_callbackChannel;
         }
 
         internal static IDisposable SetScope(OperationContext context)

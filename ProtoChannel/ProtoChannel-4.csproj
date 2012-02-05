@@ -49,7 +49,7 @@
   <ItemGroup>
     <Compile Include="CloseMode.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="HostClient.cs" />
+    <Compile Include="Client.cs" />
     <Compile Include="HybridStreamManager.cs" />
     <Compile Include="IProtoConnection.cs" />
     <Compile Include="IStreamManager.cs" />
@@ -65,9 +65,12 @@
     <Compile Include="PendingMessageManager.cs" />
     <Compile Include="PendingPackage.cs" />
     <Compile Include="PendingReceiveStream.cs" />
+    <Compile Include="PendingRequest.cs" />
     <Compile Include="PendingSendStream.cs" />
     <Compile Include="PendingStream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProtoCallbackChannel.cs" />
+    <Compile Include="ProtoCallbackContract.cs" />
     <Compile Include="ProtoChannelException.cs" />
     <Compile Include="ProtoClient.cs" />
     <Compile Include="ProtoClientConfiguration.cs" />
