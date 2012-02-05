@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using ProtoChannel.Util;
@@ -44,13 +40,9 @@ namespace ProtoChannel
                 {
                     _state = State.Authenticating;
 
-                    _sslStream = new SslStream(TcpClient.GetStream(), false, _host.Configuration.ValidationCallback ?? DummyValidationCallback);
-
-                    _sslStream.BeginAuthenticateAsServer(
+                    BeginAuthenticateAsServer(
                         _host.Configuration.Certificate,
-                        false /* clientCertificateRequired */,
-                        SslProtocols.Tls,
-                        false /* checkCertificateRevocation */,
+                        _host.Configuration.ValidationCallback,
                         AuthenticateAsServerCallback,
                         null
                     );
@@ -58,8 +50,6 @@ namespace ProtoChannel
                 else
                 {
                     _state = State.ReceivingProlog;
-
-                    Stream = TcpClient.GetStream();
 
                     Read();
                 }
@@ -74,9 +64,7 @@ namespace ProtoChannel
         {
             try
             {
-                _sslStream.EndAuthenticateAsServer(asyncResult);
-
-                Stream = _sslStream;
+                EndAuthenticateAsServer(asyncResult);
 
                 _state = State.ReceivingProlog;
 
@@ -88,22 +76,17 @@ namespace ProtoChannel
             }
         }
 
-        private bool DummyValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-        {
-            return true;
-        }
-
         protected override bool ProcessInput()
         {
             if (_state == State.ReceivingProlog)
             {
                 // Is there enough data in the buffer?
 
-                if (ReceiveBuffer.Length - ReceiveBuffer.Position >= 8)
+                if (DataAvailable >= 8)
                 {
                     byte[] header = new byte[8];
 
-                    ReceiveBuffer.Read(header, 0, header.Length);
+                    Read(header, 0, header.Length);
 
                     // Verify the magic.
 
@@ -146,17 +129,13 @@ namespace ProtoChannel
 
         private void SendHandshake()
         {
-            Debug.Assert(SendBuffer.Length == SendBuffer.Position);
+            long packageStart = BeginSendPackage();
 
-            var handshake = new Messages.HandshakeRequest
+            WriteMessage(TypeModel, new Messages.HandshakeRequest
             {
                 ProtocolMin = (uint)_host.Configuration.MinimumProtocolNumber,
                 ProtocolMax = (uint)_host.Configuration.MaximumProtocolNumber
-            };
-
-            long packageStart = BeginSendPackage();
-
-            ProtoBuf.Serializer.Serialize(SendBuffer, handshake);
+            });
 
             EndSendPackage(PackageType.Handshake, packageStart);
 
@@ -203,8 +182,8 @@ namespace ProtoChannel
         {
             // Receive the handshake response.
 
-            var response = (Messages.HandshakeResponse)TypeModel.Deserialize(
-                ReceiveBuffer, null, typeof(Messages.HandshakeResponse), (int)package.Length
+            var response = (Messages.HandshakeResponse)ReadMessage(
+                TypeModel, typeof(Messages.HandshakeResponse), (int)package.Length
             );
 
             // Validate the protocol number.
@@ -262,8 +241,8 @@ namespace ProtoChannel
 
             // Parse the message.
 
-            var message = _host.ServiceAssembly.TypeModel.Deserialize(
-                ReceiveBuffer, null, messageType.Type, (int)length
+            object message = ReadMessage(
+                _host.ServiceAssembly.TypeModel, messageType.Type, (int)length
             );
 
             // Start processing the message.
@@ -309,7 +288,7 @@ namespace ProtoChannel
 
             ByteUtil.ConvertNetwork(buffer);
 
-            SendBuffer.Write(buffer, 1, buffer.Length - 1);
+            Write(buffer, 1, buffer.Length - 1);
 
             // Write the association ID.
 
@@ -317,11 +296,11 @@ namespace ProtoChannel
 
             ByteUtil.ConvertNetwork(buffer);
 
-            SendBuffer.Write(buffer, 0, buffer.Length);
+            Write(buffer, 0, buffer.Length);
 
             // Write the message.
 
-            _host.ServiceAssembly.TypeModel.Serialize(SendBuffer, result);
+            WriteMessage(_host.ServiceAssembly.TypeModel, result);
 
             EndSendPackage(PackageType.Message, packageStart);
         }

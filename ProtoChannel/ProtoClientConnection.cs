@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using ProtoBuf.Meta;
 using ProtoChannel.Util;
 
 namespace ProtoChannel
@@ -30,33 +26,19 @@ namespace ProtoChannel
 
         private void Connect()
         {
-            // Perform authentication.
-
             if (_client.Configuration.Secure)
             {
-                _state = State.Authenticating;
-
-                var sslStream = new SslStream(TcpClient.GetStream(), false, _client.Configuration.ValidationCallback ?? DummyValidationCallback);
-
-                sslStream.AuthenticateAsClient(
-                    _client.Configuration.TargetHost ?? _client.RemoteEndPoint.Address.ToString(),
-                    null,
-                    SslProtocols.Tls,
-                    false /* checkCertificateRevocation */
+                AuthenticateAsClient(
+                    _client.Configuration.ValidationCallback,
+                    _client.Configuration.TargetHost ?? _client.RemoteEndPoint.Address.ToString()
                 );
-
-                Stream = sslStream;
-            }
-            else
-            {
-                Stream = TcpClient.GetStream();
             }
 
             _state = State.ReceivingHandshake;
 
             // Push the prolog header.
 
-            SendBuffer.Write(Constants.Header, 0, Constants.Header.Length);
+            Write(Constants.Header, 0, Constants.Header.Length);
 
             // Push the version number.
 
@@ -64,7 +46,7 @@ namespace ProtoChannel
 
             ByteUtil.ConvertNetwork(buffer);
 
-            SendBuffer.Write(buffer, 0, buffer.Length);
+            Write(buffer, 0, buffer.Length);
 
             // Send the buffer contents.
 
@@ -80,10 +62,6 @@ namespace ProtoChannel
         {
             switch (_state)
             {
-                case State.Authenticating:
-                    SendError(ProtocolError.InvalidPackageType);
-                    return;
-
                 case State.ReceivingHandshake:
                     if (package.Type != PackageType.Handshake)
                     {
@@ -115,24 +93,22 @@ namespace ProtoChannel
         {
             // Receive the handshake request.
 
-            var request = (Messages.HandshakeRequest)TypeModel.Deserialize(
-                ReceiveBuffer, null, typeof(Messages.HandshakeRequest), (int)package.Length
+            var request = (Messages.HandshakeRequest)ReadMessage(
+                TypeModel, typeof(Messages.HandshakeRequest), (int)package.Length
             );
 
             // Ask the client which protocol we're going to connect with.
 
             int protocol = _client.ChooseProtocol((int)request.ProtocolMin, (int)request.ProtocolMax);
 
-            var handshake = new Messages.HandshakeResponse
-            {
-                Protocol = (uint)protocol
-            };
-
             // Push our response
 
             long packageStart = BeginSendPackage();
 
-            ProtoBuf.Serializer.Serialize(SendBuffer, handshake);
+            WriteMessage(TypeModel, new Messages.HandshakeResponse
+            {
+                Protocol = (uint)protocol
+            });
 
             EndSendPackage(PackageType.Handshake, packageStart);
 
@@ -143,11 +119,6 @@ namespace ProtoChannel
             IsAsync = true;
 
             Read();
-        }
-
-        private bool DummyValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-        {
-            return true;
         }
 
         protected override void ProcessMessage(MessageKind kind, uint type, uint length, uint associationId)
@@ -177,8 +148,8 @@ namespace ProtoChannel
                 return;
             }
 
-            object message = _client.ServiceAssembly.TypeModel.Deserialize(
-                ReceiveBuffer, null, pendingMessage.MessageType.Type, (int)length
+            object message = ReadMessage(
+                _client.ServiceAssembly.TypeModel, pendingMessage.MessageType.Type, (int)length
             );
 
             pendingMessage.SetAsCompleted(message, false);
@@ -212,7 +183,7 @@ namespace ProtoChannel
 
             ByteUtil.ConvertNetwork(buffer);
 
-            SendBuffer.Write(buffer, 1, buffer.Length - 1);
+            Write(buffer, 1, buffer.Length - 1);
 
             // Write the association ID.
 
@@ -222,11 +193,11 @@ namespace ProtoChannel
 
             ByteUtil.ConvertNetwork(buffer);
 
-            SendBuffer.Write(buffer, 0, buffer.Length);
+            Write(buffer, 0, buffer.Length);
 
             // Write the message.
 
-            _client.ServiceAssembly.TypeModel.Serialize(SendBuffer, message);
+            WriteMessage(_client.ServiceAssembly.TypeModel, message);
 
             // Send the message.
 
@@ -250,7 +221,6 @@ namespace ProtoChannel
 
         private enum State
         {
-            Authenticating,
             ReceivingHandshake,
             Connected
         }

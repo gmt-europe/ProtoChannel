@@ -87,6 +87,7 @@
     <Compile Include="StreamPackageType.cs" />
     <Compile Include="DiskStreamManager.cs" />
     <Compile Include="StreamSendRequest.cs" />
+    <Compile Include="TcpConnection.cs" />
     <Compile Include="UnhandledExceptionEventHandler.cs" />
     <Compile Include="Util\AsyncResultImpl.cs" />
     <Compile Include="Util\ByteUtil.cs" />

@@ -37,10 +37,8 @@ namespace ProtoChannel
             return true;
         }
 
-        public ProtocolError? ProcessData(uint associationId, RingMemoryStream buffer, int length)
+        public ProtocolError? TryGetStream(uint associationId, out PendingReceiveStream stream)
         {
-            PendingReceiveStream stream;
-
             if (!_streams.TryGetValue(associationId, out stream))
                 return ProtocolError.InvalidStreamAssociationId;
 
@@ -48,31 +46,9 @@ namespace ProtoChannel
             {
                 RemoveStream(stream);
 
+                stream = null;
+
                 return ProtocolError.InvalidStreamPackageType;
-            }
-
-            // We read directly from the back buffers.
-
-            while (length > 0)
-            {
-                // Get a page where we can read from.
-
-                long pageSize = Math.Min(
-                    buffer.BlockSize - buffer.Position % buffer.BlockSize, // Maximum size to stay on the page
-                    length
-                );
-
-                var page = buffer.GetPage(buffer.Position, pageSize);
-
-                // Write the page to our stream.
-
-                stream.Stream.Write(page.Buffer, page.Offset, page.Count);
-
-                // Move the buffers position.
-
-                buffer.Position += page.Count;
-
-                length -= page.Count;
             }
 
             return null;
