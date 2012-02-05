@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using ProtoBuf.Meta;
+using ProtoBuf;
 
 namespace ProtoChannel
 {
@@ -47,6 +48,11 @@ namespace ProtoChannel
                     continue;
 
                 Debug.Assert(messageAttributes.Length == 1);
+
+                var contractAttributes = type.GetCustomAttributes(typeof(ProtoContractAttribute), true);
+
+                if (contractAttributes.Length == 0)
+                    throw new ProtoChannelException(String.Format("Type '{0}' specifies the ProtoMessage attribute but not the ProtoContract attribute", type));
 
                 var messageAttribute = (ProtoMessageAttribute)messageAttributes[0];
 

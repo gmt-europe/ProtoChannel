@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace ProtoChannel
 {
@@ -17,6 +18,7 @@ namespace ProtoChannel
         private readonly Dictionary<ProtoHostConnection<T>, T> _connections = new Dictionary<ProtoHostConnection<T>, T>();
         private readonly object _syncRoot = new object();
         private readonly IStreamManager _streamManager;
+        private AutoResetEvent _connectionsChangedEvent = new AutoResetEvent(false);
 
         public IPEndPoint LocalEndPoint { get; set; }
 
@@ -98,6 +100,8 @@ namespace ProtoChannel
                 lock (_syncRoot)
                 {
                     _connections.Add(connection, null);
+
+                    _connectionsChangedEvent.Set();
                 }
             }
             catch (Exception ex)
@@ -126,7 +130,7 @@ namespace ProtoChannel
             RemoveConnection(connection);
         }
 
-        private void RemoveConnection(ProtoHostConnection<T> connection)
+        internal void RemoveConnection(ProtoHostConnection<T> connection)
         {
             if (connection == null)
                 throw new ArgumentNullException("connection");
@@ -134,6 +138,8 @@ namespace ProtoChannel
             lock (_syncRoot)
             {
                 _connections.Remove(connection);
+
+                _connectionsChangedEvent.Set();
             }
         }
 
@@ -161,6 +167,18 @@ namespace ProtoChannel
 
                     _listener.Stop();
                 }
+
+                while (true)
+                {
+                    lock (_syncRoot)
+                    {
+                        if (_connections.Count == 0)
+                            break;
+                    }
+
+                    _connectionsChangedEvent.WaitOne();
+                }
+
                 _disposed = true;
             }
         }

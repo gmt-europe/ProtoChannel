@@ -6,14 +6,14 @@ using ProtoBuf;
 
 namespace ProtoChannel.Test.Services.PingPong
 {
-    [ProtoMessage(1)]
+    [ProtoMessage(1), ProtoContract]
     internal class Ping
     {
         [ProtoMember(1, IsRequired = true)]
         public string Payload { get; set; }
     }
 
-    [ProtoMessage(2)]
+    [ProtoMessage(2), ProtoContract]
     internal class Pong
     {
         [ProtoMember(1, IsRequired = true)]

@@ -21,6 +21,7 @@ namespace ProtoChannel
         private State _state;
         private SslStream _sslStream;
         private T _client;
+        private bool _disposed;
 
         public ProtoHostConnection(ProtoHost<T> host, TcpClient tcpClient, IStreamManager streamManager)
             : base(tcpClient, streamManager)
@@ -328,6 +329,24 @@ namespace ProtoChannel
         private void ProcessResponseMessage(uint type, uint length, uint associationId)
         {
             throw new NotImplementedException();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (_sslStream != null)
+                {
+                    _sslStream.Dispose();
+                    _sslStream = null;
+                }
+
+                _host.RemoveConnection(this);
+
+                _disposed = true;
+            }
+
+            base.Dispose(disposing);
         }
 
         private enum State
