@@ -16,6 +16,7 @@ namespace ProtoChannel
         private bool _disposed;
         private readonly Dictionary<ProtoHostConnection<T>, T> _connections = new Dictionary<ProtoHostConnection<T>, T>();
         private readonly object _syncRoot = new object();
+        private readonly IStreamManager _streamManager;
 
         public IPEndPoint LocalEndPoint { get; set; }
 
@@ -58,6 +59,8 @@ namespace ProtoChannel
 
             Service = ServiceAssembly.GetServiceRegistration(typeof(T));
 
+            _streamManager = Configuration.StreamManager ?? new MemoryStreamManager();
+
             Start();
         }
 
@@ -90,7 +93,7 @@ namespace ProtoChannel
 
             try
             {
-                var connection = new ProtoHostConnection<T>(this, tcpClient);
+                var connection = new ProtoHostConnection<T>(this, tcpClient, _streamManager);
 
                 lock (_syncRoot)
                 {

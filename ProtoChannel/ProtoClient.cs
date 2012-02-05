@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -7,7 +8,7 @@ using System.Text;
 
 namespace ProtoChannel
 {
-    public class ProtoClient : IDisposable
+    public class ProtoClient : IDisposable, IProtoConnection
     {
         private bool _disposed;
         private ProtoClientConnection _connection;
@@ -38,7 +39,9 @@ namespace ProtoChannel
 
             client.Connect(remoteEndPoint);
 
-            _connection = new ProtoClientConnection(this, client);
+            var streamManager = Configuration.StreamManager ?? new MemoryStreamManager();
+
+            _connection = new ProtoClientConnection(this, client, streamManager);
         }
 
         internal protected virtual int ChooseProtocol(int minProtocol, int maxProtocol)
@@ -61,9 +64,9 @@ namespace ProtoChannel
             return (T)_connection.EndSendMessage(asyncResult);
         }
 
-        protected void BeginSendMessage(object message, Type responseType, AsyncCallback callback, object asyncState)
+        protected IAsyncResult BeginSendMessage(object message, Type responseType, AsyncCallback callback, object asyncState)
         {
-            _connection.BeginSendMessage(message, responseType, callback, asyncState);
+            return _connection.BeginSendMessage(message, responseType, callback, asyncState);
         }
 
         protected void EndSendMessage(IAsyncResult asyncResult)
@@ -74,6 +77,26 @@ namespace ProtoChannel
         protected void PostMessage(object message)
         {
             _connection.PostMessage(message);
+        }
+
+        public uint SendStream(Stream stream, string streamName, string contentType)
+        {
+            return _connection.SendStream(stream, streamName, contentType);
+        }
+
+        public ProtoStream GetStream(uint streamId)
+        {
+            return _connection.GetStream(streamId);
+        }
+
+        public IAsyncResult BeginGetStream(uint streamId, AsyncCallback callback, object asyncState)
+        {
+            return _connection.BeginGetStream(streamId, callback, asyncState);
+        }
+
+        public ProtoStream EndGetStream(IAsyncResult asyncResult)
+        {
+            return _connection.EndGetStream(asyncResult);
         }
 
         public void Dispose()

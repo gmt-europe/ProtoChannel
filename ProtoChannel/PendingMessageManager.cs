@@ -7,7 +7,7 @@ namespace ProtoChannel
 {
     internal class PendingMessageManager
     {
-        private const uint MaxAssociationId = ushort.MaxValue;
+        private const uint MaxAssociationId = 0xffff;
 
         private uint _nextAssociationId;
         private readonly Dictionary<uint, PendingMessage> _pendingMessages = new Dictionary<uint, PendingMessage>();
@@ -30,10 +30,14 @@ namespace ProtoChannel
 
             while (_pendingMessages.ContainsKey(_nextAssociationId))
             {
-                _nextAssociationId++;
+                _nextAssociationId = (_nextAssociationId + 1) & MaxAssociationId;
             }
 
-            return _nextAssociationId++;
+            uint result = _nextAssociationId;
+
+            _nextAssociationId = (_nextAssociationId + 1) & MaxAssociationId;
+
+            return result;
         }
 
         public PendingMessage RemovePendingMessage(uint associationId)

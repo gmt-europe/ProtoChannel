@@ -44,6 +44,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="TraceListeners">
+      <HintPath>..\Libraries\TraceListeners\TraceListeners.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChannelSetup\BasicConnection.cs" />
@@ -54,6 +57,10 @@
     <Compile Include="Services\PingPong\ClientService.cs" />
     <Compile Include="Services\PingPong\Messages.cs" />
     <Compile Include="Services\PingPong\ServerService.cs" />
+    <Compile Include="Services\Streaming\ClientService.cs" />
+    <Compile Include="Services\Streaming\Messages.cs" />
+    <Compile Include="Services\Streaming\ServerService.cs" />
+    <Compile Include="Streaming\StreamingFixture.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ProtoChannel\ProtoChannel-4.csproj">
@@ -61,6 +68,7 @@
       <Name>ProtoChannel-4</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 
-namespace ProtoChannel.Test.Services.PingPong
+namespace ProtoChannel.Test.Services.Streaming
 {
     internal class ClientService : ProtoClient
     {
@@ -18,19 +18,19 @@ namespace ProtoChannel.Test.Services.PingPong
         {
         }
 
-        public Pong Ping(Ping message)
+        public StreamResponse RequestStream(StreamRequest message)
         {
-            return SendMessage<Pong>(message);
+            return SendMessage<StreamResponse>(message);
         }
 
-        public IAsyncResult BeginPing(Ping message, AsyncCallback callback, object asyncState)
+        public IAsyncResult BeginRequestStream(StreamRequest message, AsyncCallback callback, object asyncState)
         {
-            return BeginSendMessage(message, typeof(Pong), callback, asyncState);
+            return BeginSendMessage(message, typeof(StreamResponse), callback, asyncState);
         }
 
-        public Pong EndPing(IAsyncResult asyncResult)
+        public StreamResponse EndRequestStream(IAsyncResult asyncResult)
         {
-            return EndSendMessage<Pong>(asyncResult);
+            return EndSendMessage<StreamResponse>(asyncResult);
         }
     }
 }

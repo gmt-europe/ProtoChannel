@@ -15,10 +15,10 @@ namespace ProtoChannel
     {
         private readonly ProtoClient _client;
         private State _state;
-        private PendingMessageManager _messageManager = new PendingMessageManager();
+        private readonly PendingMessageManager _messageManager = new PendingMessageManager();
 
-        public ProtoClientConnection(ProtoClient client, TcpClient tcpClient)
-            : base(tcpClient)
+        public ProtoClientConnection(ProtoClient client, TcpClient tcpClient, IStreamManager streamManager)
+            : base(tcpClient, streamManager)
         {
             if (client == null)
                 throw new ArgumentNullException("client");
@@ -226,7 +226,7 @@ namespace ProtoChannel
 
             // Write the message.
 
-            ProtoBuf.Serializer.NonGeneric.Serialize(SendBuffer, message);
+            _client.ServiceAssembly.TypeModel.Serialize(SendBuffer, message);
 
             // Send the message.
 

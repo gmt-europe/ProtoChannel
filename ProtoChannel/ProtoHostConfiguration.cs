@@ -20,6 +20,7 @@ namespace ProtoChannel
         private int _minimumProtocolNumber;
         private int _maximumProtocolNumber;
         private Assembly _serviceAssembly;
+        private IStreamManager _streamManager;
 
         public ProtoHostConfiguration()
         {
@@ -114,6 +115,17 @@ namespace ProtoChannel
                 VerifyNotFrozen();
 
                 _serviceAssembly = value;
+            }
+        }
+
+        public IStreamManager StreamManager
+        {
+            get { return _streamManager; }
+            set
+            {
+                VerifyNotFrozen();
+
+                _streamManager = value;
             }
         }
 

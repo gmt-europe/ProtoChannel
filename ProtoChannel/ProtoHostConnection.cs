@@ -10,7 +10,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using ProtoChannel.Util;
-using ProtoBuf.Meta;
 
 namespace ProtoChannel
 {
@@ -23,8 +22,8 @@ namespace ProtoChannel
         private SslStream _sslStream;
         private T _client;
 
-        public ProtoHostConnection(ProtoHost<T> host, TcpClient tcpClient)
-            : base(tcpClient)
+        public ProtoHostConnection(ProtoHost<T> host, TcpClient tcpClient, IStreamManager streamManager)
+            : base(tcpClient, streamManager)
         {
             if (host == null)
                 throw new ArgumentNullException("host");
@@ -282,7 +281,10 @@ namespace ProtoChannel
 
                 lock (_clientSyncRoot)
                 {
-                    result = message.Method.Method.Invoke(_client, new[] { message.Message });
+                    using (OperationContext.SetScope(new OperationContext(this)))
+                    {
+                        result = message.Method.Method.Invoke(_client, new[] { message.Message });
+                    }
                 }
 
                 if (!message.IsOneWay)
@@ -318,7 +320,7 @@ namespace ProtoChannel
 
             // Write the message.
 
-            ProtoBuf.Serializer.NonGeneric.Serialize(SendBuffer, result);
+            _host.ServiceAssembly.TypeModel.Serialize(SendBuffer, result);
 
             EndSendPackage(PackageType.Message, packageStart);
         }
