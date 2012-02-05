@@ -32,5 +32,10 @@ namespace ProtoChannel.Test.Services.PingPong
         {
             return EndSendMessage<Pong>(asyncResult);
         }
+
+        public void OneWayPing(OneWayPing message)
+        {
+            PostMessage(message);
+        }
     }
 }

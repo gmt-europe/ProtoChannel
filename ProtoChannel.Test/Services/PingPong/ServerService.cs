@@ -10,9 +10,13 @@ namespace ProtoChannel.Test.Services.PingPong
         [ProtoMethod]
         public Pong Ping(Ping message)
         {
-            Console.WriteLine("Ping received");
-
             return new Pong { Payload = message.Payload };
+        }
+
+        [ProtoMethod(IsOneWay = true)]
+        public void OneWayPing(OneWayPing message)
+        {
+            Console.WriteLine("One way ping received");
         }
     }
 }

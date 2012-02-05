@@ -19,4 +19,9 @@ namespace ProtoChannel.Test.Services.PingPong
         [ProtoMember(1, IsRequired = true)]
         public string Payload { get; set; }
     }
+
+    [ProtoMessage(5), ProtoContract]
+    internal class OneWayPing
+    {
+    }
 }

@@ -227,9 +227,35 @@ namespace ProtoChannel
 
         public void PostMessage(object message)
         {
+            if (message == null)
+                throw new ArgumentNullException("message");
+
             lock (SyncRoot)
             {
-                throw new NotImplementedException();
+                ServiceMessage messageType;
+
+                if (!_client.ServiceAssembly.MessagesByType.TryGetValue(message.GetType(), out messageType))
+                    throw new ProtoChannelException(String.Format("Message type '{0}' is not a valid message type", message.GetType()));
+
+                long packageStart = BeginSendPackage();
+
+                // Write the header.
+
+                uint header = (uint)MessageKind.OneWay | (uint)messageType.Id << 2;
+
+                var buffer = BitConverter.GetBytes(header);
+
+                ByteUtil.ConvertNetwork(buffer);
+
+                Write(buffer, 1, buffer.Length - 1);
+
+                // Write the message.
+
+                WriteMessage(_client.ServiceAssembly.TypeModel, message);
+
+                // Send the message.
+
+                EndSendPackage(PackageType.Message, packageStart);
             }
         }
 

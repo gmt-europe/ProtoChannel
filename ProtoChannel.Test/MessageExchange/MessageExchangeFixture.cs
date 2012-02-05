@@ -23,5 +23,15 @@ namespace ProtoChannel.Test.MessageExchange
                 Assert.AreEqual("Hello", result.Payload);
             }
         }
+
+        [Test]
+        public void OneWay()
+        {
+            using (var host = new ProtoHost<ServerService>(new IPEndPoint(IPAddress.Loopback, 0)))
+            using (var client = new ClientService(host.LocalEndPoint))
+            {
+                client.OneWayPing(new OneWayPing());
+            }
+        }
     }
 }
