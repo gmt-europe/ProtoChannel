@@ -7,13 +7,13 @@ using ProtoChannel.Util;
 
 namespace ProtoChannel
 {
-    internal class ProtoClientConnection : ProtoConnection
+    internal class ClientConnection : ProtoConnection
     {
         private readonly ProtoClient _client;
         private State _state;
         private readonly PendingMessageManager _messageManager = new PendingMessageManager();
 
-        public ProtoClientConnection(ProtoClient client, TcpClient tcpClient, IStreamManager streamManager)
+        public ClientConnection(ProtoClient client, TcpClient tcpClient, IStreamManager streamManager)
             : base(tcpClient, streamManager)
         {
             if (client == null)

@@ -15,7 +15,7 @@ namespace ProtoChannel
         private TcpListener _listener;
         private bool _closing;
         private bool _disposed;
-        private readonly Dictionary<ProtoHostConnection<T>, T> _connections = new Dictionary<ProtoHostConnection<T>, T>();
+        private readonly Dictionary<HostConnection<T>, T> _connections = new Dictionary<HostConnection<T>, T>();
         private readonly object _syncRoot = new object();
         private readonly IStreamManager _streamManager;
         private AutoResetEvent _connectionsChangedEvent = new AutoResetEvent(false);
@@ -95,7 +95,7 @@ namespace ProtoChannel
 
             try
             {
-                var connection = new ProtoHostConnection<T>(this, tcpClient, _streamManager);
+                var connection = new HostConnection<T>(this, tcpClient, _streamManager);
 
                 lock (_syncRoot)
                 {
@@ -114,7 +114,7 @@ namespace ProtoChannel
             _listener.BeginAcceptTcpClient(AcceptTcpClientCallback, null);
         }
 
-        internal void RaiseUnhandledException(ProtoHostConnection<T> connection, Exception exception)
+        internal void RaiseUnhandledException(HostConnection<T> connection, Exception exception)
         {
             OnUnhandledException(new UnhandledExceptionEventArgs(exception));
 
@@ -130,7 +130,7 @@ namespace ProtoChannel
             RemoveConnection(connection);
         }
 
-        internal void RemoveConnection(ProtoHostConnection<T> connection)
+        internal void RemoveConnection(HostConnection<T> connection)
         {
             if (connection == null)
                 throw new ArgumentNullException("connection");
@@ -143,7 +143,7 @@ namespace ProtoChannel
             }
         }
 
-        internal T RaiseClientConnected(ProtoHostConnection<T> connection, int protocolNumber)
+        internal T RaiseClientConnected(HostConnection<T> connection, int protocolNumber)
         {
             lock (_syncRoot)
             {
@@ -178,6 +178,9 @@ namespace ProtoChannel
 
                     _connectionsChangedEvent.WaitOne();
                 }
+
+                _connectionsChangedEvent.Close();
+                _connectionsChangedEvent = null;
 
                 _disposed = true;
             }

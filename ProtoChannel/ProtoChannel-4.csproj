@@ -65,12 +65,12 @@
     <Compile Include="ProtoChannelException.cs" />
     <Compile Include="ProtoClient.cs" />
     <Compile Include="ProtoClientConfiguration.cs" />
-    <Compile Include="ProtoClientConnection.cs" />
+    <Compile Include="ClientConnection.cs" />
     <Compile Include="ProtocolError.cs" />
     <Compile Include="ProtoConnection.cs" />
     <Compile Include="ProtoHost.cs" />
     <Compile Include="ProtoHostConfiguration.cs" />
-    <Compile Include="ProtoHostConnection.cs" />
+    <Compile Include="HostConnection.cs" />
     <Compile Include="ProtoMessageAttribute.cs" />
     <Compile Include="ProtoMethodAttribute.cs" />
     <Compile Include="ProtoStream.cs" />

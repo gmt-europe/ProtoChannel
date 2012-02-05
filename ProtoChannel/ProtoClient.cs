@@ -11,7 +11,7 @@ namespace ProtoChannel
     public class ProtoClient : IDisposable, IProtoConnection
     {
         private bool _disposed;
-        private ProtoClientConnection _connection;
+        private ClientConnection _connection;
 
         public IPEndPoint RemoteEndPoint { get; private set; }
 
@@ -41,7 +41,7 @@ namespace ProtoChannel
 
             var streamManager = Configuration.StreamManager ?? new MemoryStreamManager();
 
-            _connection = new ProtoClientConnection(this, client, streamManager);
+            _connection = new ClientConnection(this, client, streamManager);
         }
 
         internal protected virtual int ChooseProtocol(int minProtocol, int maxProtocol)

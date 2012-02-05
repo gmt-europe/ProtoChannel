@@ -9,7 +9,7 @@ using ProtoChannel.Util;
 
 namespace ProtoChannel
 {
-    internal class ProtoHostConnection<T> : ProtoConnection
+    internal class HostConnection<T> : ProtoConnection
         where T : class, new()
     {
         private readonly ProtoHost<T> _host;
@@ -19,7 +19,7 @@ namespace ProtoChannel
         private T _client;
         private bool _disposed;
 
-        public ProtoHostConnection(ProtoHost<T> host, TcpClient tcpClient, IStreamManager streamManager)
+        public HostConnection(ProtoHost<T> host, TcpClient tcpClient, IStreamManager streamManager)
             : base(tcpClient, streamManager)
         {
             if (host == null)
