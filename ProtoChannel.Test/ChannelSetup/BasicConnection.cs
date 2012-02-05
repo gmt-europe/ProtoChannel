@@ -19,5 +19,25 @@ namespace ProtoChannel.Test.ChannelSetup
             {
             }
         }
+
+        [Test]
+        public void SecureConnect()
+        {
+            var hostConfig = new ProtoHostConfiguration
+            {
+                Secure = true,
+                Certificate = GetCertificate()
+            };
+
+            var clientConfig = new ProtoClientConfiguration
+            {
+                Secure = true
+            };
+
+            using (var host = new ProtoHost<ServerService>(new IPEndPoint(IPAddress.Loopback, 0), hostConfig))
+            using (new ClientService(host.LocalEndPoint, clientConfig))
+            {
+            }
+        }
     }
 }

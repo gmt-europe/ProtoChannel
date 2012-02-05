@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using TraceListeners;
 
@@ -27,6 +29,19 @@ namespace ProtoChannel.Test
             // an assert fails.
 
             Debug.Listeners.Add(new DebugBreakListener());
+        }
+
+        protected X509Certificate2 GetCertificate()
+        {
+            string resourceName = typeof(FixtureBase).Namespace + ".testcert.pfx";
+
+            using (var inputStream = GetType().Assembly.GetManifestResourceStream(resourceName))
+            using (var outputStream = new MemoryStream())
+            {
+                inputStream.CopyTo(outputStream);
+
+                return new X509Certificate2(outputStream.ToArray());
+            }
         }
     }
 }

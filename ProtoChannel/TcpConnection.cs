@@ -71,6 +71,8 @@ namespace ProtoChannel
         {
             _sslStream = new SslStream(_stream, false, validationCallback ?? DummyValidationCallback);
 
+            _stream = null;
+
             _sslStream.BeginAuthenticateAsServer(
                 certificate,
                 false /* clientCertificateRequired */,
@@ -416,16 +418,27 @@ namespace ProtoChannel
         {
             if (!IsDisposed)
             {
-                if (_sslStream != null)
-                {
-                    _sslStream.Dispose();
-                    _sslStream = null;
-                }
-
                 if (_tcpClient != null)
                 {
                     _tcpClient.Close();
                     _tcpClient = null;
+                }
+
+                if (_sslStream != null)
+                {
+                    _sslStream.Dispose();
+                    _sslStream = null;
+
+                    // When we have an SslStream, _stream is set to the same
+                    // stream.
+
+                    _stream = null;
+                }
+
+                if (_stream != null)
+                {
+                    _stream.Dispose();
+                    _stream = null;
                 }
 
                 IsDisposed = true;
