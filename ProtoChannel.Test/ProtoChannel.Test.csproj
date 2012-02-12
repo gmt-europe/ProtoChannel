@@ -73,6 +73,7 @@
     <Compile Include="Services\Streaming\Messages.cs" />
     <Compile Include="Services\Streaming\ServerService.cs" />
     <Compile Include="Streaming\StreamingFixture.cs" />
+    <Compile Include="Util\RingMemoryStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ProtoChannel\ProtoChannel-4.csproj">

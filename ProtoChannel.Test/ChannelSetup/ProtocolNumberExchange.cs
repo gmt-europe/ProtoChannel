@@ -67,7 +67,7 @@ namespace ProtoChannel.Test.ChannelSetup
                 get { return base.Configuration as ClientConfiguration; }
             }
 
-            protected override int ChooseProtocol(int minProtocol, int maxProtocol)
+            internal protected override int ChooseProtocol(int minProtocol, int maxProtocol)
             {
                 if (Configuration == null || Configuration.ProtocolChooser == null)
                     return base.ChooseProtocol(minProtocol, maxProtocol);
