@@ -21,8 +21,7 @@ namespace ProtoChannel.Util
 
         public RingMemoryStream(int blockSize)
         {
-            if (blockSize <= 0)
-                throw new ArgumentOutOfRangeException("blockSize");
+            Require.That(blockSize > 0, "Block size must be greater than zero", "blockSize");
 
             BlockSize = blockSize;
 
@@ -37,12 +36,9 @@ namespace ProtoChannel.Util
             {
                 VerifyNotDisposed();
 
-                if (value < _head)
-                    throw new ArgumentOutOfRangeException("value", "Cannot decrease header");
-                if (value > _length)
-                    throw new ArgumentOutOfRangeException("value", "Head is greater than the length");
-                if (value > _position)
-                    throw new ArgumentOutOfRangeException("value", "Head is greater than the position");
+                Require.That(!(value < _head), "value", "Cannot decrease header");
+                Require.That(!(value > _length), "value", "Head is greater than the length");
+                Require.That(!(value > _position), "value", "Head is greater than the position");
 
                 long startPage = GetPage(_head);
                 long endPage = GetPage(value);
@@ -78,8 +74,7 @@ namespace ProtoChannel.Util
             get { return _capacity; }
             set
             {
-                if (value < _capacity)
-                    throw new ArgumentOutOfRangeException("value");
+                Require.That(value >= _capacity, "Capacity cannot be decreased", "value");
 
                 long startPage = GetPage(_capacity);
                 long endPage = GetPage(value - 1);
@@ -196,8 +191,7 @@ namespace ProtoChannel.Util
         {
             VerifyNotDisposed();
 
-            if (value < _length)
-                throw new ArgumentOutOfRangeException("value", "Length cannot be decreased");
+            Require.That(!(value < _length), "value", "Length cannot be decreased");
 
             _length = value;
 
@@ -209,12 +203,9 @@ namespace ProtoChannel.Util
         {
             VerifyNotDisposed();
 
-            if (buffer == null)
-                throw new ArgumentNullException("buffer");
-            if (offset < 0 || offset > buffer.Length)
-                throw new ArgumentOutOfRangeException("offset");
-            if (count < 0 || offset + count > buffer.Length)
-                throw new ArgumentOutOfRangeException("count");
+            Require.NotNull(buffer, "buffer");
+            Require.That(offset >= 0 && offset <= buffer.Length, "Offset must fall within the buffer", "offset");
+            Require.That(count >= 0 && offset + count <= buffer.Length, "Count must fall within the buffer", "count");
 
             if (count == 0)
                 return 0;
@@ -252,12 +243,9 @@ namespace ProtoChannel.Util
         {
             VerifyNotDisposed();
 
-            if (buffer == null)
-                throw new ArgumentNullException("buffer");
-            if (offset < 0 || offset > buffer.Length)
-                throw new ArgumentOutOfRangeException("offset");
-            if (count < 0 || offset + count > buffer.Length)
-                throw new ArgumentOutOfRangeException("count");
+            Require.NotNull(buffer, "buffer");
+            Require.That(offset >= 0 && offset <= buffer.Length, "Offset must fall within the buffer", "offset");
+            Require.That(count >= 0 && offset + count <= buffer.Length, "Count must fall within the buffer", "count");
 
             if (count == 0)
                 return;
@@ -334,8 +322,7 @@ namespace ProtoChannel.Util
         {
             VerifyNotDisposed();
 
-            if (count <= 0)
-                throw new ArgumentOutOfRangeException("count");
+            Require.That(count > 0, "Count must be greater than zero", "count");
 
             VerifyCapacityRange(offset, offset + count);
 
@@ -366,16 +353,14 @@ namespace ProtoChannel.Util
         {
             VerifyNotDisposed();
 
-            if (count <= 0)
-                throw new ArgumentOutOfRangeException("count");
+            Require.That(count > 0, "Count must be greater than zero", "count");
 
             VerifyCapacityRange(offset, offset + count);
 
             long startPage = GetPage(offset);
             long endPage = GetPage(offset + count - 1);
 
-            if (startPage != endPage)
-                throw new ArgumentOutOfRangeException("count", "GetPage cannot span pages");
+            Require.That(startPage == endPage, "GetPage cannot span pages", "count");
 
             long pageOffset = offset - GetPageOffset(startPage);
 

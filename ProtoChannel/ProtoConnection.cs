@@ -40,10 +40,8 @@ namespace ProtoChannel
         protected ProtoConnection(TcpClient tcpClient, IStreamManager streamManager, ServiceAssembly serviceAssembly)
             : base(tcpClient)
         {
-            if (streamManager == null)
-                throw new ArgumentNullException("streamManager");
-            if (serviceAssembly == null)
-                throw new ArgumentNullException("serviceAssembly");
+            Require.NotNull(streamManager, "streamManager");
+            Require.NotNull(serviceAssembly, "serviceAssembly");
 
             _serviceAssembly = serviceAssembly;
             _sendStreamManager = new SendStreamManager();
@@ -650,8 +648,7 @@ namespace ProtoChannel
 
         public IAsyncResult BeginSendMessage(object message, Type responseType, AsyncCallback callback, object asyncState)
         {
-            if (message == null)
-                throw new ArgumentNullException("message");
+            Require.NotNull(message, "message");
 
             lock (SyncRoot)
             {
@@ -704,16 +701,14 @@ namespace ProtoChannel
 
         public object EndSendMessage(IAsyncResult asyncResult)
         {
-            if (asyncResult == null)
-                throw new ArgumentNullException("asyncResult");
+            Require.NotNull(asyncResult, "asyncResult");
 
             return ((PendingMessage)asyncResult).EndInvoke();
         }
 
         public void PostMessage(object message)
         {
-            if (message == null)
-                throw new ArgumentNullException("message");
+            Require.NotNull(message, "message");
 
             lock (SyncRoot)
             {

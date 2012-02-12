@@ -24,10 +24,8 @@ namespace ProtoChannel
 
         public ServiceMethod(MethodInfo method, ProtoMethodAttribute attribute, ServiceAssembly assembly)
         {
-            if (method == null)
-                throw new ArgumentNullException("method");
-            if (attribute == null)
-                throw new ArgumentNullException("attribute");
+            Require.NotNull(method, "method");
+            Require.NotNull(attribute, "attribute");
 
             Method = method;
 

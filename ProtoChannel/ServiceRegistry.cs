@@ -16,8 +16,7 @@ namespace ProtoChannel
 
         public static ServiceAssembly GetAssemblyRegistration(Assembly assembly)
         {
-            if (assembly == null)
-                throw new ArgumentNullException("assembly");
+            Require.NotNull(assembly, "assembly");
 
             lock (_syncRoot)
             {

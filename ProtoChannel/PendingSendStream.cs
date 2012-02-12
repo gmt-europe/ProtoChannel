@@ -17,8 +17,7 @@ namespace ProtoChannel
         public PendingSendStream(long length, string streamName, string contentType, uint associationId, Stream stream)
             : base(length, streamName, contentType, associationId)
         {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
+            Require.NotNull(stream, "stream");
 
             Stream = stream;
         }

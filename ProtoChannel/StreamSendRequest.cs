@@ -12,8 +12,7 @@ namespace ProtoChannel
 
         public StreamSendRequest(PendingSendStream stream, long length)
         {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
+            Require.NotNull(stream, "stream");
 
             _stream = stream;
             _length = length;

@@ -22,8 +22,7 @@ namespace ProtoChannel
 
         public Stream GetStream(ProtoStream stream)
         {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
+            Require.NotNull(stream, "stream");
 
             if (stream.Length > MaxStreamSize)
                 return null;

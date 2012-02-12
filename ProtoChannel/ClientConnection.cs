@@ -17,10 +17,8 @@ namespace ProtoChannel
         public ClientConnection(ProtoClient client, TcpClient tcpClient, string hostname, IStreamManager streamManager)
             : base(tcpClient, streamManager, client.ServiceAssembly)
         {
-            if (client == null)
-                throw new ArgumentNullException("client");
-            if (hostname == null)
-                throw new ArgumentNullException("hostname");
+            Require.NotNull(client, "client");
+            Require.NotNull(hostname, "hostname");
 
             _client = client;
             _hostname = hostname;

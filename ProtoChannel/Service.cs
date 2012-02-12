@@ -21,14 +21,10 @@ namespace ProtoChannel
 
         public Service(Type serviceType, ServiceMethodCollection methods, ServiceMessageByIdCollection messagesById, ServiceAssembly serviceAssembly)
         {
-            if (serviceType == null)
-                throw new ArgumentNullException("serviceType");
-            if (methods == null)
-                throw new ArgumentNullException("methods");
-            if (messagesById == null)
-                throw new ArgumentNullException("messagesById");
-            if (serviceAssembly == null)
-                throw new ArgumentNullException("serviceAssembly");
+            Require.NotNull(serviceType, "serviceType");
+            Require.NotNull(methods, "methods");
+            Require.NotNull(messagesById, "messagesById");
+            Require.NotNull(serviceAssembly, "serviceAssembly");
 
             Type = serviceType;
             ServiceAssembly = serviceAssembly;

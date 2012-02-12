@@ -9,12 +9,9 @@ namespace ProtoChannel.Util
         public RingMemoryPage(byte[] buffer, int offset, int count)
             : this()
         {
-            if (buffer == null)
-                throw new ArgumentNullException("buffer");
-            if (offset < 0)
-                throw new ArgumentOutOfRangeException("offset");
-            if (offset + count > buffer.Length)
-                throw new ArgumentOutOfRangeException("count");
+            Require.NotNull(buffer, "buffer");
+            Require.That(offset >= 0, "Offset must be positive", "offset");
+            Require.That(offset + count <= buffer.Length, "Count cannot be beyond the buffer length", "count");
 
             Buffer = buffer;
             Offset = offset;

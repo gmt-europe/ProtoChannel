@@ -15,10 +15,8 @@ namespace ProtoChannel
 
         public Client(object client, Service service)
         {
-            if (client == null)
-                throw new ArgumentNullException("client");
-            if (service == null)
-                throw new ArgumentNullException("service");
+            Require.NotNull(client, "client");
+            Require.NotNull(service, "service");
 
             Instance = client;
             Service = service;

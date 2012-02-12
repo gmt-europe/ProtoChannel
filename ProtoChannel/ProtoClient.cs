@@ -30,8 +30,7 @@ namespace ProtoChannel
 
         private ProtoClient(ProtoClientConfiguration configuration, TcpClient tcpClient, string hostname)
         {
-            if (hostname == null)
-                throw new ArgumentNullException("hostname");
+            Require.NotNull(hostname, "hostname");
 
             Configuration = configuration ?? new ProtoClientConfiguration();
             Configuration.Freeze();
@@ -85,8 +84,7 @@ namespace ProtoChannel
 
         private static TcpClient CreateClient(IPEndPoint remoteEndPoint)
         {
-            if (remoteEndPoint == null)
-                throw new ArgumentNullException("remoteEndPoint");
+            Require.NotNull(remoteEndPoint, "remoteEndPoint");
 
             var client = new TcpClient();
 
@@ -97,8 +95,7 @@ namespace ProtoChannel
 
         private static TcpClient CreateClient(IPAddress address, int port)
         {
-            if (address == null)
-                throw new ArgumentNullException("address");
+            Require.NotNull(address, "address");
 
             var client = new TcpClient();
 
@@ -109,8 +106,7 @@ namespace ProtoChannel
 
         private static TcpClient CreateClient(string hostname, int port)
         {
-            if (hostname == null)
-                throw new ArgumentNullException("hostname");
+            Require.NotNull(hostname, "hostname");
 
             var client = new TcpClient();
 

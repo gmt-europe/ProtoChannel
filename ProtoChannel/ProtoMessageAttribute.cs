@@ -10,8 +10,7 @@ namespace ProtoChannel
     {
         public ProtoMessageAttribute(int messageId)
         {
-            if (messageId < 1)
-                throw new ArgumentOutOfRangeException("messageId", "Message ID must be greater than zero");
+            Require.That(!(messageId < 1), "messageId", "Message ID must be greater than zero");
 
             MessageId = messageId;
         }

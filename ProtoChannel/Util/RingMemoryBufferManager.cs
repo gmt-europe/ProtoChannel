@@ -40,8 +40,7 @@ namespace ProtoChannel.Util
 
         public void ReleaseBlock(byte[] block)
         {
-            if (block == null)
-                throw new ArgumentNullException("block");
+            Require.NotNull(block, "block");
 
             Debug.Assert(block.Length == BlockSize);
 
@@ -94,8 +93,7 @@ namespace ProtoChannel.Util
 
         public void ReleaseBlock(byte[] block)
         {
-            if (block == null)
-                throw new ArgumentNullException("block");
+            Require.NotNull(block, "block");
 
             Debug.Assert(block.Length == BlockSize);
 

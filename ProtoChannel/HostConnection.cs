@@ -18,8 +18,7 @@ namespace ProtoChannel
         public HostConnection(ProtoHost host, TcpClient tcpClient, IStreamManager streamManager)
             : base(tcpClient, streamManager, host.ServiceAssembly)
         {
-            if (host == null)
-                throw new ArgumentNullException("host");
+            Require.NotNull(host, "host");
 
             _host = host;
 

@@ -59,10 +59,8 @@ namespace ProtoChannel
 
         internal ProtoHost(IPEndPoint localEndPoint, Type serviceType, ProtoHostConfiguration configuration)
         {
-            if (localEndPoint == null)
-                throw new ArgumentNullException("localEndPoint");
-            if (serviceType == null)
-                throw new ArgumentNullException("serviceType");
+            Require.NotNull(localEndPoint, "localEndPoint");
+            Require.NotNull(serviceType, "serviceType");
 
             LocalEndPoint = localEndPoint;
 
@@ -142,10 +140,8 @@ namespace ProtoChannel
 
         internal void RaiseUnhandledException(HostConnection connection, Exception exception)
         {
-            if (connection == null)
-                throw new ArgumentNullException("connection");
-            if (exception == null)
-                throw new ArgumentNullException("exception");
+            Require.NotNull(connection, "connection");
+            Require.NotNull(exception, "exception");
 
             try
             {
@@ -168,8 +164,7 @@ namespace ProtoChannel
 
         internal void RemoveConnection(HostConnection connection)
         {
-            if (connection == null)
-                throw new ArgumentNullException("connection");
+            Require.NotNull(connection, "connection");
 
             lock (_syncRoot)
             {
@@ -185,8 +180,7 @@ namespace ProtoChannel
 
         internal Client RaiseClientConnected(HostConnection connection, int protocolNumber)
         {
-            if (connection == null)
-                throw new ArgumentNullException("connection");
+            Require.NotNull(connection, "connection");
 
             lock (_syncRoot)
             {

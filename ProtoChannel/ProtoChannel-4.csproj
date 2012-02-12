@@ -64,6 +64,7 @@
     <Compile Include="Messages\Error.cs" />
     <Compile Include="Messages\HandshakeRequest.cs" />
     <Compile Include="Messages\HandshakeResponse.cs" />
+    <Compile Include="Require.cs" />
     <Compile Include="Messages\StartStream.cs" />
     <Compile Include="OperationContext.cs" />
     <Compile Include="PackageType.cs" />

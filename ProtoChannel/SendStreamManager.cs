@@ -17,8 +17,7 @@ namespace ProtoChannel
 
         public uint RegisterStream(Stream stream, string streamName, string contentType)
         {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
+            Require.NotNull(stream, "stream");
 
             if (_streams.Count == MaxAssociationId)
                 throw new ProtoChannelException("No stream association ID's are available");

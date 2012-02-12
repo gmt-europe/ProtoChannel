@@ -12,8 +12,7 @@ namespace ProtoChannel
 
         public ProtoCallbackContractAttribute(Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException("type");
+            Require.NotNull(type, "type");
 
             if (!typeof(ProtoCallbackChannel).IsAssignableFrom(type))
                 throw new ProtoChannelException("Callback contract type is not of type ProtoCallbackChannel");

@@ -24,14 +24,10 @@ namespace ProtoChannel
 
         public ServiceAssembly(Assembly assembly, RuntimeTypeModel typeModel, ServiceMessageByIdCollection messagesById, ServiceMessageByTypeCollection messagesByType)
         {
-            if (assembly == null)
-                throw new ArgumentNullException("assembly");
-            if (typeModel == null)
-                throw new ArgumentNullException("typeModel");
-            if (messagesById == null)
-                throw new ArgumentNullException("messagesById");
-            if (messagesByType == null)
-                throw new ArgumentNullException("messagesByType");
+            Require.NotNull(assembly, "assembly");
+            Require.NotNull(typeModel, "typeModel");
+            Require.NotNull(messagesById, "messagesById");
+            Require.NotNull(messagesByType, "messagesByType");
 
             Assembly = assembly;
             TypeModel = typeModel;
@@ -41,8 +37,7 @@ namespace ProtoChannel
 
         public Service GetServiceRegistration(Type serviceType)
         {
-            if (serviceType == null)
-                throw new ArgumentNullException("serviceType");
+            Require.NotNull(serviceType, "serviceType");
 
             lock (_syncRoot)
             {

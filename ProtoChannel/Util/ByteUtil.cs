@@ -21,10 +21,8 @@ namespace ProtoChannel.Util
 
         public static bool Equals(byte[] x, byte[] y)
         {
-            if (x == null)
-                throw new ArgumentNullException("x");
-            if (y == null)
-                throw new ArgumentNullException("y");
+            Require.NotNull(x, "x");
+            Require.NotNull(y, "y");
 
             if (x.Length != y.Length)
                 return false;
@@ -40,10 +38,8 @@ namespace ProtoChannel.Util
 
         public static bool Equals(byte[] x, byte[] y, int length)
         {
-            if (x == null)
-                throw new ArgumentNullException("x");
-            if (y == null)
-                throw new ArgumentNullException("y");
+            Require.NotNull(x, "x");
+            Require.NotNull(y, "y");
 
             if (x.Length < length || y.Length < length)
                 return false;

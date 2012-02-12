@@ -19,10 +19,8 @@ namespace ProtoChannel
         public ServiceMessage(ProtoMessageAttribute attribute, Type type)
         {
             Type = type;
-            if (attribute == null)
-                throw new ArgumentNullException("attribute");
-            if (type == null)
-                throw new ArgumentNullException("type");
+            Require.NotNull(attribute, "attribute");
+            Require.NotNull(type, "type");
 
             _attribute = attribute;
         }

@@ -22,8 +22,7 @@ namespace ProtoChannel.Util
         /// that will be wrapped.</param>
         public ReadOnlyKeyedCollection(IKeyedCollection<TKey, TItem> source)
         {
-            if (source == null)
-                throw new ArgumentNullException("source");
+            Require.NotNull(source, "source");
 
             _source = source;
         }

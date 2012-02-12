@@ -14,10 +14,8 @@ namespace ProtoChannel
 
         public PendingRequest(object message, bool isOneWay, uint associationId, ServiceMethod method)
         {
-            if (message == null)
-                throw new ArgumentNullException("message");
-            if (method == null)
-                throw new ArgumentNullException("method");
+            Require.NotNull(message, "message");
+            Require.NotNull(method, "method");
 
             _message = message;
             _isOneWay = isOneWay;

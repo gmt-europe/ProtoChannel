@@ -42,8 +42,7 @@ namespace ProtoChannel
 
         protected TcpConnection(TcpClient tcpClient)
         {
-            if (tcpClient == null)
-                throw new ArgumentNullException("tcpClient");
+            Require.NotNull(tcpClient, "tcpClient");
 
             SyncRoot = new object();
 
@@ -58,8 +57,7 @@ namespace ProtoChannel
 
         protected void AuthenticateAsClient(RemoteCertificateValidationCallback validationCallback, string targetHost)
         {
-            if (targetHost == null)
-                throw new ArgumentNullException("targetHost");
+            Require.NotNull(targetHost, "targetHost");
 
             lock (SyncRoot)
             {
@@ -81,8 +79,7 @@ namespace ProtoChannel
 
         protected void BeginAuthenticateAsServer(X509Certificate certificate, RemoteCertificateValidationCallback validationCallback, AsyncCallback callback, object asyncState)
         {
-            if (certificate == null)
-                throw new ArgumentNullException("certificate");
+            Require.NotNull(certificate, "certificate");
 
             lock (SyncRoot)
             {
@@ -123,18 +120,15 @@ namespace ProtoChannel
 
         protected int Read(byte[] buffer, int offset, int count)
         {
-            if (buffer == null)
-                throw new ArgumentNullException("buffer");
+            Require.NotNull(buffer, "buffer");
 
             return _receiveStream.Read(buffer, offset, count);
         }
 
         protected object ReadMessage(RuntimeTypeModel typeModel, Type messageType, int length)
         {
-            if (typeModel == null)
-                throw new ArgumentNullException("typeModel");
-            if (messageType == null)
-                throw new ArgumentNullException("messageType");
+            Require.NotNull(typeModel, "typeModel");
+            Require.NotNull(messageType, "messageType");
 
             return typeModel.Deserialize(_receiveStream, null, messageType, length);
         }
@@ -168,26 +162,22 @@ namespace ProtoChannel
 
         protected void Write(byte[] buffer, int offset, int count)
         {
-            if (buffer == null)
-                throw new ArgumentNullException("buffer");
+            Require.NotNull(buffer, "buffer");
 
             _sendStream.Write(buffer, offset, count);
         }
 
         protected void WriteMessage(RuntimeTypeModel typeModel, object message)
         {
-            if (typeModel == null)
-                throw new ArgumentNullException("typeModel");
-            if (message == null)
-                throw new ArgumentNullException("message");
+            Require.NotNull(typeModel, "typeModel");
+            Require.NotNull(message, "message");
 
             typeModel.Serialize(_sendStream, message);
         }
 
         protected void WriteStream(Stream stream, long length)
         {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
+            Require.NotNull(stream, "stream");
 
             while (length > 0)
             {

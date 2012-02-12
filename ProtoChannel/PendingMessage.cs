@@ -15,8 +15,7 @@ namespace ProtoChannel
         public PendingMessage(ServiceMessage messageType, uint associationId, AsyncCallback callback, object asyncState)
             : base(callback, asyncState)
         {
-            if (messageType == null)
-                throw new ArgumentNullException("messageType");
+            Require.NotNull(messageType, "messageType");
 
             MessageType = messageType;
             AssociationId = associationId;

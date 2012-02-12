@@ -11,8 +11,7 @@ namespace ProtoChannel
 
         public UnhandledExceptionEventArgs(Exception exception)
         {
-            if (exception == null)
-                throw new ArgumentNullException("exception");
+            Require.NotNull(exception, "exception");
 
             Exception = exception;
         }

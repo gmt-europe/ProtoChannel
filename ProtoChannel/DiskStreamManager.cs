@@ -19,8 +19,7 @@ namespace ProtoChannel
 
         public DiskStreamManager(string path, int maxStreamSize)
         {
-            if (path == null)
-                throw new ArgumentNullException("path");
+            Require.NotNull(path, "path");
 
             if (!Directory.Exists(path))
                 throw new ArgumentException("Path does not exist", "path");
@@ -31,8 +30,7 @@ namespace ProtoChannel
 
         public Stream GetStream(ProtoStream stream)
         {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
+            Require.NotNull(stream, "stream");
 
             if (stream.Length > MaxStreamSize)
                 return null;

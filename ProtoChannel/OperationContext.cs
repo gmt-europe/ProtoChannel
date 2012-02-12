@@ -23,8 +23,7 @@ namespace ProtoChannel
         internal OperationContext(IProtoConnection connection, ProtoCallbackChannel callbackChannel)
         {
             _callbackChannel = callbackChannel;
-            if (connection == null)
-                throw new ArgumentNullException("connection");
+            Require.NotNull(connection, "connection");
 
             Connection = connection;
         }
@@ -40,8 +39,7 @@ namespace ProtoChannel
 
         internal static IDisposable SetScope(OperationContext context)
         {
-            if (context == null)
-                throw new ArgumentNullException("context");
+            Require.NotNull(context, "context");
 
             var current = _current;
 

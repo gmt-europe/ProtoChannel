@@ -19,8 +19,7 @@ namespace ProtoChannel
         public PendingReceiveStream(long length, string streamName, string contentType, uint associationId, Stream stream)
             : base(length, streamName, contentType, associationId)
         {
-            if (stream == null)
-                throw new ArgumentNullException("stream");
+            Require.NotNull(stream, "stream");
 
             // Stream is not disposed. The receiving party is supposed to dispose
             // of the stream.
@@ -53,8 +52,7 @@ namespace ProtoChannel
 
         public void SetAsFailed(Exception exception)
         {
-            if (exception == null)
-                throw new ArgumentNullException("exception");
+            Require.NotNull(exception, "exception");
 
             Debug.Assert(!_isCompleted && _completedException == null);
 
@@ -75,8 +73,7 @@ namespace ProtoChannel
 
         public static ProtoStream EndGetStream(IAsyncResult asyncResult)
         {
-            if (asyncResult == null)
-                throw new ArgumentNullException("asyncResult");
+            Require.NotNull(asyncResult, "asyncResult");
 
             var result = ((AsyncResultImpl<PendingReceiveStream>)asyncResult).EndInvoke();
 

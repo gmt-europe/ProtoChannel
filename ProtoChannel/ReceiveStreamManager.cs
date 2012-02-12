@@ -12,8 +12,7 @@ namespace ProtoChannel
 
         public ReceiveStreamManager(IStreamManager streamManager)
         {
-            if (streamManager == null)
-                throw new ArgumentNullException("streamManager");
+            Require.NotNull(streamManager, "streamManager");
 
             _streamManager = streamManager;
         }
