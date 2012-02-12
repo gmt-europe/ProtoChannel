@@ -21,7 +21,6 @@ namespace ProtoChannel
         private readonly IStreamManager _streamManager;
         private AutoResetEvent _stateChangedEvent = new AutoResetEvent(false);
         private ProtoHostState _state;
-        private readonly Service _service;
 
         public ProtoHostState State
         {
@@ -48,6 +47,8 @@ namespace ProtoChannel
 
         internal ServiceAssembly ServiceAssembly { get; private set; }
 
+        internal Service Service { get; private set; }
+
         protected virtual void OnUnhandledException(UnhandledExceptionEventArgs e)
         {
             var ev = UnhandledException;
@@ -72,7 +73,7 @@ namespace ProtoChannel
                 Configuration.ServiceAssembly ?? serviceType.Assembly
             );
 
-            _service = ServiceAssembly.GetServiceRegistration(serviceType);
+            Service = ServiceAssembly.GetServiceRegistration(serviceType);
 
             _streamManager = Configuration.StreamManager ?? new MemoryStreamManager();
 
@@ -204,7 +205,7 @@ namespace ProtoChannel
 
                 if (client != null)
                 {
-                    var hostClient = new Client(client, _service);
+                    var hostClient = new Client(client, Service);
 
                     _connections[connection] = hostClient;
 

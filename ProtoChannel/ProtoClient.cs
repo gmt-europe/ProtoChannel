@@ -12,8 +12,19 @@ namespace ProtoChannel
     {
         private bool _disposed;
         private ClientConnection _connection;
+        private Exception _unhandledException;
 
         public ProtoClientConfiguration Configuration { get; private set; }
+
+        public event EventHandler Disposed;
+
+        protected virtual void OnDisposed(EventArgs e)
+        {
+            var ev = Disposed;
+
+            if (ev != null)
+                ev(this, e);
+        }
 
         internal ServiceAssembly ServiceAssembly { get; private set; }
 
@@ -143,18 +154,33 @@ namespace ProtoChannel
             return _connection.EndGetStream(asyncResult);
         }
 
+        internal void RaiseUnhandledException(Exception exception)
+        {
+            _unhandledException = exception;
+        }
+
         public void Dispose()
         {
             if (!_disposed)
             {
-                if (_connection != null)
-                {
-                    _connection.Dispose();
-                    _connection = null;
-                }
+                OnDisposed(EventArgs.Empty);
+
+                var connection = _connection;
+
+                _connection = null;
+
+                if (connection != null)
+                    connection.Dispose();
 
                 _disposed = true;
             }
+
+            var unhandledException = _unhandledException;
+
+            _unhandledException = null;
+
+            if (unhandledException != null)
+                throw unhandledException;
         }
     }
 }

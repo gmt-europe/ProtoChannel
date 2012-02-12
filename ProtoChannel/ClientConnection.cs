@@ -9,9 +9,10 @@ namespace ProtoChannel
 {
     internal class ClientConnection : ProtoConnection
     {
-        private readonly ProtoClient _client;
+        private ProtoClient _client;
         private readonly string _hostname;
         private bool _connected;
+        private bool _disposed;
 
         public ClientConnection(ProtoClient client, TcpClient tcpClient, string hostname, IStreamManager streamManager)
             : base(tcpClient, streamManager, client.ServiceAssembly)
@@ -111,6 +112,28 @@ namespace ProtoChannel
             IsAsync = true;
 
             Read();
+        }
+
+        protected override void RaiseUnhandledException(Exception exception)
+        {
+            _client.RaiseUnhandledException(exception);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                var client = _client;
+
+                _client = null;
+
+                if (client != null)
+                    client.Dispose();
+
+                _disposed = true;
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

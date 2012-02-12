@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ProtoChannel
 {
-    internal enum ProtocolError
+    public enum ProtocolError
     {
         UnknownError = 0,
         InvalidPackageType = 1,

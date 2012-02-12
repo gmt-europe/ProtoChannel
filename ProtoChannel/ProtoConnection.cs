@@ -85,7 +85,7 @@ namespace ProtoChannel
 
             ProcessPackage(pendingPackage);
 
-            return ReadAvailable > 0;
+            return !IsDisposed && ReadAvailable > 0;
         }
 
         protected virtual void ProcessPackage(PendingPackage package)
@@ -119,7 +119,13 @@ namespace ProtoChannel
                 TypeModel, typeof(Messages.Error), (int)package.Length
             );
 
-            throw new ProtoChannelException(String.Format("Protocol exception '{0}'", (ProtocolError)error.ErrorNumber));
+            var exception = new ProtoChannelException((ProtocolError)error.ErrorNumber);
+
+            _messageManager.SetError(exception);
+
+            RaiseUnhandledException(exception);
+
+            Dispose();
         }
 
         private void ProcessMessagePackage(PendingPackage package)

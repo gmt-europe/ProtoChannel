@@ -204,13 +204,13 @@ namespace ProtoChannel
                 // Create the callback channel so we can provide it with the
                 // operation context.
 
-                if (Client.Service.CallbackContractType != null)
+                if (_host.Service.CallbackContractType != null)
                 {
                     // Else, if we have a callback contract, we create the
                     // channel.
 
                     CallbackChannel = (ProtoCallbackChannel)Activator.CreateInstance(
-                        Client.Service.CallbackContractType
+                        _host.Service.CallbackContractType
                     );
 
                     CallbackChannel.Connection = this;

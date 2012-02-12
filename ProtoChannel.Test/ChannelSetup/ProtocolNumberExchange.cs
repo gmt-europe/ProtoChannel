@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using NUnit.Framework;
 
 namespace ProtoChannel.Test.ChannelSetup
@@ -39,8 +40,13 @@ namespace ProtoChannel.Test.ChannelSetup
             };
 
             using (var host = new ProtoHost(new IPEndPoint(IPAddress.Loopback, 0), null, null))
-            using (new ClientService(host.LocalEndPoint, clientConfig))
+            using (var client = new ClientService(host.LocalEndPoint, clientConfig))
             {
+                var @event = new ManualResetEvent(false);
+
+                client.Disposed += (s, e) => @event.Set();
+
+                @event.WaitOne();
             }
         }
 
