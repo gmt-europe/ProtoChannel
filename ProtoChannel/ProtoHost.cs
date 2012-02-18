@@ -14,6 +14,8 @@ namespace ProtoChannel
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(ProtoHost<>));
 
+        public const int ProtocolVersion = Constants.ProtocolVersion;
+
         private readonly object _syncRoot = new object();
         private TcpListener _listener;
         private bool _disposed;

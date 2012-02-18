@@ -66,7 +66,7 @@ namespace ProtoChannel
         private void CompleteAsyncResult(bool completedSynchronously)
         {
             if (_completedException != null)
-                _asyncResult.SetAsFailed(_completedException, completedSynchronously);
+                _asyncResult.SetAsCompleted(_completedException, completedSynchronously);
             else
                 _asyncResult.SetAsCompleted(this, completedSynchronously);
         }

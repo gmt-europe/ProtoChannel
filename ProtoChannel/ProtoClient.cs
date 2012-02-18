@@ -14,6 +14,8 @@ namespace ProtoChannel
         private ClientConnection _connection;
         private Exception _unhandledException;
 
+        public const int ProtocolVersion = Constants.ProtocolVersion;
+
         public ProtoClientConfiguration Configuration { get; private set; }
 
         public event EventHandler Disposed;

@@ -333,9 +333,9 @@ namespace ProtoChannel
         {
             var pendingMessage = _messageManager.RemovePendingMessage(associationId);
 
-            if (type != pendingMessage.MessageType.Id)
+            if (pendingMessage.MessageType != null && type != pendingMessage.MessageType.Id)
             {
-                pendingMessage.SetAsFailed(
+                pendingMessage.SetAsCompleted(
                     new ProtoChannelException("Response was of an unexpected message type"), false
                 );
 
@@ -343,8 +343,10 @@ namespace ProtoChannel
                 return;
             }
 
+            var messageType = pendingMessage.MessageType ?? _serviceAssembly.MessagesById[(int)type];
+
             object message = ReadMessage(
-                _serviceAssembly.TypeModel, pendingMessage.MessageType.Type, (int)length
+                _serviceAssembly.TypeModel, messageType.Type, (int)length
             );
 
             pendingMessage.SetAsCompleted(message, false);

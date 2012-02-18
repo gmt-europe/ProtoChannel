@@ -34,7 +34,7 @@ namespace ProtoChannel.Util
             _asyncState = state;
         }
 
-        public void SetAsFailed(Exception exception, bool completedSynchronously)
+        public void SetAsCompleted(Exception exception, bool completedSynchronously)
         {
             // Passing null for exception means no error occurred. 
             // This is the common case
@@ -150,7 +150,7 @@ namespace ProtoChannel.Util
             // Tell the base class that the operation completed 
             // successfully (no exception)
 
-            SetAsFailed(null, completedSynchronously);
+            SetAsCompleted(null, completedSynchronously);
         }
 
         new public TResult EndInvoke()

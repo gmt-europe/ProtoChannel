@@ -1,0 +1,28 @@
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+
+namespace ProtoChannel.Web
+{
+    internal static class ServiceRegistry
+    {
+        private static readonly object _syncRoot = new object();
+        private static readonly ConcurrentDictionary<Assembly, ServiceAssembly> _assemblies = new ConcurrentDictionary<Assembly, ServiceAssembly>();
+
+        public static ServiceAssembly GetAssembly(Assembly assembly)
+        {
+            if (assembly == null)
+                throw new ArgumentNullException("assembly");
+
+            return _assemblies.GetOrAdd(assembly, ServiceAssemblyFactory);
+        }
+
+        private static ServiceAssembly ServiceAssemblyFactory(Assembly assembly)
+        {
+            return new ServiceAssembly(assembly);
+        }
+    }
+}
