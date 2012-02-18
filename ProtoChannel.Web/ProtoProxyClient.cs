@@ -127,5 +127,14 @@ namespace ProtoChannel.Web
                 }
             }
         }
+
+        public void CheckDownstreamAge(TimeSpan maxAge)
+        {
+            lock (_syncRoot)
+            {
+                if (Downstream != null && Downstream.Created + maxAge < DateTime.Now)
+                    Downstream = null;
+            }
+        }
     }
 }

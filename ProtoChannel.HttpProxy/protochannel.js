@@ -9,6 +9,7 @@
         this._messages = {};
         this._connectedCallback = connectedCallback;
         this._receiveCallback = receiveCallback;
+        this._downstreamId = 0;
 
         new Ajax.Request(
             this._getUrl('channel', { PVER: protocol }),
@@ -38,7 +39,10 @@
             this._connectedCallback.apply(this);
     },
 
-    _processDownstreamProgress: function (transport) {
+    _processDownstreamProgress: function (transport, downstreamId) {
+        if (this._downstreamId != downstreamId)
+            return;
+
         while (true) {
             var pos = transport.responseText.indexOf('\n', this._downstreamOffset);
 
@@ -46,6 +50,11 @@
                 return;
 
             var length = parseInt(transport.responseText.substr(this._downstreamOffset, pos - this._downstreamOffset), 10);
+
+            if (length == 0) {
+                this._startDownstream();
+                return;
+            }
 
             if (transport.responseText.length < pos + 1 + length)
                 return;
@@ -99,19 +108,23 @@
         callback(deserialized);
     },
 
-    _processDownstreamCompleted: function () {
-        this._startDownstream();
+    _processDownstreamCompleted: function (transport, downstreamId) {
+        if (downstreamId == this._downstreamId)
+            this._startDownstream();
     },
 
     _startDownstream: function () {
         this._downstreamOffset = 0;
+        var downstreamId = ++this._downstreamId;
+
+        var me = this;
 
         new Ajax.Request(
             this._getUrl('channel', { CID: this._cid }),
             {
                 method: 'get',
-                onInteractive: this._processDownstreamProgress.bind(this),
-                onSuccess: this._processDownstreamCompleted.bind(this),
+                onInteractive: function (transport) { me._processDownstreamProgress(transport, downstreamId); },
+                onSuccess: function (transport) { me._processDownstreamCompleted(transport, downstreamId); },
                 onFailure: this._processFailure.bind(this)
             }
         );
@@ -154,7 +167,7 @@
     getSendStreamAid: function () {
         var aid = this._nextStreamAid++;
 
-        if (this._nextStreamAid > 0x1fffff /* max supported by the protocol */)
+        if (this._nextStreamAid >= 0x1fffff /* max supported by the protocol */)
             this._nextStreamAid = 0;
 
         return aid;

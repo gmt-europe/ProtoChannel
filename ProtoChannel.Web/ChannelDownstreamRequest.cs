@@ -12,9 +12,13 @@ namespace ProtoChannel.Web
     {
         private readonly ProtoProxyClient _client;
 
+        public DateTime Created { get; private set; }
+
         public ChannelDownstreamRequest(HttpContext context, AsyncCallback asyncCallback, object extraData, ProtoProxyClient client)
             : base(context, asyncCallback, extraData)
         {
+            Created = DateTime.Now;
+
             _client = client;
 
             // Below content type is not gzipped by default. Gzipping the response
