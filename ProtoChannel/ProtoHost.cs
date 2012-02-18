@@ -201,7 +201,7 @@ namespace ProtoChannel
 
                 if (client != null)
                 {
-                    var hostClient = new Client(client, Service);
+                    var hostClient = new Client(client, ServiceAssembly, Service);
 
                     _connections[connection] = hostClient;
 

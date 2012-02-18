@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Web;
 using System.Web.Configuration;
@@ -15,12 +16,12 @@ namespace ProtoChannel.Web
 
         static ProtoHandler()
         {
-            string clientFactoryTypeString = WebConfigurationManager.AppSettings["protochannel.client-factory"];
+            string serviceAssemblyString = WebConfigurationManager.AppSettings["protochannel.service-assembly"];
 
-            if (clientFactoryTypeString == null)
-                throw new InvalidOperationException("protochannel.client appSetting is missing");
+            if (serviceAssemblyString == null)
+                throw new InvalidOperationException("protochannel.service-assembly appSetting is missing");
 
-            var clientFactoryType = Type.GetType(clientFactoryTypeString, true);
+            var serviceAssembly = Assembly.Load(serviceAssemblyString);
 
             string hostEndPoint = WebConfigurationManager.AppSettings["protochannel.host"];
 
@@ -45,7 +46,7 @@ namespace ProtoChannel.Web
             if (hostName == null)
                 throw new InvalidOperationException("protochannel.host is of incorrect format; use <host>:<port>");
 
-            Proxy = new ProtoProxyHost(hostName, hostPort, (IProtoClientFactory)Activator.CreateInstance(clientFactoryType));
+            Proxy = new ProtoProxyHost(hostName, hostPort, serviceAssembly);
         }
 
         public void ProcessRequest(HttpContext context)

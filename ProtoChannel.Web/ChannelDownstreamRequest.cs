@@ -36,7 +36,7 @@ namespace ProtoChannel.Web
 
                     writer.WriteStartObject();
                     writer.WritePropertyName("r");
-                    writer.WriteValue((int)MessageKind.Response);
+                    writer.WriteValue((int)message.Kind);
                     writer.WritePropertyName("a");
                     writer.WriteValue((int)message.AssociationId);
                     writer.WritePropertyName("t");

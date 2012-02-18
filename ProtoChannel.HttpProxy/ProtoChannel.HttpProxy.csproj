@@ -85,10 +85,6 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Service\PingPong\ClientCallbackService.cs" />
-    <Compile Include="Service\PingPong\ClientConfiguration.cs" />
-    <Compile Include="Service\PingPong\ClientFactory.cs" />
-    <Compile Include="Service\PingPong\ClientService.cs" />
     <Compile Include="Service\PingPong\Messages.cs" />
     <Compile Include="Service\PingPong\ServerCallbackService.cs" />
     <Compile Include="Service\PingPong\ServerService.cs" />

@@ -7,15 +7,16 @@ namespace ProtoChannel.Web
 {
     internal class PendingDownstreamMessage
     {
+        public MessageKind Kind { get; private set; }
         public uint AssociationId { get; private set; }
-
         public object Message { get; private set; }
 
-        public PendingDownstreamMessage(uint associationId, object message)
+        public PendingDownstreamMessage(MessageKind kind, uint associationId, object message)
         {
             if (message == null)
                 throw new ArgumentNullException("message");
 
+            Kind = kind;
             AssociationId = associationId;
             Message = message;
         }

@@ -110,11 +110,11 @@ namespace ProtoChannel.Web
                 return new InvalidRequest(context, asyncCallback, extraData, "Invalid VER query string parameter");
 
             string associationIdString = context.Request.QueryString["AID"];
-            int associationId;
+            uint associationId;
 
             if (
                 associationIdString == null ||
-                !int.TryParse(associationIdString, NumberStyles.None, CultureInfo.InvariantCulture, out associationId)
+                !uint.TryParse(associationIdString, NumberStyles.None, CultureInfo.InvariantCulture, out associationId)
             )
                 return new InvalidRequest(context, asyncCallback, extraData, "Invalid AID query string parameter");
 

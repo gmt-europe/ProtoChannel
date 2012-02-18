@@ -10,11 +10,12 @@ namespace ProtoChannel
 {
     internal class PendingReceiveStream : PendingStream
     {
-        private bool _isCompleted;
         private Exception _completedException;
         private AsyncResultImpl<PendingReceiveStream> _asyncResult;
 
         public Stream Stream { get; private set; }
+        public bool IsCompleted { get; private set; }
+        public bool IsRequested { get; set; }
 
         public PendingReceiveStream(long length, string streamName, string contentType, uint associationId, Stream stream)
             : base(length, streamName, contentType, associationId)
@@ -34,7 +35,7 @@ namespace ProtoChannel
 
             _asyncResult = new AsyncResultImpl<PendingReceiveStream>(callback, asyncState);
 
-            if (_isCompleted)
+            if (IsCompleted)
                 CompleteAsyncResult(true);
 
             return _asyncResult;
@@ -42,9 +43,9 @@ namespace ProtoChannel
 
         public void SetAsCompleted()
         {
-            Debug.Assert(!_isCompleted && _completedException == null);
+            Debug.Assert(!IsCompleted && _completedException == null);
 
-            _isCompleted = true;
+            IsCompleted = true;
 
             if (_asyncResult != null)
                 CompleteAsyncResult(false);
@@ -54,9 +55,9 @@ namespace ProtoChannel
         {
             Require.NotNull(exception, "exception");
 
-            Debug.Assert(!_isCompleted && _completedException == null);
+            Debug.Assert(!IsCompleted && _completedException == null);
 
-            _isCompleted = true;
+            IsCompleted = true;
             _completedException = exception;
 
             if (_asyncResult != null)

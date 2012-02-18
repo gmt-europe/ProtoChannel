@@ -54,16 +54,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CallbackChannel.cs" />
     <Compile Include="ChannelCreateRequest.cs" />
     <Compile Include="ChannelDownstreamRequest.cs" />
     <Compile Include="PendingDownstreamMessage.cs" />
+    <Compile Include="ProtoClient.cs" />
     <Compile Include="StreamDownloadRequest.cs" />
     <Compile Include="InvalidRequest.cs" />
     <Compile Include="JsonUtil.cs" />
     <Compile Include="ChannelUpstreamRequest.cs" />
     <Compile Include="StreamUploadRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProtoClientFactory.cs" />
     <Compile Include="ProtoHandler.cs" />
     <Compile Include="ProtoProxyClient.cs" />
     <Compile Include="ProtoProxyHost.cs" />

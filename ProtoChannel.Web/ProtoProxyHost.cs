@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using ProtoChannel.Web.Util;
 
@@ -11,27 +12,33 @@ namespace ProtoChannel.Web
         private bool _disposed;
         private readonly string _hostname;
         private readonly int _hostPort;
-        private readonly IProtoClientFactory _clientFactory;
         private readonly object _syncRoot = new object();
         private readonly Dictionary<string, ProtoProxyClient> _clients = new Dictionary<string, ProtoProxyClient>();
+        private readonly Assembly _serviceAssembly;
 
-        public ProtoProxyHost(string hostname, int hostPort, IProtoClientFactory clientFactory)
+        public ProtoProxyHost(string hostname, int hostPort, Assembly serviceAssembly)
         {
             if (hostname == null)
                 throw new ArgumentNullException("hostname");
-            if (clientFactory == null)
-                throw new ArgumentNullException("clientFactory");
+            if (serviceAssembly == null)
+                throw new ArgumentNullException("serviceAssembly");
 
             _hostname = hostname;
             _hostPort = hostPort;
-            _clientFactory = clientFactory;
+            _serviceAssembly = serviceAssembly;
         }
 
         public string CreateClient(int protocolVersion)
         {
-            var client = _clientFactory.CreateClient(_hostname, _hostPort, protocolVersion);
-
             string key = RandomKeyGenerator.GetRandomKey(12);
+
+            var configuration = new ProtoClientConfiguration
+            {
+                ServiceAssembly = _serviceAssembly,
+                CallbackObject = new CallbackChannel(this, key)
+            };
+
+            var client = new ProtoClient(_hostname, _hostPort, configuration, protocolVersion);
 
             lock (_syncRoot)
             {

@@ -204,9 +204,35 @@ namespace ProtoChannel
 
             ServiceMessage messageType;
 
-            if (!Client.Service.Messages.TryGetValue((int)type, out messageType))
+            if (!Client.ServiceAssembly.MessagesById.TryGetValue((int)type, out messageType))
             {
                 SendError(ProtocolError.InvalidMessageType);
+                return;
+            }
+
+            // Parse the message.
+
+            object message = ReadMessage(
+                Client.ServiceAssembly.TypeModel, messageType.Type, (int)length
+            );
+
+            // Dispatch the message.
+
+            var dispatcher = Client.Instance as IProtoMessageAsyncDispatcher;
+
+            if (dispatcher != null)
+            {
+                if (isOneWay)
+                {
+                    dispatcher.DispatchPost(message);
+                }
+                else
+                {
+                    var dispatchMessage = new DispatchMessage(dispatcher, associationId, this);
+
+                    dispatcher.BeginDispatch(message, dispatchMessage.BeginDispatchCallback, null);
+                }
+
                 return;
             }
 
@@ -223,12 +249,6 @@ namespace ProtoChannel
                 SendError(method.IsOneWay ? ProtocolError.ExpectedIsOneWay : ProtocolError.ExpectedRequest);
                 return;
             }
-
-            // Parse the message.
-
-            object message = ReadMessage(
-                Client.Service.ServiceAssembly.TypeModel, messageType.Type, (int)length
-            );
 
             // Start processing the message.
 
@@ -272,9 +292,18 @@ namespace ProtoChannel
                     {
                         using (OperationContext.SetScope(new OperationContext(this, CallbackChannel)))
                         {
-                            result = pendingRequest.Method.Method.Invoke(
-                                Client.Instance, new[] { pendingRequest.Message }
-                            );
+                            var dispatcher = Client.Instance as IProtoMessageDispatcher;
+
+                            if (dispatcher != null)
+                            {
+                                result = dispatcher.Dispatch(pendingRequest.Message);
+                            }
+                            else
+                            {
+                                result = pendingRequest.Method.Method.Invoke(
+                                    Client.Instance, new[] { pendingRequest.Message }
+                                );
+                            }
                         }
                     }
 
@@ -286,7 +315,7 @@ namespace ProtoChannel
                         _pendingRequests.Dequeue();
 
                         if (!pendingRequest.IsOneWay)
-                            SendResponse(pendingRequest, result);
+                            SendResponse(result, pendingRequest.Method.Response.Id, pendingRequest.AssociationId);
                     }
                 }
             }
@@ -300,13 +329,13 @@ namespace ProtoChannel
         {
         }
 
-        private void SendResponse(PendingRequest message, object result)
+        private void SendResponse(object result, int messageType, uint associationId)
         {
             long packageStart = BeginSendPackage();
 
             // Write the header.
 
-            uint header = (uint)MessageKind.Response | (uint)message.Method.Response.Id << 2;
+            uint header = (uint)MessageKind.Response | (uint)messageType << 2;
 
             byte[] buffer = BitConverter.GetBytes(header);
 
@@ -316,7 +345,7 @@ namespace ProtoChannel
 
             // Write the association ID.
 
-            buffer = BitConverter.GetBytes((ushort)message.AssociationId);
+            buffer = BitConverter.GetBytes((ushort)associationId);
 
             ByteUtil.ConvertNetwork(buffer);
 
@@ -324,7 +353,7 @@ namespace ProtoChannel
 
             // Write the message.
 
-            WriteMessage(Client.Service.ServiceAssembly.TypeModel, result);
+            WriteMessage(Client.ServiceAssembly.TypeModel, result);
 
             EndSendPackage(PackageType.Message, packageStart);
         }
@@ -598,10 +627,15 @@ namespace ProtoChannel
 
         public uint SendStream(Stream stream, string streamName, string contentType)
         {
+            return SendStream(stream, streamName, contentType, null);
+        }
+
+        public uint SendStream(Stream stream, string streamName, string contentType, uint? associationId)
+        {
             lock (SyncRoot)
             {
-                var associationId = _sendStreamManager.RegisterStream(
-                    stream, streamName, contentType
+                associationId = _sendStreamManager.RegisterStream(
+                    stream, streamName, contentType, associationId
                 );
 
                 // Send the start of the stream.
@@ -610,7 +644,7 @@ namespace ProtoChannel
 
                 // Construct the header.
 
-                uint header = (uint)StreamPackageType.StartStream | associationId << 3;
+                uint header = (uint)StreamPackageType.StartStream | associationId.Value << 3;
 
                 var buffer = BitConverter.GetBytes(header);
 
@@ -631,7 +665,7 @@ namespace ProtoChannel
 
                 EndSendPackage(PackageType.Stream, packageStart);
 
-                return associationId;
+                return associationId.Value;
             }
         }
 
@@ -738,6 +772,38 @@ namespace ProtoChannel
                 // Send the message.
 
                 EndSendPackage(PackageType.Message, packageStart);
+            }
+        }
+
+        private class DispatchMessage
+        {
+            private readonly IProtoMessageAsyncDispatcher _dispatcher;
+            private readonly uint _associationId;
+            private readonly ProtoConnection _connection;
+
+            public DispatchMessage(IProtoMessageAsyncDispatcher dispatcher, uint associationId, ProtoConnection connection)
+            {
+                Require.NotNull(dispatcher, "dispatcher");
+                Require.NotNull(connection, "connection");
+
+                _dispatcher = dispatcher;
+                _associationId = associationId;
+                _connection = connection;
+            }
+
+            public void BeginDispatchCallback(IAsyncResult asyncResult)
+            {
+                lock (_connection.SyncRoot)
+                {
+                    if (_connection.IsDisposed)
+                        return;
+
+                    var response = _dispatcher.EndDispatch(asyncResult);
+
+                    var responseMessage = _connection._serviceAssembly.MessagesByType[response.GetType()];
+
+                    _connection.SendResponse(response, responseMessage.Id, _associationId);
+                }
             }
         }
     }

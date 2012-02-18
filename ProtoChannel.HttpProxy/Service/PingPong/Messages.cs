@@ -20,6 +20,18 @@ namespace ProtoChannel.HttpProxy.Service.PingPong
         public string Payload { get; set; }
     }
 
+    [ProtoMessage(3), ProtoContract]
+    public class StreamRequest
+    {
+    }
+
+    [ProtoMessage(4), ProtoContract]
+    public class StreamResponse
+    {
+        [ProtoMember(1, IsRequired = true)]
+        public uint StreamId { get; set; }
+    }
+
     [ProtoMessage(5), ProtoContract]
     public class OneWayPing
     {

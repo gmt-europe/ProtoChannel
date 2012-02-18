@@ -15,7 +15,7 @@ namespace ProtoChannel
         private readonly Queue<PendingSendStream> _sendQueue = new Queue<PendingSendStream>();
         private readonly Dictionary<uint, PendingSendStream> _streams = new Dictionary<uint, PendingSendStream>();
 
-        public uint RegisterStream(Stream stream, string streamName, string contentType)
+        public uint RegisterStream(Stream stream, string streamName, string contentType, uint? associationId)
         {
             Require.NotNull(stream, "stream");
 
@@ -25,7 +25,7 @@ namespace ProtoChannel
             stream.Position = 0;
 
             var protoStream = new PendingSendStream(
-                stream.Length, streamName, contentType, GetNextAssociationId(), stream
+                stream.Length, streamName, contentType, GetNextAssociationId(associationId), stream
             );
 
             _streams.Add(protoStream.AssociationId, protoStream);
@@ -33,8 +33,16 @@ namespace ProtoChannel
             return protoStream.AssociationId;
         }
 
-        private uint GetNextAssociationId()
+        private uint GetNextAssociationId(uint? associationId)
         {
+            if (associationId.HasValue)
+            {
+                if (_streams.ContainsKey(associationId.Value))
+                    throw new ProtoChannelException("Requested association ID is already in use");
+
+                return associationId.Value;
+            }
+
             while (_streams.ContainsKey(_nextAssociationId))
             {
                 _nextAssociationId = (_nextAssociationId + 1) & MaxAssociationId;

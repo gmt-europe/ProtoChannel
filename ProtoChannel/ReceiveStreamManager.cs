@@ -73,9 +73,12 @@ namespace ProtoChannel
 
         private void RemoveStream(PendingReceiveStream stream)
         {
-            _streams.Remove(stream.AssociationId);
+            if (stream.IsRequested && stream.IsCompleted)
+            {
+                _streams.Remove(stream.AssociationId);
 
-            stream.Dispose();
+                stream.Dispose();
+            }
         }
 
         public IAsyncResult BeginGetStream(uint streamId, AsyncCallback callback, object asyncState)
@@ -84,6 +87,10 @@ namespace ProtoChannel
 
             if (!_streams.TryGetValue(streamId, out stream))
                 throw new ProtoChannelException("Stream is not available");
+
+            stream.IsRequested = true;
+
+            RemoveStream(stream);
 
             return stream.GetAsyncResult(callback, asyncState);
         }

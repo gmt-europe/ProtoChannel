@@ -19,7 +19,7 @@ namespace ProtoChannel.Web
             _client = client;
 
             HandleRequest();
-
+            
             SetAsCompleted(null, true);
         }
 
@@ -141,7 +141,10 @@ namespace ProtoChannel.Web
                     break;
 
                 case MessageKind.Response:
-                    throw new NotImplementedException();
+                    var pendingCallback = _client.GetPendingCallbackMessage(associationId);
+
+                    pendingCallback.SetAsCompleted(message, false);
+                    break;
             }
         }
 

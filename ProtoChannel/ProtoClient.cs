@@ -47,10 +47,15 @@ namespace ProtoChannel
 
             if (Configuration.CallbackObject != null)
             {
-                _connection.Client = new Client(
-                    configuration.CallbackObject,
-                    ServiceAssembly.GetServiceRegistration(Configuration.CallbackObject.GetType())
-                );
+                Service service = null;
+
+                if (
+                    !(Configuration.CallbackObject is IProtoMessageDispatcher) &&
+                    !(Configuration.CallbackObject is IProtoMessageAsyncDispatcher)
+                )
+                    service = ServiceAssembly.GetServiceRegistration(Configuration.CallbackObject.GetType());
+
+                _connection.Client = new Client(configuration.CallbackObject, ServiceAssembly, service);
             }
         }
 
@@ -139,7 +144,12 @@ namespace ProtoChannel
 
         public uint SendStream(Stream stream, string streamName, string contentType)
         {
-            return _connection.SendStream(stream, streamName, contentType);
+            return SendStream(stream, streamName, contentType, null);
+        }
+
+        internal uint SendStream(Stream stream, string streamName, string contentType, uint? associationId)
+        {
+            return _connection.SendStream(stream, streamName, contentType, associationId);
         }
 
         public IAsyncResult BeginGetStream(uint streamId, AsyncCallback callback, object asyncState)

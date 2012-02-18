@@ -8,9 +8,36 @@ namespace ProtoChannel.Web
 {
     internal class StreamDownloadRequest : Request
     {
-        public StreamDownloadRequest(HttpContext context, AsyncCallback asyncCallback, object extraData, ProtoProxyClient client, int associationId)
+        private readonly ProtoProxyClient _client;
+        private readonly uint _associationId;
+
+        public StreamDownloadRequest(HttpContext context, AsyncCallback asyncCallback, object extraData, ProtoProxyClient client, uint associationId)
             : base(context, asyncCallback, extraData)
         {
+            if (client == null)
+                throw new ArgumentNullException("client");
+
+            _client = client;
+            _associationId = associationId;
+
+            HandleRequest();
+        }
+
+        private void HandleRequest()
+        {
+            _client.Client.BeginGetStream(_associationId, BeginGetStreamCallback, null);
+        }
+
+        private void BeginGetStreamCallback(IAsyncResult asyncResult)
+        {
+            var stream = _client.Client.EndGetStream(asyncResult);
+
+            Context.Response.ContentType = stream.ContentType;
+            Context.Response.Headers["Content-Disposition"] = "attachment; filename=" + stream.StreamName;
+
+            stream.Stream.CopyTo(Context.Response.OutputStream);
+
+            SetAsCompleted(null, false);
         }
     }
 }
