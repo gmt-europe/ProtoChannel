@@ -11,7 +11,7 @@
         this._receiveCallback = receiveCallback;
 
         new Ajax.Request(
-            this._host + 'pchx/channel?VER=1&PVER=' + encodeURIComponent(protocol),
+            this._getUrl('channel', { PVER: protocol }),
             {
                 method: 'get',
                 onSuccess: this._processConnect.bind(this),
@@ -107,7 +107,7 @@
         this._downstreamOffset = 0;
 
         new Ajax.Request(
-            this._host + 'pchx/channel?VER=1&CID=' + encodeURIComponent(this._cid),
+            this._getUrl('channel', { CID: this._cid }),
             {
                 method: 'get',
                 onInteractive: this._processDownstreamProgress.bind(this),
@@ -134,7 +134,7 @@
             throw 'Message does not inherit from ProtoMessage';
 
         new Ajax.Request(
-            this._host + 'pchx/channel?VER=1&CID=' + encodeURIComponent(this._cid),
+            this._getUrl('channel', { CID: this._cid }),
             {
                 parameters: {
                     count: 1,
@@ -161,8 +161,36 @@
     },
 
     getStreamUrl: function (aid) {
-        return this._host + 'pchx/stream?VER=1&CID=' + encodeURIComponent(this._cid) + '&AID=' + encodeURIComponent(aid);
+        return this._getUrl('stream', { CID: this._cid, AID: aid });
+    },
+
+    _getUrl: function (action, params) {
+        var result =
+            this._host + 'pchx/' + action +
+            '?VER=' + encodeURIComponent(ProtoChannel._protocolVersion) +
+            '&zx=' + encodeURIComponent(this._getZx());
+
+        for (var key in params) {
+            result += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+        }
+
+        return result;
+    },
+
+    _getZx: function () {
+        var result = '';
+
+        for (var i = 0; i < 8; i++) {
+            result += ProtoChannel._zxSeed[Math.floor(Math.random() * ProtoChannel._zxSeed.length)];
+        }
+
+        return result;
     }
+});
+
+Object.extend(ProtoChannel, {
+    _zxSeed: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890',
+    _protocolVersion: 1
 });
 
 ProtoRegistry = {
