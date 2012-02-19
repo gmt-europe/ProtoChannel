@@ -154,9 +154,15 @@ namespace ProtoChannel.Web
                     var downstream = GetDownstream();
 
                     if (downstream != null)
+                    {
                         downstream.SendMessage(_messages.Peek());
 
-                    _messages.Dequeue();
+                        _messages.Dequeue();
+                    }
+                    else
+                    {
+                        return;
+                    }
                 }
                 catch
                 {
