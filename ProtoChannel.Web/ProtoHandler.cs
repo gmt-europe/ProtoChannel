@@ -16,37 +16,35 @@ namespace ProtoChannel.Web
 
         static ProtoHandler()
         {
-            string serviceAssemblyString = WebConfigurationManager.AppSettings["protochannel.service-assembly"];
+            var config = (ProtoConfigurationSection)WebConfigurationManager.GetSection("protoChannel");
 
-            if (serviceAssemblyString == null)
-                throw new InvalidOperationException("protochannel.service-assembly appSetting is missing");
+            if (config == null)
+                throw new InvalidOperationException("No protoChannel configuration section has been provided");
 
-            var serviceAssembly = Assembly.Load(serviceAssemblyString);
+            string hostName = config.Host;
+            int hostPort = config.Port;
 
             string hostEndPoint = WebConfigurationManager.AppSettings["protochannel.host"];
 
-            if (hostEndPoint == null)
-                throw new InvalidOperationException("protochannel.host appSetting is missing");
-
-            string[] parts = hostEndPoint.Split(new[] { ':' }, 2);
-            string hostName = null;
-            int hostPort = 0;
-
-            if (parts.Length == 2)
+            if (hostEndPoint != null)
             {
-                int port;
-
-                if (int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out port))
+                string[] parts = hostEndPoint.Split(new[] { ':' }, 2);
+                if (parts.Length == 2)
                 {
-                    hostName = parts[0];
-                    hostPort = port;
+                    int port;
+
+                    if (int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out port))
+                    {
+                        hostName = parts[0];
+                        hostPort = port;
+                    }
                 }
             }
 
-            if (hostName == null)
-                throw new InvalidOperationException("protochannel.host is of incorrect format; use <host>:<port>");
+            if (hostName == null || hostPort <= 0)
+                throw new InvalidOperationException("No host and port have been provided; specify them either in the protoChannel config section or through the protochannel.host appSetting");
 
-            Proxy = new ProtoProxyHost(hostName, hostPort, serviceAssembly);
+            Proxy = new ProtoProxyHost(hostName, hostPort, Assembly.Load(config.ServiceAssembly));
         }
 
         public void ProcessRequest(HttpContext context)

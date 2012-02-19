@@ -218,7 +218,7 @@ namespace ProtoChannel
 
             // Dispatch the message.
 
-            var dispatcher = Client.Instance as IProtoMessageAsyncDispatcher;
+            var dispatcher = Client.Instance as IProtoMessageDispatcher;
 
             if (dispatcher != null)
             {
@@ -292,18 +292,9 @@ namespace ProtoChannel
                     {
                         using (OperationContext.SetScope(new OperationContext(this, CallbackChannel)))
                         {
-                            var dispatcher = Client.Instance as IProtoMessageDispatcher;
-
-                            if (dispatcher != null)
-                            {
-                                result = dispatcher.Dispatch(pendingRequest.Message);
-                            }
-                            else
-                            {
-                                result = pendingRequest.Method.Method.Invoke(
-                                    Client.Instance, new[] { pendingRequest.Message }
-                                );
-                            }
+                            result = pendingRequest.Method.Method.Invoke(
+                                Client.Instance, new[] { pendingRequest.Message }
+                            );
                         }
                     }
 
@@ -777,11 +768,11 @@ namespace ProtoChannel
 
         private class DispatchMessage
         {
-            private readonly IProtoMessageAsyncDispatcher _dispatcher;
+            private readonly IProtoMessageDispatcher _dispatcher;
             private readonly uint _associationId;
             private readonly ProtoConnection _connection;
 
-            public DispatchMessage(IProtoMessageAsyncDispatcher dispatcher, uint associationId, ProtoConnection connection)
+            public DispatchMessage(IProtoMessageDispatcher dispatcher, uint associationId, ProtoConnection connection)
             {
                 Require.NotNull(dispatcher, "dispatcher");
                 Require.NotNull(connection, "connection");

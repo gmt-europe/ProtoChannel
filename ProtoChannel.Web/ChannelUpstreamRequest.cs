@@ -18,6 +18,8 @@ namespace ProtoChannel.Web
         {
             _client = client;
 
+            _client.Touch();
+
             HandleRequest();
             
             SetAsCompleted(null, true);

@@ -45,6 +45,7 @@
       <HintPath>..\Libraries\Protobuf-Net\protobuf-net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
@@ -59,6 +60,7 @@
     <Compile Include="ChannelDownstreamRequest.cs" />
     <Compile Include="PendingDownstreamMessage.cs" />
     <Compile Include="ProtoClient.cs" />
+    <Compile Include="ProtoConfigurationSection.cs" />
     <Compile Include="StreamDownloadRequest.cs" />
     <Compile Include="InvalidRequest.cs" />
     <Compile Include="JsonUtil.cs" />

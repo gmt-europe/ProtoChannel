@@ -58,7 +58,6 @@
     <Compile Include="Client.cs" />
     <Compile Include="HybridStreamManager.cs" />
     <Compile Include="IProtoConnection.cs" />
-    <Compile Include="IProtoMessageAsyncDispatcher.cs" />
     <Compile Include="IProtoMessageDispatcher.cs" />
     <Compile Include="IStreamManager.cs" />
     <Compile Include="MemoryStreamManager.cs" />

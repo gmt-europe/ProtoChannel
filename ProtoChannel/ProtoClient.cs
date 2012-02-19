@@ -49,10 +49,7 @@ namespace ProtoChannel
             {
                 Service service = null;
 
-                if (
-                    !(Configuration.CallbackObject is IProtoMessageDispatcher) &&
-                    !(Configuration.CallbackObject is IProtoMessageAsyncDispatcher)
-                )
+                if (!(Configuration.CallbackObject is IProtoMessageDispatcher))
                     service = ServiceAssembly.GetServiceRegistration(Configuration.CallbackObject.GetType());
 
                 _connection.Client = new Client(configuration.CallbackObject, ServiceAssembly, service);

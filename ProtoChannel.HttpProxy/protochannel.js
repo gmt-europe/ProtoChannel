@@ -68,6 +68,11 @@
     },
 
     _processReceivedMessage: function (message) {
+        // No-ops.
+
+        if (Object.isArray(message))
+            return;
+
         var type = ProtoRegistry.getMessageType(message.t);
 
         if (type === undefined)

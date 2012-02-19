@@ -20,6 +20,8 @@ namespace ProtoChannel.Web
             _client = client;
             _associationId = associationId;
 
+            _client.Touch();
+
             HandleRequest();
         }
 
@@ -31,6 +33,8 @@ namespace ProtoChannel.Web
         private void BeginGetStreamCallback(IAsyncResult asyncResult)
         {
             var stream = _client.Client.EndGetStream(asyncResult);
+
+            _client.Touch();
 
             Context.Response.ContentType = stream.ContentType;
             Context.Response.Headers["Content-Disposition"] = "attachment; filename=" + stream.StreamName;

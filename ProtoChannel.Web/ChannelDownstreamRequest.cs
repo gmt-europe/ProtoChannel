@@ -21,35 +21,48 @@ namespace ProtoChannel.Web
 
             _client = client;
 
+            _client.Touch();
+
             // Below content type is not gzipped by default. Gzipping the response
             // has the effect that chunked transport encoding doesn't work anymore.
 
             Context.Response.ContentType = "application/octet-stream";
 
-            _client.Downstream = this;
+            _client.AssignDownstream(this);
         }
 
         public void SendMessage(PendingDownstreamMessage message)
         {
+            _client.Touch();
+
             using (var stringWriter = new StringWriter())
             {
                 using (var writer = new JsonTextWriter(stringWriter))
                 {
-                    var responseType = message.Message.GetType();
-                    var responseServiceType = ServiceRegistry.GetAssembly(responseType.Assembly).TypesByType[responseType];
+                    if (message == null)
+                    {
+                        writer.WriteStartArray();
+                        writer.WriteValue("noop");
+                        writer.WriteEndArray();
+                    }
+                    else
+                    {
+                        var responseType = message.Message.GetType();
+                        var responseServiceType = ServiceRegistry.GetAssembly(responseType.Assembly).TypesByType[responseType];
 
-                    writer.WriteStartObject();
-                    writer.WritePropertyName("r");
-                    writer.WriteValue((int)message.Kind);
-                    writer.WritePropertyName("a");
-                    writer.WriteValue((int)message.AssociationId);
-                    writer.WritePropertyName("t");
-                    writer.WriteValue(responseServiceType.Message.Id);
-                    writer.WritePropertyName("p");
+                        writer.WriteStartObject();
+                        writer.WritePropertyName("r");
+                        writer.WriteValue((int)message.Kind);
+                        writer.WritePropertyName("a");
+                        writer.WriteValue((int)message.AssociationId);
+                        writer.WritePropertyName("t");
+                        writer.WriteValue(responseServiceType.Message.Id);
+                        writer.WritePropertyName("p");
 
-                    JsonUtil.SerializeMessage(writer, responseServiceType, message.Message);
+                        JsonUtil.SerializeMessage(writer, responseServiceType, message.Message);
 
-                    writer.WriteEndObject();
+                        writer.WriteEndObject();
+                    }
                 }
 
                 var response = stringWriter.GetStringBuilder().ToString();
@@ -62,6 +75,8 @@ namespace ProtoChannel.Web
 
         public override void EndRequest()
         {
+            _client.Touch();
+
             base.EndRequest();
 
             // Message size of zero signifies end of the request.

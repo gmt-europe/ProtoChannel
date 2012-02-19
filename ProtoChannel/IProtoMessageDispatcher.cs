@@ -7,6 +7,8 @@ namespace ProtoChannel
 {
     internal interface IProtoMessageDispatcher
     {
-        object Dispatch(object message);
+        IAsyncResult BeginDispatch(object message, AsyncCallback callback, object asyncState);
+        object EndDispatch(IAsyncResult asyncResult);
+        void DispatchPost(object message);
     }
 }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ProtoChannel.Web
 {
-    internal class CallbackChannel : IProtoMessageAsyncDispatcher
+    internal class CallbackChannel : IProtoMessageDispatcher
     {
         private readonly ProtoProxyHost _host;
         private readonly string _channelId;

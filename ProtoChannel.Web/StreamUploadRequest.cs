@@ -21,6 +21,8 @@ namespace ProtoChannel.Web
             _client = client;
             _associationId = associationId;
 
+            _client.Touch();
+
             HandleRequest();
 
             SetAsCompleted(null, true);

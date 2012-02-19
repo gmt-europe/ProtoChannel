@@ -6,49 +6,81 @@ using ProtoChannel.Util;
 
 namespace ProtoChannel.Web
 {
-    internal class ProtoProxyClient
+    internal class ProtoProxyClient : IDisposable
     {
+        private readonly ProtoProxyHost _host;
+        private static readonly TimeSpan DownstreamMaxAge = TimeSpan.FromMinutes(5);
+        private static readonly TimeSpan LastInteractionMaxAge = TimeSpan.FromMinutes(1);
+
+        private bool _disposed;
         private readonly object _syncRoot = new object();
         private readonly Queue<PendingDownstreamMessage> _messages = new Queue<PendingDownstreamMessage>();
         private ChannelDownstreamRequest _downstream;
         private uint _nextCallbackAssociationId;
         private readonly Dictionary<uint, AsyncResultImpl<object>> _pendingCallbacks = new Dictionary<uint, AsyncResultImpl<object>>();
+        private DateTime _lastInteraction;
 
         public string Key { get; private set; }
 
         public ProtoClient Client { get; private set; }
 
-        public ChannelDownstreamRequest Downstream
+        public ProtoProxyClient(ProtoProxyHost host, string key, ProtoClient client)
         {
-            get { return _downstream; }
-            set
-            {
-                lock (_syncRoot)
-                {
-                    if (_downstream != null)
-                        _downstream.SetAsCompleted(null, false);
-
-                    _downstream = value;
-
-                    if (_downstream != null)
-                        SendMessages();
-                }
-            }
-        }
-
-        public ProtoProxyClient(string key, ProtoClient client)
-        {
+            if (host == null)
+                throw new ArgumentNullException("host");
             if (key == null)
                 throw new ArgumentNullException("key");
             if (client == null)
                 throw new ArgumentNullException("client");
 
+            _host = host;
             Key = key;
             Client = client;
+
+            _lastInteraction = DateTime.Now;
+        }
+
+        public void AssignDownstream(ChannelDownstreamRequest downstream)
+        {
+            VerifyNotDisposed();
+
+            if (downstream == null)
+                throw new ArgumentNullException("downstream");
+
+            lock (_syncRoot)
+            {
+                DetachDownstream();
+
+                _downstream = downstream;
+
+                SendMessages();
+            }
+        }
+
+        private void DetachDownstream()
+        {
+            if (_downstream != null)
+            {
+                _downstream.SetAsCompleted(null, false);
+                _downstream = null;
+            }
+        }
+
+        private ChannelDownstreamRequest GetDownstream()
+        {
+            if (_downstream == null)
+                return null;
+
+            if (_downstream.Created + DownstreamMaxAge < DateTime.Now || !_downstream.Context.Response.IsClientConnected)
+                DetachDownstream();
+
+            return _downstream;
         }
 
         public IAsyncResult BeginSendMessage(object message, AsyncCallback callback, object asyncState)
         {
+            VerifyNotDisposed();
+
             lock (_syncRoot)
             {
                 var asyncMessage = new AsyncResultImpl<object>(callback, asyncState);
@@ -59,8 +91,7 @@ namespace ProtoChannel.Web
 
                 _messages.Enqueue(new PendingDownstreamMessage(MessageKind.Request, associationId, message));
 
-                if (Downstream != null)
-                    SendMessages();
+                SendMessages();
 
                 return asyncMessage;
             }
@@ -68,6 +99,8 @@ namespace ProtoChannel.Web
 
         public AsyncResultImpl<object> GetPendingCallbackMessage(uint associationId)
         {
+            VerifyNotDisposed();
+
             lock (_syncRoot)
             {
                 AsyncResultImpl<object> result;
@@ -83,6 +116,8 @@ namespace ProtoChannel.Web
 
         public object EndSendMessage(IAsyncResult asyncResult)
         {
+            VerifyNotDisposed();
+
             lock (_syncRoot)
             {
                 return ((AsyncResultImpl<object>)asyncResult).EndInvoke();
@@ -91,23 +126,25 @@ namespace ProtoChannel.Web
 
         public void PostMessage(object message)
         {
+            VerifyNotDisposed();
+
             lock (_syncRoot)
             {
                 _messages.Enqueue(new PendingDownstreamMessage(MessageKind.OneWay, 0, message));
 
-                if (Downstream != null)
-                    SendMessages();
+                SendMessages();
             }
         }
 
         public void EndSendMessage(uint associationId, object message)
         {
+            VerifyNotDisposed();
+
             lock (_syncRoot)
             {
                 _messages.Enqueue(new PendingDownstreamMessage(MessageKind.Response, associationId, message));
 
-                if (Downstream != null)
-                    SendMessages();
+                SendMessages();
             }
         }
 
@@ -117,23 +154,81 @@ namespace ProtoChannel.Web
             {
                 try
                 {
-                    Downstream.SendMessage(_messages.Peek());
+                    var downstream = GetDownstream();
+
+                    if (downstream != null)
+                        downstream.SendMessage(_messages.Peek());
 
                     _messages.Dequeue();
                 }
                 catch
                 {
+                    DetachDownstream();
+
                     return;
                 }
             }
         }
 
-        public void CheckDownstreamAge(TimeSpan maxAge)
+        public void Maintenance()
+        {
+            VerifyNotDisposed();
+
+            lock (_syncRoot)
+            {
+                if (_lastInteraction + LastInteractionMaxAge < DateTime.Now)
+                {
+                    Dispose();
+                }
+                else
+                {
+                    try
+                    {
+                        var downstream = GetDownstream();
+
+                        if (downstream != null)
+                        {
+                            // Send a no-op.
+
+                            downstream.SendMessage(null);
+                        }
+                    }
+                    catch
+                    {
+                        DetachDownstream();
+                    }
+                }
+            }
+        }
+
+        public void Touch()
         {
             lock (_syncRoot)
             {
-                if (Downstream != null && Downstream.Created + maxAge < DateTime.Now)
-                    Downstream = null;
+                _lastInteraction = DateTime.Now;
+            }
+        }
+
+        private void VerifyNotDisposed()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
+        }
+
+        public void Dispose()
+        {
+            lock (_syncRoot)
+            {
+                if (!_disposed)
+                {
+                    _host.RemoveClient(this);
+
+                    DetachDownstream();
+
+                    Client.Dispose();
+
+                    _disposed = true;
+                }
             }
         }
     }
