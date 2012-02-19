@@ -1,5 +1,8 @@
 ﻿function __mr(cid, did, message) {
-    ProtoChannel._channels[cid]._processReceivedMessage(did, message);
+    var channel = ProtoChannel._channels[cid];
+
+    if (channel !== undefined)
+        channel._processReceivedMessage(did, message);
 };
 
 ProtoChannel = Class.create({
@@ -288,6 +291,8 @@ ProtoChannel = Class.create({
         this._verifyNotClosed();
 
         this._closed = true;
+
+        delete ProtoChannel._channels[this._cid];
 
         new Ajax.Request(
             this._getUrl('channel', { CID: this._cid }),
