@@ -45,7 +45,7 @@ namespace ProtoChannel
 
         public ProtoHostConfiguration Configuration { get; private set; }
 
-        public UnhandledExceptionEventHandler UnhandledException;
+        public event UnhandledExceptionEventHandler UnhandledException;
 
         internal ServiceAssembly ServiceAssembly { get; private set; }
 
@@ -96,7 +96,7 @@ namespace ProtoChannel
             Log.InfoFormat("Listening for incoming connections at {0}", LocalEndPoint);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         private void AcceptTcpClientCallback(IAsyncResult asyncResult)
         {
             lock (_syncRoot)
@@ -141,6 +141,7 @@ namespace ProtoChannel
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         internal void RaiseUnhandledException(HostConnection connection, Exception exception)
         {
             Require.NotNull(connection, "connection");
@@ -181,6 +182,7 @@ namespace ProtoChannel
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         internal Client RaiseClientConnected(HostConnection connection, int protocolNumber)
         {
             Require.NotNull(connection, "connection");

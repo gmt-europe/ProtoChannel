@@ -9,7 +9,6 @@ namespace ProtoChannel.Web
 {
     internal static class ServiceRegistry
     {
-        private static readonly object _syncRoot = new object();
         private static readonly ConcurrentDictionary<Assembly, ServiceAssembly> _assemblies = new ConcurrentDictionary<Assembly, ServiceAssembly>();
 
         public static ServiceAssembly GetAssembly(Assembly assembly)

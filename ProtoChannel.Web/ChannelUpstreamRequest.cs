@@ -25,7 +25,6 @@ namespace ProtoChannel.Web
             SetAsCompleted(null, true);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         private void HandleRequest()
         {
             string countString = Context.Request.Form["count"];
@@ -48,85 +47,91 @@ namespace ProtoChannel.Web
                 if (request == null)
                     throw new HttpException("Missing request " + i.ToString(CultureInfo.InvariantCulture));
 
-                using (var stringReader = new StringReader(request))
-                using (var reader = new JsonTextReader(stringReader))
+                ParseRequest(request);
+            }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
+        private void ParseRequest(string request)
+        {
+            using (var stringReader = new StringReader(request))
+            using (var reader = new JsonTextReader(stringReader))
+            {
+                // Messages parsed as a dictionary with the following
+                // parameters:
+                //
+                //   'r': Request type: 0, 1 or 2
+                //   'a': Association ID when the request type is 1 or 2
+                //   't': Message type
+                //   'p': Payload
+
+                ReadToken(reader, JsonToken.StartObject);
+
+                MessageKind? messageKind = null;
+                int? associationId = null;
+                int? messageType = null;
+                bool hadPayload = false;
+
+                while (reader.Read())
                 {
-                    // Messages parsed as a dictionary with the following
-                    // parameters:
-                    //
-                    //   'r': Request type: 0, 1 or 2
-                    //   'a': Association ID when the request type is 1 or 2
-                    //   't': Message type
-                    //   'p': Payload
-
-                    ReadToken(reader, JsonToken.StartObject);
-
-                    MessageKind? messageKind = null;
-                    int? associationId = null;
-                    int? messageType = null;
-                    bool hadPayload = false;
-
-                    while (reader.Read())
-                    {
-                        if (reader.TokenType == JsonToken.EndObject)
-                            break;
-                        else if (reader.TokenType != JsonToken.PropertyName)
-                            throw new HttpException("Invalid request");
-
-                        switch ((string)reader.Value)
-                        {
-                            case "r":
-                                ReadToken(reader, JsonToken.Integer);
-                                int value = (int)(long)reader.Value;
-
-                                if (value < 0 || value > 2)
-                                    throw new HttpException("Invalid request type");
-
-                                messageKind = (MessageKind)value;
-                                break;
-
-                            case "a":
-                                ReadToken(reader, JsonToken.Integer);
-                                associationId = (int)(long)reader.Value;
-
-                                if (associationId < 0)
-                                    throw new HttpException("Invalid association id");
-                                break;
-
-                            case "t":
-                                ReadToken(reader, JsonToken.Integer);
-                                messageType = (int)(long)reader.Value;
-
-                                if (messageType < 0)
-                                    throw new HttpException("Invalid message type");
-                                break;
-
-                            case "p":
-                                hadPayload = true;
-
-                                if (
-                                    !messageKind.HasValue ||
-                                    !messageType.HasValue ||
-                                    (messageKind.Value != MessageKind.OneWay && !associationId.HasValue)
-                                )
-                                    throw new HttpException("Invalid request");
-
-                                ProcessRequest(
-                                    messageKind.Value,
-                                    messageType.Value,
-                                    (uint)associationId.GetValueOrDefault(0),
-                                    reader
-                                );
-                                break;
-
-                            default:
-                                throw new HttpException("Invalid request");
-                        }
-                    }
-
-                    if (!hadPayload || reader.Read())
+                    if (reader.TokenType == JsonToken.EndObject)
+                        break;
+                    else if (reader.TokenType != JsonToken.PropertyName)
                         throw new HttpException("Invalid request");
+
+                    switch ((string)reader.Value)
+                    {
+                        case "r":
+                            ReadToken(reader, JsonToken.Integer);
+                            int value = (int)(long)reader.Value;
+
+                            if (value < 0 || value > 2)
+                                throw new HttpException("Invalid request type");
+
+                            messageKind = (MessageKind)value;
+                            break;
+
+                        case "a":
+                            ReadToken(reader, JsonToken.Integer);
+                            associationId = (int)(long)reader.Value;
+
+                            if (associationId < 0)
+                                throw new HttpException("Invalid association id");
+                            break;
+
+                        case "t":
+                            ReadToken(reader, JsonToken.Integer);
+                            messageType = (int)(long)reader.Value;
+
+                            if (messageType < 0)
+                                throw new HttpException("Invalid message type");
+                            break;
+
+                        case "p":
+                            hadPayload = true;
+
+                            if (
+                                !messageKind.HasValue ||
+                                    !messageType.HasValue ||
+                                        (messageKind.Value != MessageKind.OneWay && !associationId.HasValue)
+                                )
+                                throw new HttpException("Invalid request");
+
+                            ProcessRequest(
+                                messageKind.Value,
+                                messageType.Value,
+                                (uint)associationId.GetValueOrDefault(0),
+                                reader
+                                );
+                            break;
+
+                        default:
+                            throw new HttpException("Invalid request");
+                    }
                 }
+
+                if (!hadPayload || reader.Read())
+                    throw new HttpException("Invalid request");
             }
         }
 
@@ -139,11 +144,11 @@ namespace ProtoChannel.Web
             switch (messageKind)
             {
                 case MessageKind.Request:
-                    ProtoHandler.Proxy.BeginSendMessage(_client, serviceType, message, associationId);
+                    ProtoProxyHost.BeginSendMessage(_client, message, associationId);
                     break;
 
                 case MessageKind.OneWay:
-                    ProtoHandler.Proxy.PostMessage(_client, message);
+                    ProtoProxyHost.PostMessage(_client, message);
                     break;
 
                 case MessageKind.Response:

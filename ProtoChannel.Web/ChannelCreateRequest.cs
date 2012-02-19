@@ -22,6 +22,7 @@ namespace ProtoChannel.Web
             Task.Factory.StartNew(Execute);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void Execute()
         {
             try

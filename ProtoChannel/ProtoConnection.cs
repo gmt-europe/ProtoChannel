@@ -13,6 +13,19 @@ namespace ProtoChannel
     internal abstract class ProtoConnection : TcpConnection, IProtoConnection
     {
         private static readonly byte[] FrameSpacing = new byte[3];
+        private static RuntimeTypeModel _typeModel = CreateTypeModel();
+
+        private static RuntimeTypeModel CreateTypeModel()
+        {
+            var result = RuntimeTypeModel.Create();
+
+            result.Add(typeof(Messages.Error), true);
+            result.Add(typeof(Messages.HandshakeRequest), true);
+            result.Add(typeof(Messages.HandshakeResponse), true);
+            result.Add(typeof(Messages.StartStream), true);
+
+            return result;
+        }
 
         private PendingPackage? _pendingPackage;
         private readonly SendStreamManager _sendStreamManager;
@@ -25,16 +38,9 @@ namespace ProtoChannel
 
         public ProtoCallbackChannel CallbackChannel { get; set; }
 
-        public static RuntimeTypeModel TypeModel { get; private set; }
-
-        static ProtoConnection()
+        public static RuntimeTypeModel TypeModel
         {
-            TypeModel = RuntimeTypeModel.Create();
-
-            TypeModel.Add(typeof(Messages.Error), true);
-            TypeModel.Add(typeof(Messages.HandshakeRequest), true);
-            TypeModel.Add(typeof(Messages.HandshakeResponse), true);
-            TypeModel.Add(typeof(Messages.StartStream), true);
+            get { return _typeModel; }
         }
 
         protected ProtoConnection(TcpClient tcpClient, IStreamManager streamManager, ServiceAssembly serviceAssembly)
@@ -267,6 +273,7 @@ namespace ProtoChannel
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void ExecuteRequests(object unused)
         {
             try

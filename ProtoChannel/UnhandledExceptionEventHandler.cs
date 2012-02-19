@@ -17,5 +17,6 @@ namespace ProtoChannel
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage ("Microsoft.Design", "CA1003:UseGenericEventHandlerInstances")]
     public delegate void UnhandledExceptionEventHandler(object sender, UnhandledExceptionEventArgs e);
 }

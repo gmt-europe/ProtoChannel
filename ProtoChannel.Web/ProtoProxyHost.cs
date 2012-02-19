@@ -130,14 +130,14 @@ namespace ProtoChannel.Web
             }
         }
 
-        public void BeginSendMessage(ProtoProxyClient client, ServiceType serviceType, object message, uint associationId)
+        public static void BeginSendMessage(ProtoProxyClient client, object message, uint associationId)
         {
             var pendingMessage = new PendingMessage(client, associationId);
 
             client.Client.BeginSendMessage(message, null, pendingMessage.EndSendMessage, null);
         }
 
-        public void PostMessage(ProtoProxyClient client, object message)
+        public static void PostMessage(ProtoProxyClient client, object message)
         {
             client.Client.PostMessage(message);
         }

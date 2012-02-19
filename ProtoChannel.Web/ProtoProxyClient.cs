@@ -144,6 +144,7 @@ namespace ProtoChannel.Web
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void SendMessages()
         {
             while (_messages.Count > 0)
@@ -166,6 +167,7 @@ namespace ProtoChannel.Web
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         public void Maintenance()
         {
             VerifyNotDisposed();

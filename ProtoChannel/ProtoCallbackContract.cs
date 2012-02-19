@@ -6,7 +6,7 @@ using System.Text;
 namespace ProtoChannel
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public class ProtoCallbackContractAttribute : Attribute
+    public sealed class ProtoCallbackContractAttribute : Attribute
     {
         public Type Type { get; private set; }
 

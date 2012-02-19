@@ -240,6 +240,7 @@ namespace ProtoChannel
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void ReadCallback(IAsyncResult asyncResult)
         {
             lock (SyncRoot)
@@ -383,6 +384,7 @@ namespace ProtoChannel
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void WriteCallback(IAsyncResult asyncResult)
         {
             lock (SyncRoot)

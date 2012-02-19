@@ -11,10 +11,8 @@ namespace ProtoChannel.Web
 {
     internal class ServiceAssembly
     {
-        private ServiceTypeByIdCollection _typesById = new ServiceTypeByIdCollection();
-        private ServiceTypeByTypeCollection _typesByType = new ServiceTypeByTypeCollection();
-
-        public Assembly Assembly { get; set; }
+        private readonly ServiceTypeByIdCollection _typesById = new ServiceTypeByIdCollection();
+        private readonly ServiceTypeByTypeCollection _typesByType = new ServiceTypeByTypeCollection();
 
         public IKeyedCollection<int, ServiceType> TypesById { get; private set; }
 
@@ -26,8 +24,6 @@ namespace ProtoChannel.Web
 
             TypesById = new ReadOnlyKeyedCollection<int, ServiceType>(_typesById);
             TypesByType = new ReadOnlyKeyedCollection<Type, ServiceType>(_typesByType);
-
-            Assembly = assembly;
 
             foreach (var type in assembly.GetTypes())
             {

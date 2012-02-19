@@ -27,6 +27,7 @@ namespace ProtoChannel
             Connect();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void Connect()
         {
             try
@@ -55,6 +56,7 @@ namespace ProtoChannel
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void AuthenticateAsServerCallback(IAsyncResult asyncResult)
         {
             try

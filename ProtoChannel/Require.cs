@@ -32,17 +32,17 @@ namespace ProtoChannel
         }
 
         [AssertionMethod]
-        public static void That([AssertionCondition(AssertionConditionType.IS_TRUE)] bool condition, string message)
+        public static void That([AssertionCondition(AssertionConditionType.IS_TRUE)] bool condition, string error)
         {
             if (!condition)
-                throw new ArgumentException(message);
+                throw new ArgumentException(error);
         }
 
         [AssertionMethod]
-        public static void That([AssertionCondition(AssertionConditionType.IS_TRUE)] bool condition, string message, string paramName)
+        public static void That([AssertionCondition(AssertionConditionType.IS_TRUE)] bool condition, string error, string paramName)
         {
             if (!condition)
-                throw new ArgumentException(message, paramName);
+                throw new ArgumentException(error, paramName);
         }
     }
 }

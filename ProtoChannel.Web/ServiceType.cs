@@ -65,7 +65,7 @@ namespace ProtoChannel.Web
             return result;
         }
 
-        private void AddMember(ServiceTypeFieldCollection result, MemberInfo member, Type memberType)
+        private static void AddMember(ServiceTypeFieldCollection result, MemberInfo member, Type memberType)
         {
             var attributes = member.GetCustomAttributes(typeof(ProtoMemberAttribute), true);
 

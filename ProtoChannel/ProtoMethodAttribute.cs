@@ -6,7 +6,7 @@ using System.Text;
 namespace ProtoChannel
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class ProtoMethodAttribute : Attribute
+    public sealed class ProtoMethodAttribute : Attribute
     {
         public bool IsOneWay { get; set; }
     }

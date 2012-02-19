@@ -6,7 +6,7 @@ using System.Text;
 namespace ProtoChannel
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public class ProtoMessageAttribute : Attribute
+    public sealed class ProtoMessageAttribute : Attribute
     {
         public ProtoMessageAttribute(int messageId)
         {
