@@ -14,8 +14,7 @@ namespace ProtoChannel.Web
         public StreamDownloadRequest(HttpContext context, AsyncCallback asyncCallback, object extraData, ProtoProxyClient client, uint associationId)
             : base(context, asyncCallback, extraData)
         {
-            if (client == null)
-                throw new ArgumentNullException("client");
+            Require.NotNull(client, "client");
 
             _client = client;
             _associationId = associationId;

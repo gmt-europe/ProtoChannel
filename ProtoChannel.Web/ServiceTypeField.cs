@@ -25,12 +25,9 @@ namespace ProtoChannel.Web
 
         public ServiceTypeField(ReflectionOptimizer.Getter getter, ReflectionOptimizer.Setter setter, int tag, bool isRequired, Type type)
         {
-            if (getter == null)
-                throw new ArgumentNullException("getter");
-            if (setter == null)
-                throw new ArgumentNullException("setter");
-            if (type == null)
-                throw new ArgumentNullException("type");
+            Require.NotNull(getter, "getter");
+            Require.NotNull(setter, "setter");
+            Require.NotNull(type, "type");
 
             Getter = getter;
             Setter = setter;

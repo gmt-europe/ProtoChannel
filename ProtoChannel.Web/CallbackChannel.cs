@@ -13,10 +13,8 @@ namespace ProtoChannel.Web
 
         public CallbackChannel(ProtoProxyHost host, string channelId)
         {
-            if (host == null)
-                throw new ArgumentNullException("host");
-            if (channelId == null)
-                throw new ArgumentNullException("channelId");
+            Require.NotNull(host, "host");
+            Require.NotNull(channelId, "channelId");
 
             _host = host;
             _channelId = channelId;

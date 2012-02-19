@@ -13,8 +13,7 @@ namespace ProtoChannel.Web
         public InvalidRequest(HttpContext context, AsyncCallback asyncCallback, object extraData, string error)
             : base(context, asyncCallback, extraData)
         {
-            if (error == null)
-                throw new ArgumentNullException("error");
+            Require.NotNull(error, "error");
 
             _error = error;
 

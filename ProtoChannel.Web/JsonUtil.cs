@@ -18,10 +18,8 @@ namespace ProtoChannel.Web
 
         private static object DeserializeMessage(JsonTextReader reader, ServiceType type, bool skipRead)
         {
-            if (reader == null)
-                throw new ArgumentNullException("reader");
-            if (type == null)
-                throw new ArgumentNullException("type");
+            Require.NotNull(reader, "reader");
+            Require.NotNull(type, "type");
 
             if (!skipRead && !reader.Read())
                 throw new HttpException("Invalid request");
@@ -106,12 +104,9 @@ namespace ProtoChannel.Web
 
         public static void SerializeMessage(JsonTextWriter writer, ServiceType type, object message)
         {
-            if (writer == null)
-                throw new ArgumentNullException("writer");
-            if (type == null)
-                throw new ArgumentNullException("type");
-            if (message == null)
-                throw new ArgumentNullException("message");
+            Require.NotNull(writer, "writer");
+            Require.NotNull(type, "type");
+            Require.NotNull(message, "message");
 
             writer.WriteStartObject();
 

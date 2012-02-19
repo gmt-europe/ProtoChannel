@@ -15,16 +15,14 @@ namespace ProtoChannel.Web
         protected Request(HttpContext context, AsyncCallback asyncCallback, object extraData)
             : base(asyncCallback, extraData)
         {
-            if (context == null)
-                throw new ArgumentNullException("context");
+            Require.NotNull(context, "context");
 
             Context = context;
         }
 
         public static Request CreateRequest(HttpContext context, AsyncCallback asyncCallback, object extraData)
         {
-            if (context == null)
-                throw new ArgumentNullException("context");
+            Require.NotNull(context, "context");
 
             switch (context.Request.Path)
             {

@@ -36,9 +36,9 @@ namespace ProtoChannel.Util
             {
                 VerifyNotDisposed();
 
-                Require.That(!(value < _head), "value", "Cannot decrease header");
-                Require.That(!(value > _length), "value", "Head is greater than the length");
-                Require.That(!(value > _position), "value", "Head is greater than the position");
+                Require.That(value >= _head, "Cannot decrease header", "value");
+                Require.That(value <= _length, "Head is greater than the length", "value");
+                Require.That(value <= _position, "Head is greater than the position", "value");
 
                 long startPage = GetPage(_head);
                 long endPage = GetPage(value);
@@ -191,7 +191,7 @@ namespace ProtoChannel.Util
         {
             VerifyNotDisposed();
 
-            Require.That(!(value < _length), "value", "Length cannot be decreased");
+            Require.That(value >= _length, "Length cannot be decreased", "value");
 
             _length = value;
 

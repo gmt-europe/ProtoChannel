@@ -14,8 +14,7 @@ namespace ProtoChannel.Web
 
         public static ServiceAssembly GetAssembly(Assembly assembly)
         {
-            if (assembly == null)
-                throw new ArgumentNullException("assembly");
+            Require.NotNull(assembly, "assembly");
 
             return _assemblies.GetOrAdd(assembly, ServiceAssemblyFactory);
         }

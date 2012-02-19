@@ -13,8 +13,7 @@ namespace ProtoChannel.Web
 
         public PendingDownstreamMessage(MessageKind kind, uint associationId, object message)
         {
-            if (message == null)
-                throw new ArgumentNullException("message");
+            Require.NotNull(message, "message");
 
             Kind = kind;
             AssociationId = associationId;

@@ -17,8 +17,7 @@ namespace ProtoChannel.Web.Util
 
         public static Getter BuildGetter(MemberInfo memberInfo)
         {
-            if (memberInfo == null)
-                throw new ArgumentNullException("memberInfo");
+            Require.NotNull(memberInfo, "memberInfo");
 
             if (memberInfo is FieldInfo)
                 return BuildGetter((FieldInfo)memberInfo);
@@ -30,8 +29,7 @@ namespace ProtoChannel.Web.Util
 
         public static Getter BuildGetter(FieldInfo fieldInfo)
         {
-            if (fieldInfo == null)
-                throw new ArgumentNullException("fieldInfo");
+            Require.NotNull(fieldInfo, "fieldInfo");
 
             var method = new DynamicMethod(
                 fieldInfo.DeclaringType.Name + "_" + fieldInfo.Name + "_Getter",
@@ -68,8 +66,7 @@ namespace ProtoChannel.Web.Util
 
         public static Getter BuildGetter(PropertyInfo propertyInfo)
         {
-            if (propertyInfo == null)
-                throw new ArgumentNullException("propertyInfo");
+            Require.NotNull(propertyInfo, "propertyInfo");
 
             var getterMethod = propertyInfo.DeclaringType.GetMethod(
                 "get_" + propertyInfo.Name,
@@ -116,8 +113,7 @@ namespace ProtoChannel.Web.Util
 
         public static Setter BuildSetter(MemberInfo memberInfo, bool convert)
         {
-            if (memberInfo == null)
-                throw new ArgumentNullException("memberInfo");
+            Require.NotNull(memberInfo, "memberInfo");
 
             if (memberInfo is FieldInfo)
                 return BuildSetter((FieldInfo)memberInfo, convert);
@@ -134,8 +130,7 @@ namespace ProtoChannel.Web.Util
 
         public static Setter BuildSetter(FieldInfo fieldInfo, bool convert)
         {
-            if (fieldInfo == null)
-                throw new ArgumentNullException("fieldInfo");
+            Require.NotNull(fieldInfo, "fieldInfo");
 
             var method = new DynamicMethod(
                 fieldInfo.DeclaringType.Name + "_" + fieldInfo.Name + "_Setter",
@@ -180,8 +175,7 @@ namespace ProtoChannel.Web.Util
 
         public static Setter BuildSetter(PropertyInfo propertyInfo, bool convert)
         {
-            if (propertyInfo == null)
-                throw new ArgumentNullException("propertyInfo");
+            Require.NotNull(propertyInfo, "propertyInfo");
 
             var setterMethod = propertyInfo.DeclaringType.GetMethod(
                 "set_" + propertyInfo.Name,

@@ -22,8 +22,7 @@ namespace ProtoChannel.Web
 
         public ServiceAssembly(Assembly assembly)
         {
-            if (assembly == null)
-                throw new ArgumentNullException("assembly");
+            Require.NotNull(assembly, "assembly");
 
             TypesById = new ReadOnlyKeyedCollection<int, ServiceType>(_typesById);
             TypesByType = new ReadOnlyKeyedCollection<Type, ServiceType>(_typesByType);

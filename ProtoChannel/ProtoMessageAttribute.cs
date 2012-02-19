@@ -10,7 +10,7 @@ namespace ProtoChannel
     {
         public ProtoMessageAttribute(int messageId)
         {
-            Require.That(!(messageId < 1), "messageId", "Message ID must be greater than zero");
+            Require.That(messageId >= 1, "Message ID must be greater than zero", "messageId");
 
             MessageId = messageId;
         }

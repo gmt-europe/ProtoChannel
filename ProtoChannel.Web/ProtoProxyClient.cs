@@ -26,12 +26,9 @@ namespace ProtoChannel.Web
 
         public ProtoProxyClient(ProtoProxyHost host, string key, ProtoClient client)
         {
-            if (host == null)
-                throw new ArgumentNullException("host");
-            if (key == null)
-                throw new ArgumentNullException("key");
-            if (client == null)
-                throw new ArgumentNullException("client");
+            Require.NotNull(host, "host");
+            Require.NotNull(key, "key");
+            Require.NotNull(client, "client");
 
             _host = host;
             Key = key;
@@ -44,8 +41,7 @@ namespace ProtoChannel.Web
         {
             VerifyNotDisposed();
 
-            if (downstream == null)
-                throw new ArgumentNullException("downstream");
+            Require.NotNull(downstream, "downstream");
 
             lock (_syncRoot)
             {

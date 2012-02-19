@@ -21,8 +21,7 @@ namespace ProtoChannel.Web
 
         public ServiceType(Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException("type");
+            Require.NotNull(type, "type");
 
             Type = type;
 

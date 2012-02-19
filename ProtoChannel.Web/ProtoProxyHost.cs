@@ -23,10 +23,8 @@ namespace ProtoChannel.Web
 
         public ProtoProxyHost(string hostname, int hostPort, Assembly serviceAssembly)
         {
-            if (hostname == null)
-                throw new ArgumentNullException("hostname");
-            if (serviceAssembly == null)
-                throw new ArgumentNullException("serviceAssembly");
+            Require.NotNull(hostname, "hostname");
+            Require.NotNull(serviceAssembly, "serviceAssembly");
 
             _hostname = hostname;
             _hostPort = hostPort;
@@ -109,8 +107,7 @@ namespace ProtoChannel.Web
 
         public ProtoProxyClient FindClient(string channelId)
         {
-            if (channelId == null)
-                throw new ArgumentNullException("channelId");
+            Require.NotNull(channelId, "channelId");
 
             lock (_syncRoot)
             {
@@ -124,8 +121,7 @@ namespace ProtoChannel.Web
 
         public void RemoveClient(ProtoProxyClient client)
         {
-            if (client == null)
-                throw new ArgumentNullException("client");
+            Require.NotNull(client, "client");
 
             lock(_syncRoot)
             {
@@ -183,8 +179,7 @@ namespace ProtoChannel.Web
 
             public PendingMessage(ProtoProxyClient client, uint associationId)
             {
-                if (client == null)
-                    throw new ArgumentNullException("client");
+                Require.NotNull(client, "client");
 
                 _client = client;
                 _associationId = associationId;
