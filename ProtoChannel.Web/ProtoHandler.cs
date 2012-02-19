@@ -14,12 +14,13 @@ namespace ProtoChannel.Web
     {
         internal static ProtoProxyHost Proxy { get; private set; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations", Justification = "Cannot continue without configuration")]
         static ProtoHandler()
         {
             var config = (ProtoConfigurationSection)WebConfigurationManager.GetSection("protoChannel");
 
             if (config == null)
-                throw new InvalidOperationException("No protoChannel configuration section has been provided");
+                throw new ProtoChannelException("No protoChannel configuration section has been provided");
 
             string hostName = config.Host;
             int hostPort = config.Port;
@@ -42,7 +43,7 @@ namespace ProtoChannel.Web
             }
 
             if (hostName == null || hostPort <= 0)
-                throw new InvalidOperationException("No host and port have been provided; specify them either in the protoChannel config section or through the protochannel.host appSetting");
+                throw new ProtoChannelException("No host and port have been provided; specify them either in the protoChannel config section or through the protochannel.host appSetting");
 
             Proxy = new ProtoProxyHost(hostName, hostPort, Assembly.Load(config.ServiceAssembly));
         }

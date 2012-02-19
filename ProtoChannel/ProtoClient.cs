@@ -61,6 +61,7 @@ namespace ProtoChannel
         {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public ProtoClient(IPEndPoint remoteEndPoint, ProtoClientConfiguration configuration)
             : this(configuration, CreateClient(remoteEndPoint), remoteEndPoint.Address.ToString())
         {
@@ -71,6 +72,7 @@ namespace ProtoChannel
         {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public ProtoClient(IPAddress address, int port, ProtoClientConfiguration configuration)
             : this(configuration, CreateClient(address, port), address.ToString())
         {
@@ -81,11 +83,13 @@ namespace ProtoChannel
         {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public ProtoClient(string hostname, int port, ProtoClientConfiguration configuration)
             : this(configuration, CreateClient(hostname, port), hostname)
         {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         private static TcpClient CreateClient(IPEndPoint remoteEndPoint)
         {
             Require.NotNull(remoteEndPoint, "remoteEndPoint");
@@ -97,6 +101,7 @@ namespace ProtoChannel
             return client;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         private static TcpClient CreateClient(IPAddress address, int port)
         {
             Require.NotNull(address, "address");
@@ -108,6 +113,7 @@ namespace ProtoChannel
             return client;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         private static TcpClient CreateClient(string hostname, int port)
         {
             Require.NotNull(hostname, "hostname");
@@ -166,7 +172,14 @@ namespace ProtoChannel
 
         public void Dispose()
         {
-            if (!_disposed)
+            Dispose(true);
+
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed && disposing)
             {
                 OnDisposed(EventArgs.Empty);
 

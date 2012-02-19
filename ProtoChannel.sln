@@ -11,22 +11,31 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtoChannel.Web", "ProtoCh
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Code Analysis|Any CPU = Code Analysis|Any CPU
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B43F28DC-926B-4B95-AF13-83F74F7BCC5A}.Code Analysis|Any CPU.ActiveCfg = Code Analysis|Any CPU
+		{B43F28DC-926B-4B95-AF13-83F74F7BCC5A}.Code Analysis|Any CPU.Build.0 = Code Analysis|Any CPU
 		{B43F28DC-926B-4B95-AF13-83F74F7BCC5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B43F28DC-926B-4B95-AF13-83F74F7BCC5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B43F28DC-926B-4B95-AF13-83F74F7BCC5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B43F28DC-926B-4B95-AF13-83F74F7BCC5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE44E74F-982E-4FD1-A0BC-7F2C01A3F8E5}.Code Analysis|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE44E74F-982E-4FD1-A0BC-7F2C01A3F8E5}.Code Analysis|Any CPU.Build.0 = Debug|Any CPU
 		{AE44E74F-982E-4FD1-A0BC-7F2C01A3F8E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AE44E74F-982E-4FD1-A0BC-7F2C01A3F8E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE44E74F-982E-4FD1-A0BC-7F2C01A3F8E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE44E74F-982E-4FD1-A0BC-7F2C01A3F8E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B280DD28-CC32-4824-86F9-A2FEB4C6899E}.Code Analysis|Any CPU.ActiveCfg = Debug|Any CPU
+		{B280DD28-CC32-4824-86F9-A2FEB4C6899E}.Code Analysis|Any CPU.Build.0 = Debug|Any CPU
 		{B280DD28-CC32-4824-86F9-A2FEB4C6899E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B280DD28-CC32-4824-86F9-A2FEB4C6899E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B280DD28-CC32-4824-86F9-A2FEB4C6899E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B280DD28-CC32-4824-86F9-A2FEB4C6899E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9768EB10-ED94-444C-BC70-36FE325B60E5}.Code Analysis|Any CPU.ActiveCfg = Code Analysis|Any CPU
+		{9768EB10-ED94-444C-BC70-36FE325B60E5}.Code Analysis|Any CPU.Build.0 = Code Analysis|Any CPU
 		{9768EB10-ED94-444C-BC70-36FE325B60E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9768EB10-ED94-444C-BC70-36FE325B60E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9768EB10-ED94-444C-BC70-36FE325B60E5}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -36,6 +36,7 @@ namespace ProtoChannel.Web
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public override void EndRequest()
         {
             base.EndRequest();

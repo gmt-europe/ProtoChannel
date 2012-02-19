@@ -96,6 +96,7 @@ namespace ProtoChannel
             Log.InfoFormat("Listening for incoming connections at {0}", LocalEndPoint);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         private void AcceptTcpClientCallback(IAsyncResult asyncResult)
         {
             lock (_syncRoot)
@@ -300,7 +301,14 @@ namespace ProtoChannel
 
         public void Dispose()
         {
-            if (!_disposed)
+            Dispose(true);
+
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed && disposing)
             {
                 if (State != ProtoHostState.Closed)
                     Close();

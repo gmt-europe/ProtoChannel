@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ProtoChannel
 {
-    public class ProtoStream : IDisposable
+    public sealed class ProtoStream : IDisposable
     {
         private bool _disposed;
 

@@ -31,6 +31,7 @@ namespace ProtoChannel.Web
             _client.AssignDownstream(this);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
         public void SendMessage(PendingDownstreamMessage message)
         {
             _client.Touch();

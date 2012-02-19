@@ -33,6 +33,7 @@ namespace ProtoChannel.Web
             _maintenancetimer = new Timer(Maintenance, null, MaintenanceInterval, MaintenanceInterval);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public string CreateClient(int protocolVersion)
         {
             string key = RandomKeyGenerator.GetRandomKey(12);
@@ -76,7 +77,7 @@ namespace ProtoChannel.Web
                 (config.HybridStreamManager.ElementInformation.IsPresent ? 1 : 0);
 
             if (streamManagers > 1)
-                throw new InvalidOperationException("Specify ether a diskStreamManager, memoryStreamManager or hybridStreamManager");
+                throw new ProtoChannelException("Specify ether a diskStreamManager, memoryStreamManager or hybridStreamManager");
 
             if (config.DiskStreamManager.ElementInformation.IsPresent)
             {

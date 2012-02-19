@@ -89,6 +89,7 @@ namespace ProtoChannel.Util
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public WaitHandle AsyncWaitHandle
         {
             get
