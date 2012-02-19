@@ -63,7 +63,7 @@
             channel.sendMessage(
                 new StreamRequest(),
                 function (message) {
-                    window.open(channel.getStreamUrl(message.streamId), 'sink');
+                    channel.downloadStream(message.streamId);
                 }
             );
 

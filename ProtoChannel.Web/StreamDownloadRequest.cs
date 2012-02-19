@@ -36,8 +36,10 @@ namespace ProtoChannel.Web
 
             _client.Touch();
 
+            string disposition = Context.Request.QueryString["disposition"] ?? "inline";
+
             Context.Response.ContentType = stream.ContentType;
-            Context.Response.Headers["Content-Disposition"] = "attachment; filename=" + stream.StreamName;
+            Context.Response.Headers["Content-Disposition"] = disposition + "; filename=" + stream.StreamName;
 
             stream.Stream.CopyTo(Context.Response.OutputStream);
 

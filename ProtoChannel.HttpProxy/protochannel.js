@@ -178,8 +178,22 @@
         return aid;
     },
 
-    getStreamUrl: function (aid) {
-        return this._getUrl('stream', { CID: this._cid, AID: aid });
+    getStreamUrl: function (aid, disposition) {
+        if (disposition === undefined)
+            disposition = 'inline';
+
+        return this._getUrl('stream', { CID: this._cid, AID: aid, disposition: disposition });
+    },
+
+    downloadStream: function (aid) {
+        if (this._downloadIframe === undefined) {
+            this._downloadIframe = document.createElement('iframe');
+            this._downloadIframe.setAttribute('style', 'display:none');
+
+            document.body.appendChild(this._downloadIframe);
+        }
+
+        this._downloadIframe.setAttribute('src', this.getStreamUrl(aid, 'attachment'));
     },
 
     _getUrl: function (action, params) {
