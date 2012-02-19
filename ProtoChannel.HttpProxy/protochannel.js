@@ -1,4 +1,6 @@
-﻿function __mr(cid, did, message) {
+﻿// Entry point for "forever frame streaming".
+
+function __mr(cid, did, message) {
     var channel = ProtoChannel._channels[cid];
 
     if (channel !== undefined)
@@ -173,8 +175,14 @@ ProtoChannel = Class.create({
     },
 
     _startIeDownstream: function (downstreamId) {
-        this._downstreamFrame = document.createElement('iframe');
-        document.appendChild(this._downstreamFrame);
+        if (this._downstreamFrame === undefined) {
+            this._downstreamFrame = document.createElement('iframe');
+            this._downstreamFrame.setAttribute('style', 'display:none');
+            document.appendChild(this._downstreamFrame);
+        }
+
+        // DID query string parameter triggers the IFrame behavior.
+
         this._downstreamFrame.setAttribute('src', this._getUrl('channel', { CID: this._cid, DID: downstreamId }));
     },
 
