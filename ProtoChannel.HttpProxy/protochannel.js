@@ -1,4 +1,8 @@
-﻿ProtoChannel = Class.create({
+﻿function __mr(cid, did, message) {
+    ProtoChannel._channels[cid]._processReceivedMessage(did, message);
+};
+
+ProtoChannel = Class.create({
     initialize: function (host, protocol, connectedCallback, receiveCallback) {
         if (host.substr(-1) != '/')
             host = host + '/';
@@ -10,6 +14,8 @@
         this._connectedCallback = connectedCallback;
         this._receiveCallback = receiveCallback;
         this._downstreamId = 0;
+        this._lastDownstreamTime = null;
+        this._closed = false;
 
         new Ajax.Request(
             this._getUrl('channel', { PVER: protocol }),
@@ -33,6 +39,8 @@
 
         this._cid = json.c;
 
+        ProtoChannel._channels[this._cid] = this;
+
         this._startDownstream();
 
         if (Object.isFunction(this._connectedCallback))
@@ -44,15 +52,23 @@
             return;
 
         while (true) {
-            var pos = transport.responseText.indexOf('\n', this._downstreamOffset);
+            var pos;
+            var length;
 
-            if (pos == -1)
-                return;
+            try {
+                pos = transport.responseText.indexOf('\n', this._downstreamOffset);
 
-            var length = parseInt(transport.responseText.substr(this._downstreamOffset, pos - this._downstreamOffset), 10);
+                if (pos == -1)
+                    return;
 
-            if (length == 0) {
-                this._startDownstream();
+                length = parseInt(transport.responseText.substr(this._downstreamOffset, pos - this._downstreamOffset), 10);
+
+                if (length == 0) {
+                    this._startDownstream();
+                    return;
+                }
+            }
+            catch (e) {
                 return;
             }
 
@@ -61,13 +77,21 @@
 
             this._downstreamOffset = pos + 1 + length;
 
-            var message = transport.responseText.substr(pos + 1, length).evalJSON();
+            var message = transport.responseText.substr(pos + 1, length).evalJSON(); ;
 
-            this._processReceivedMessage(message);
+            this._processReceivedMessage(downstreamId, message);
         }
     },
 
-    _processReceivedMessage: function (message) {
+    _processReceivedMessage: function (downstreamId, message) {
+        if (this._downstreamId != downstreamId)
+            return;
+
+        if (message == null) {
+            this._startDownstream();
+            return;
+        }
+
         // No-ops.
 
         if (Object.isArray(message))
@@ -110,7 +134,7 @@
 
         delete this._messages[message.a];
 
-        callback(deserialized);
+        callback.apply(this, [deserialized]);
     },
 
     _processDownstreamCompleted: function (transport, downstreamId) {
@@ -119,12 +143,42 @@
     },
 
     _startDownstream: function () {
+        if (this._closed)
+            return;
+
+        var lastDownstreamTime = this._lastDownstreamTime;
+        this._lastDownstreamTime = new Date().getTime();
+
+        if (lastDownstreamTime != null) {
+            var diff = new Date(this._lastDownstreamTime - lastDownstreamTime);
+
+            var seconds = diff.getHours() * 3600 + diff.getMinutes() * 60 + diff.getSeconds();
+
+            if (seconds < 5) {
+                this._processFailure();
+                return;
+            }
+        }
+
         this._downstreamOffset = 0;
         var downstreamId = ++this._downstreamId;
 
+        if (Prototype.Browser.IE)
+            this._startIeDownstream(downstreamId);
+        else
+            this._startSaneDownstream(downstreamId);
+    },
+
+    _startIeDownstream: function (downstreamId) {
+        this._downstreamFrame = document.createElement('iframe');
+        document.appendChild(this._downstreamFrame);
+        this._downstreamFrame.setAttribute('src', this._getUrl('channel', { CID: this._cid, DID: downstreamId }));
+    },
+
+    _startSaneDownstream: function (downstreamId) {
         var me = this;
 
-        new Ajax.Request(
+        this._downstream = new Ajax.Request(
             this._getUrl('channel', { CID: this._cid }),
             {
                 method: 'get',
@@ -136,6 +190,8 @@
     },
 
     sendMessage: function (message, callback) {
+        this._verifyNotClosed();
+
         var aid = this._nextAid++;
 
         this._messages[aid] = callback;
@@ -144,6 +200,8 @@
     },
 
     postMessage: function (message) {
+        this._verifyNotClosed();
+
         this._sendMessage(0 /* one way */, message, undefined);
     },
 
@@ -170,6 +228,8 @@
     },
 
     getSendStreamAid: function () {
+        this._verifyNotClosed();
+
         var aid = this._nextStreamAid++;
 
         if (this._nextStreamAid >= 0x1fffff /* max supported by the protocol */)
@@ -179,6 +239,8 @@
     },
 
     getStreamUrl: function (aid, disposition) {
+        this._verifyNotClosed();
+
         if (disposition === undefined)
             disposition = 'inline';
 
@@ -186,6 +248,8 @@
     },
 
     downloadStream: function (aid) {
+        this._verifyNotClosed();
+
         if (this._downloadIframe === undefined) {
             this._downloadIframe = document.createElement('iframe');
             this._downloadIframe.setAttribute('style', 'display:none');
@@ -213,16 +277,41 @@
         var result = '';
 
         for (var i = 0; i < 8; i++) {
-            result += ProtoChannel._zxSeed[Math.floor(Math.random() * ProtoChannel._zxSeed.length)];
+            var index = Math.floor(Math.random() * ProtoChannel._zxSeed.length);
+            result += ProtoChannel._zxSeed.substr(index, 1);
         }
 
         return result;
+    },
+
+    close: function () {
+        this._verifyNotClosed();
+
+        this._closed = true;
+
+        new Ajax.Request(
+            this._getUrl('channel', { CID: this._cid }),
+            {
+                parameters: {
+                    count: 1,
+                    req0_key: Object.toJSON(['close'])
+                },
+                method: 'post',
+                onFailure: this._processFailure.bind(this)
+            }
+        );
+    },
+
+    _verifyNotClosed: function () {
+        if (this._closed)
+            throw 'Channel has been closed';
     }
 });
 
 Object.extend(ProtoChannel, {
     _zxSeed: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890',
-    _protocolVersion: 1
+    _protocolVersion: 1,
+    _channels: {}
 });
 
 ProtoRegistry = {
