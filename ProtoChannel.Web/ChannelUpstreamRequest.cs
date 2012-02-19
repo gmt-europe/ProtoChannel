@@ -65,74 +65,109 @@ namespace ProtoChannel.Web
                 //   't': Message type
                 //   'p': Payload
 
-                ReadToken(reader, JsonToken.StartObject);
+                if (!reader.Read())
+                    throw new HttpException("Invalid request");
 
-                MessageKind? messageKind = null;
-                int? associationId = null;
-                int? messageType = null;
-                bool hadPayload = false;
-
-                while (reader.Read())
+                if (reader.TokenType == JsonToken.StartObject)
                 {
-                    if (reader.TokenType == JsonToken.EndObject)
-                        break;
-                    else if (reader.TokenType != JsonToken.PropertyName)
-                        throw new HttpException("Invalid request");
+                    ProcessMessageRequest(reader);
+                }
+                else if (reader.TokenType == JsonToken.StartArray)
+                {
+                    ReadToken(reader, JsonToken.String);
 
-                    switch ((string)reader.Value)
+                    string action = (string)reader.Value;
+
+                    ReadToken(reader, JsonToken.EndArray);
+
+                    switch (action)
                     {
-                        case "r":
-                            ReadToken(reader, JsonToken.Integer);
-                            int value = (int)(long)reader.Value;
-
-                            if (value < 0 || value > 2)
-                                throw new HttpException("Invalid request type");
-
-                            messageKind = (MessageKind)value;
-                            break;
-
-                        case "a":
-                            ReadToken(reader, JsonToken.Integer);
-                            associationId = (int)(long)reader.Value;
-
-                            if (associationId < 0)
-                                throw new HttpException("Invalid association id");
-                            break;
-
-                        case "t":
-                            ReadToken(reader, JsonToken.Integer);
-                            messageType = (int)(long)reader.Value;
-
-                            if (messageType < 0)
-                                throw new HttpException("Invalid message type");
-                            break;
-
-                        case "p":
-                            hadPayload = true;
-
-                            if (
-                                !messageKind.HasValue ||
-                                    !messageType.HasValue ||
-                                        (messageKind.Value != MessageKind.OneWay && !associationId.HasValue)
-                                )
-                                throw new HttpException("Invalid request");
-
-                            ProcessRequest(
-                                messageKind.Value,
-                                messageType.Value,
-                                (uint)associationId.GetValueOrDefault(0),
-                                reader
-                                );
+                        case "close":
+                            _client.Dispose();
                             break;
 
                         default:
                             throw new HttpException("Invalid request");
                     }
                 }
-
-                if (!hadPayload || reader.Read())
+                else
+                {
                     throw new HttpException("Invalid request");
+                }
+
+                if (reader.Read())
+                    throw new HttpException("Invalid request");
+
             }
+        }
+
+        private void ProcessMessageRequest(JsonTextReader reader)
+        {
+            MessageKind? messageKind = null;
+            int? associationId = null;
+            int? messageType = null;
+            bool hadPayload = false;
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonToken.EndObject)
+                    break;
+                else if (reader.TokenType != JsonToken.PropertyName)
+                    throw new HttpException("Invalid request");
+
+                switch ((string)reader.Value)
+                {
+                    case "r":
+                        ReadToken(reader, JsonToken.Integer);
+                        int value = (int)(long)reader.Value;
+
+                        if (value < 0 || value > 2)
+                            throw new HttpException("Invalid request type");
+
+                        messageKind = (MessageKind)value;
+                        break;
+
+                    case "a":
+                        ReadToken(reader, JsonToken.Integer);
+                        associationId = (int)(long)reader.Value;
+
+                        if (associationId < 0)
+                            throw new HttpException("Invalid association id");
+                        break;
+
+                    case "t":
+                        ReadToken(reader, JsonToken.Integer);
+                        messageType = (int)(long)reader.Value;
+
+                        if (messageType < 0)
+                            throw new HttpException("Invalid message type");
+                        break;
+
+                    case "p":
+                        hadPayload = true;
+
+                        if (
+                            !messageKind.HasValue ||
+                                !messageType.HasValue ||
+                                    (messageKind.Value != MessageKind.OneWay && !associationId.HasValue)
+                            )
+                            throw new HttpException("Invalid request");
+
+                        ProcessRequest(
+                            messageKind.Value,
+                            messageType.Value,
+                            (uint)associationId.GetValueOrDefault(0),
+                            reader
+                            );
+                        break;
+
+                    default:
+                        throw new HttpException("Invalid request");
+                }
+            }
+
+            if (!hadPayload)
+                throw new HttpException("Invalid request");
         }
 
         private void ProcessRequest(MessageKind messageKind, int messageType, uint associationId, JsonTextReader reader)
@@ -170,7 +205,7 @@ namespace ProtoChannel.Web
             base.EndRequest();
 
             Context.Response.ContentType = "text/plain";
-            Context.Response.Write("4\ny2f%\n");
+            Context.Response.Write("ok");
         }
     }
 }
