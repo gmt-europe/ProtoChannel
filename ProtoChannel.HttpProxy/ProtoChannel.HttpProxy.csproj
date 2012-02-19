@@ -62,9 +62,17 @@
   <ItemGroup>
     <Content Include="Default.aspx" />
     <Content Include="Global.asax" />
+    <Content Include="Jasmine\jasmine-html.js" />
+    <Content Include="Jasmine\jasmine.css" />
+    <Content Include="Jasmine\jasmine.js" />
     <Content Include="pingpong.js" />
     <Content Include="protochannel.js" />
     <Content Include="prototype.js" />
+    <Content Include="Tests.aspx" />
+    <Content Include="Tests\Messages.js" />
+    <Content Include="Tests\Setup.js" />
+    <Content Include="Tests\Streams.js" />
+    <Content Include="Tests\util.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -88,6 +96,13 @@
     <Compile Include="Service\PingPong\Messages.cs" />
     <Compile Include="Service\PingPong\ServerCallbackService.cs" />
     <Compile Include="Service\PingPong\ServerService.cs" />
+    <Compile Include="Tests.aspx.cs">
+      <DependentUpon>Tests.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Tests.aspx.designer.cs">
+      <DependentUpon>Tests.aspx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Key.snk">
