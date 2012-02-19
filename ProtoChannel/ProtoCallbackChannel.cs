@@ -10,12 +10,12 @@ namespace ProtoChannel
     {
         internal IProtoConnection Connection { get; set; }
 
-        public uint SendStream(Stream stream, string streamName, string contentType)
+        public int SendStream(Stream stream, string streamName, string contentType)
         {
             return Connection.SendStream(stream, streamName, contentType);
         }
 
-        public IAsyncResult BeginGetStream(uint streamId, AsyncCallback callback, object asyncState)
+        public IAsyncResult BeginGetStream(int streamId, AsyncCallback callback, object asyncState)
         {
             return Connection.BeginGetStream(streamId, callback, asyncState);
         }

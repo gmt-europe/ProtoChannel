@@ -35,7 +35,7 @@ namespace ProtoChannel.HttpProxy.Service.PingPong
 
             var pendingStream = new PendingGetStream(callbackService);
 
-            callbackService.BeginGetStream(stream.StreamId, pendingStream.BeginGetStreamCallback, null);
+            callbackService.BeginGetStream((int)stream.StreamId, pendingStream.BeginGetStreamCallback, null);
         }
 
         [ProtoMethod]
@@ -47,13 +47,13 @@ namespace ProtoChannel.HttpProxy.Service.PingPong
 
             var stream = new MemoryStream(payload);
 
-            uint aid = OperationContext.Current.GetCallbackChannel<ServerCallbackService>().SendStream(
+            int aid = OperationContext.Current.GetCallbackChannel<ServerCallbackService>().SendStream(
                 stream, "Stream request.txt", "text/plain"
             );
 
             return new StreamResponse
             {
-                StreamId = aid
+                StreamId = (uint)aid
             };
         }
 

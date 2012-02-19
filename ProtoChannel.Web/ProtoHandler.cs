@@ -34,8 +34,10 @@ namespace ProtoChannel.Web
                 {
                     int port;
 
-                    if (int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out port))
-                    {
+                    if (
+                        int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out port) &&
+                        port > 0
+                    ) {
                         hostName = parts[0];
                         hostPort = port;
                     }

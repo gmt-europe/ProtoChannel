@@ -14,7 +14,7 @@ namespace ProtoChannel
 
         public bool IsAccepted { get; set; }
 
-        public PendingSendStream(long length, string streamName, string contentType, uint associationId, Stream stream)
+        public PendingSendStream(long length, string streamName, string contentType, int associationId, Stream stream)
             : base(length, streamName, contentType, associationId)
         {
             Require.NotNull(stream, "stream");

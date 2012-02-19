@@ -145,17 +145,17 @@ namespace ProtoChannel
             _connection.PostMessage(message);
         }
 
-        public uint SendStream(Stream stream, string streamName, string contentType)
+        public int SendStream(Stream stream, string streamName, string contentType)
         {
             return SendStream(stream, streamName, contentType, null);
         }
 
-        internal uint SendStream(Stream stream, string streamName, string contentType, uint? associationId)
+        internal int SendStream(Stream stream, string streamName, string contentType, int? associationId)
         {
             return _connection.SendStream(stream, streamName, contentType, associationId);
         }
 
-        public IAsyncResult BeginGetStream(uint streamId, AsyncCallback callback, object asyncState)
+        public IAsyncResult BeginGetStream(int streamId, AsyncCallback callback, object asyncState)
         {
             return _connection.BeginGetStream(streamId, callback, asyncState);
         }

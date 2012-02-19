@@ -395,7 +395,7 @@ namespace ProtoChannel
             // Get the details from the header.
 
             uint streamPackageTypeNumber = header & 0x7;
-            uint associationId = header >> 3;
+            int associationId = (int)(header >> 3);
 
             if (streamPackageTypeNumber > 4)
             {
@@ -429,7 +429,7 @@ namespace ProtoChannel
             }
         }
 
-        private void ProcessStartStreamPackage(uint associationId, int packageLength)
+        private void ProcessStartStreamPackage(int associationId, int packageLength)
         {
             // Get the stream start message.
 
@@ -449,7 +449,7 @@ namespace ProtoChannel
 
             // Construct the header.
 
-            uint header = (uint)responseType | associationId << 3;
+            uint header = (uint)responseType | (uint)associationId << 3;
 
             var buffer = BitConverter.GetBytes(header);
 
@@ -464,7 +464,7 @@ namespace ProtoChannel
             EndSendPackage(PackageType.Stream, packageStart);
         }
 
-        private void ProcessAcceptStreamPackage(uint associationId)
+        private void ProcessAcceptStreamPackage(int associationId)
         {
             // Accepting the stream will put it into the queue for sending.
             // We kick of an async send so we actually start sending the
@@ -478,7 +478,7 @@ namespace ProtoChannel
                 Send();
         }
 
-        private void ProcessRejectStreamPackage(uint associationId)
+        private void ProcessRejectStreamPackage(int associationId)
         {
             var error = _sendStreamManager.RejectStream(associationId);
 
@@ -486,7 +486,7 @@ namespace ProtoChannel
                 SendError(error.Value);
         }
 
-        private void ProcessStreamDataPackage(uint associationId, int length)
+        private void ProcessStreamDataPackage(int associationId, int length)
         {
             PendingReceiveStream stream;
 
@@ -501,7 +501,7 @@ namespace ProtoChannel
             ReadStream(stream.Stream, length);
         }
 
-        private void ProcessEndStreamPackage(uint associationId)
+        private void ProcessEndStreamPackage(int associationId)
         {
             var error = _receiveStreamManager.EndStream(associationId);
 
@@ -595,7 +595,7 @@ namespace ProtoChannel
 
         private void WriteStreamPackageHeader(StreamSendRequest request, StreamPackageType streamPackageType)
         {
-            uint header = (uint)streamPackageType | request.Stream.AssociationId << 3;
+            uint header = (uint)streamPackageType | (uint)request.Stream.AssociationId << 3;
 
             var buffer = BitConverter.GetBytes(header);
 
@@ -616,12 +616,12 @@ namespace ProtoChannel
             EndSendPackage(PackageType.Error, packageStart);
         }
 
-        public uint SendStream(Stream stream, string streamName, string contentType)
+        public int SendStream(Stream stream, string streamName, string contentType)
         {
             return SendStream(stream, streamName, contentType, null);
         }
 
-        public uint SendStream(Stream stream, string streamName, string contentType, uint? associationId)
+        public int SendStream(Stream stream, string streamName, string contentType, int? associationId)
         {
             lock (SyncRoot)
             {
@@ -635,7 +635,7 @@ namespace ProtoChannel
 
                 // Construct the header.
 
-                uint header = (uint)StreamPackageType.StartStream | associationId.Value << 3;
+                uint header = (uint)StreamPackageType.StartStream | (uint)associationId.Value << 3;
 
                 var buffer = BitConverter.GetBytes(header);
 
@@ -660,7 +660,7 @@ namespace ProtoChannel
             }
         }
 
-        public IAsyncResult BeginGetStream(uint streamId, AsyncCallback callback, object asyncState)
+        public IAsyncResult BeginGetStream(int streamId, AsyncCallback callback, object asyncState)
         {
             lock (SyncRoot)
             {

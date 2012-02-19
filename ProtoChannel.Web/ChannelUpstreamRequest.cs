@@ -35,7 +35,10 @@ namespace ProtoChannel.Web
 
             int count;
 
-            if (!int.TryParse(countString, NumberStyles.None, CultureInfo.InvariantCulture, out count))
+            if (
+                !int.TryParse(countString, NumberStyles.None, CultureInfo.InvariantCulture, out count) ||
+                count < 1
+            )
                 throw new HttpException("count form parameter invalid");
 
             for (int i = 0; i < count; i++)

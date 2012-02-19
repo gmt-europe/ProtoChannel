@@ -12,11 +12,11 @@ namespace ProtoChannel
 
         public string ContentType { get; private set; }
 
-        public uint AssociationId { get; private set; }
+        public int AssociationId { get; private set; }
 
         public bool IsDisposed { get; private set; }
 
-        protected PendingStream(long length, string streamName, string contentType, uint associationId)
+        protected PendingStream(long length, string streamName, string contentType, int associationId)
         {
             Length = length;
             StreamName = streamName;

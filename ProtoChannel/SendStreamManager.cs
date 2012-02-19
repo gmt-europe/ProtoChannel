@@ -9,13 +9,13 @@ namespace ProtoChannel
 {
     internal class SendStreamManager
     {
-        private const uint MaxAssociationId = 0x1fffff; // 21 bits
+        private const int MaxAssociationId = 0x1fffff; // 21 bits
 
-        private uint _nextAssociationId;
+        private int _nextAssociationId;
         private readonly Queue<PendingSendStream> _sendQueue = new Queue<PendingSendStream>();
-        private readonly Dictionary<uint, PendingSendStream> _streams = new Dictionary<uint, PendingSendStream>();
+        private readonly Dictionary<int, PendingSendStream> _streams = new Dictionary<int, PendingSendStream>();
 
-        public uint RegisterStream(Stream stream, string streamName, string contentType, uint? associationId)
+        public int RegisterStream(Stream stream, string streamName, string contentType, int? associationId)
         {
             Require.NotNull(stream, "stream");
 
@@ -33,8 +33,10 @@ namespace ProtoChannel
             return protoStream.AssociationId;
         }
 
-        private uint GetNextAssociationId(uint? associationId)
+        private int GetNextAssociationId(int? associationId)
         {
+            Require.That(!associationId.HasValue || associationId.Value >= 0, "Association ID may not be negative", "associationId");
+
             if (associationId.HasValue)
             {
                 if (_streams.ContainsKey(associationId.Value))
@@ -48,14 +50,14 @@ namespace ProtoChannel
                 _nextAssociationId = (_nextAssociationId + 1) & MaxAssociationId;
             }
 
-            uint result = _nextAssociationId;
+            int result = _nextAssociationId;
 
             _nextAssociationId = (_nextAssociationId + 1) & MaxAssociationId;
 
             return result;
         }
 
-        public ProtocolError? AcceptStream(uint associationId)
+        public ProtocolError? AcceptStream(int associationId)
         {
             PendingSendStream stream;
 
@@ -76,7 +78,7 @@ namespace ProtoChannel
             return null;
         }
 
-        public ProtocolError? RejectStream(uint associationId)
+        public ProtocolError? RejectStream(int associationId)
         {
             PendingSendStream stream;
 
@@ -94,7 +96,7 @@ namespace ProtoChannel
                 return null;
         }
 
-        public ProtocolError? EndStream(uint associationId)
+        public ProtocolError? EndStream(int associationId)
         {
             PendingSendStream stream;
 

@@ -17,11 +17,11 @@ namespace ProtoChannel.Test.Services.Streaming
                 Encoding.UTF8.GetBytes("Stream contents")
             );
 
-            uint id = OperationContext.Current.Connection.SendStream(
+            int id = OperationContext.Current.Connection.SendStream(
                 stream, "Payload", "application/octet-stream"
             );
 
-            return new StreamResponse { StreamId = id };
+            return new StreamResponse { StreamId = (uint)id };
         }
     }
 }

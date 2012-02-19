@@ -10,9 +10,9 @@ namespace ProtoChannel.Web
     internal class StreamUploadRequest : Request
     {
         private readonly ProtoProxyClient _client;
-        private readonly uint _associationId;
+        private readonly int _associationId;
 
-        public StreamUploadRequest(HttpContext context, AsyncCallback asyncCallback, object extraData, ProtoProxyClient client, uint associationId)
+        public StreamUploadRequest(HttpContext context, AsyncCallback asyncCallback, object extraData, ProtoProxyClient client, int associationId)
             : base(context, asyncCallback, extraData)
         {
             Require.NotNull(client, "client");
@@ -34,7 +34,7 @@ namespace ProtoChannel.Web
 
             var file = Context.Request.Files[0];
 
-            uint associationId = _client.Client.SendStream(file.InputStream, file.FileName, file.ContentType, _associationId);
+            int associationId = _client.Client.SendStream(file.InputStream, file.FileName, file.ContentType, _associationId);
 
             Debug.Assert(_associationId == associationId);
         }

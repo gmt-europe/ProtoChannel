@@ -9,9 +9,9 @@ namespace ProtoChannel.Web
     internal class StreamDownloadRequest : Request
     {
         private readonly ProtoProxyClient _client;
-        private readonly uint _associationId;
+        private readonly int _associationId;
 
-        public StreamDownloadRequest(HttpContext context, AsyncCallback asyncCallback, object extraData, ProtoProxyClient client, uint associationId)
+        public StreamDownloadRequest(HttpContext context, AsyncCallback asyncCallback, object extraData, ProtoProxyClient client, int associationId)
             : base(context, asyncCallback, extraData)
         {
             Require.NotNull(client, "client");

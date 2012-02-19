@@ -74,7 +74,8 @@ namespace ProtoChannel.Web
 
                 if (
                     protocolVersionString == null ||
-                    !int.TryParse(protocolVersionString, NumberStyles.None, CultureInfo.InvariantCulture, out protocolVersion)
+                    !int.TryParse(protocolVersionString, NumberStyles.None, CultureInfo.InvariantCulture, out protocolVersion) ||
+                    protocolVersion < 0
                 )
                     return new InvalidRequest(context, asyncCallback, extraData, "Invalid PVER query string parameter");
 
@@ -108,11 +109,12 @@ namespace ProtoChannel.Web
                 return new InvalidRequest(context, asyncCallback, extraData, "Invalid VER query string parameter");
 
             string associationIdString = context.Request.QueryString["AID"];
-            uint associationId;
+            int associationId;
 
             if (
                 associationIdString == null ||
-                !uint.TryParse(associationIdString, NumberStyles.None, CultureInfo.InvariantCulture, out associationId)
+                !int.TryParse(associationIdString, NumberStyles.None, CultureInfo.InvariantCulture, out associationId) ||
+                associationId < 0
             )
                 return new InvalidRequest(context, asyncCallback, extraData, "Invalid AID query string parameter");
 

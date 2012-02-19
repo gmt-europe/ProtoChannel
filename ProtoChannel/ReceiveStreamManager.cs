@@ -8,7 +8,7 @@ namespace ProtoChannel
     internal class ReceiveStreamManager
     {
         private readonly IStreamManager _streamManager;
-        private readonly Dictionary<uint, PendingReceiveStream> _streams = new Dictionary<uint, PendingReceiveStream>();
+        private readonly Dictionary<int, PendingReceiveStream> _streams = new Dictionary<int, PendingReceiveStream>();
 
         public ReceiveStreamManager(IStreamManager streamManager)
         {
@@ -17,7 +17,7 @@ namespace ProtoChannel
             _streamManager = streamManager;
         }
 
-        public bool RegisterStream(uint associationId, Messages.StartStream message)
+        public bool RegisterStream(int associationId, Messages.StartStream message)
         {
             var protoStream = new ProtoStream(message.Length, message.StreamName, message.ContentType, null);
 
@@ -35,7 +35,7 @@ namespace ProtoChannel
             return true;
         }
 
-        public ProtocolError? TryGetStream(uint associationId, out PendingReceiveStream stream)
+        public ProtocolError? TryGetStream(int associationId, out PendingReceiveStream stream)
         {
             if (!_streams.TryGetValue(associationId, out stream))
                 return ProtocolError.InvalidStreamAssociationId;
@@ -52,7 +52,7 @@ namespace ProtoChannel
             return null;
         }
 
-        public ProtocolError? EndStream(uint associationId)
+        public ProtocolError? EndStream(int associationId)
         {
             PendingReceiveStream stream;
 
@@ -81,7 +81,7 @@ namespace ProtoChannel
             }
         }
 
-        public IAsyncResult BeginGetStream(uint streamId, AsyncCallback callback, object asyncState)
+        public IAsyncResult BeginGetStream(int streamId, AsyncCallback callback, object asyncState)
         {
             PendingReceiveStream stream;
 
