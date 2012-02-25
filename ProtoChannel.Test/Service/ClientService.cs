@@ -95,5 +95,23 @@ namespace ProtoChannel.Test.Service
         {
             return (global::ProtoChannel.Test.Service.StreamResponse)EndSendMessage(asyncResult);
         }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.DefaultValueTests DefaultValueTest(global::ProtoChannel.Test.Service.DefaultValueTests message)
+        {
+            return EndDefaultValueTest(BeginDefaultValueTest(message, null, null));
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::System.IAsyncResult BeginDefaultValueTest(global::ProtoChannel.Test.Service.DefaultValueTests message, global::System.AsyncCallback callback, object asyncState)
+        {
+            return BeginSendMessage(message, typeof(global::ProtoChannel.Test.Service.DefaultValueTests), callback, asyncState);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.DefaultValueTests EndDefaultValueTest(global::System.IAsyncResult asyncResult)
+        {
+            return (global::ProtoChannel.Test.Service.DefaultValueTests)EndSendMessage(asyncResult);
+        }
     }
 }

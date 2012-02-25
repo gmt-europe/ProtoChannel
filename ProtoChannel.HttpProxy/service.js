@@ -120,6 +120,40 @@ OneWayPing = Class.create(ProtoMessage, {
 
 ProtoRegistry.registerType(OneWayPing, 5);
 
+DefaultValueTests = Class.create(ProtoMessage, {
+    initialize: function ($super, values) {
+        this.stringValue = 'Default value';
+        this.intValue = 1;
+        this.doubleValue = 1.0;
+
+        $super(6, values);
+    },
+
+    serialize: function () {
+        var message = {};
+
+        if (this.stringValue !== 'Default value')
+            message[1] = this.stringValue;
+        if (this.intValue !== 1)
+            message[2] = this.intValue;
+        if (this.doubleValue !== 1.0)
+            message[3] = this.doubleValue;
+
+        return message;
+    },
+
+    deserialize: function (message) {
+        if (message[1] !== undefined)
+            this.stringValue = message[1];
+        if (message[2] !== undefined)
+            this.intValue = message[2];
+        if (message[3] !== undefined)
+            this.doubleValue = message[3];
+    }
+});
+
+ProtoRegistry.registerType(DefaultValueTests, 6);
+
 ServiceChannel = Class.create(ProtoChannel, {
     ping: function (message, callback) {
         if (!(message instanceof Ping))

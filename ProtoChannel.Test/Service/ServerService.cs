@@ -57,6 +57,12 @@ namespace ProtoChannel.Test.Service
             };
         }
 
+        [ProtoMethod]
+        public DefaultValueTests DefaultValueTest(DefaultValueTests message)
+        {
+            return message;
+        }
+
         private class PendingGetStream
         {
             private readonly ServerCallbackService _callbackService;
