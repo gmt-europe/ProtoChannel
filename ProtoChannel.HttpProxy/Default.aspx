@@ -6,7 +6,7 @@
     <script src="protochannel.js" type="text/javascript"></script>
     <script src="service.js" type="text/javascript"></script>
     <script type="text/javascript">
-        var channel, callback;
+        var channel;
 
         CallbackChannel = Class.create(ServiceCallbackChannel, {
             oneWayPing: function (message) {
@@ -23,8 +23,7 @@
             pos = document.URL.indexOf('/', pos + 3);
             var host = document.URL.substr(0, pos);
 
-            callback = new CallbackChannel();
-            channel = new ServiceChannel(host, 0, null, callback);
+            channel = new ServiceChannel(host, 0, { onReceived: new CallbackChannel() });
         };
 
         function submitPing() {

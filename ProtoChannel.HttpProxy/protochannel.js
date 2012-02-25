@@ -8,7 +8,7 @@ function __mr(cid, did, message) {
 };
 
 ProtoChannel = Class.create({
-    initialize: function (host, protocol, connectedCallback, receiveCallback) {
+    initialize: function (host, protocol, options) {
         if (host.substr(-1) != '/')
             host = host + '/';
 
@@ -16,8 +16,7 @@ ProtoChannel = Class.create({
         this._nextAid = 0;
         this._nextStreamAid = 0;
         this._messages = {};
-        this._connectedCallback = connectedCallback;
-        this._receiveCallback = receiveCallback;
+        this._options = options === undefined ? {} : options;
         this._downstreamId = 0;
         this._lastDownstreamTime = null;
         this._closed = false;
@@ -33,7 +32,10 @@ ProtoChannel = Class.create({
     },
 
     _processFailure: function () {
-        alert('Protocol failure');
+        if (Object.isFunction(this._options.onFailure))
+            this._options.onFailure.apply(this);
+        else
+            alert('Protocol failure');
     },
 
     _processConnect: function (transport) {
@@ -48,8 +50,8 @@ ProtoChannel = Class.create({
 
         this._startDownstream();
 
-        if (Object.isFunction(this._connectedCallback))
-            this._connectedCallback.apply(this);
+        if (Object.isFunction(this._options.onConnected))
+            this._options.onConnected.apply(this);
     },
 
     _processDownstreamProgress: function (transport, downstreamId) {
@@ -119,24 +121,20 @@ ProtoChannel = Class.create({
     },
 
     _processOneWayMessage: function (message, deserialized) {
-        if (this._receiveCallback instanceof ProtoCallbackChannel)
-            this._receiveCallback._receiveCallback(deserialized, false);
-        else if (Object.isFunction(this._receiveCallback))
-            this._receiveCallback(deserialized, false);
+        this._callReceivedCallback(deserialized, false);
+    },
+
+    _callReceivedCallback: function (message, expectResponse) {
+        if (this._options.onReceived instanceof ProtoCallbackChannel)
+            return this._options.onReceived._receiveCallback(message, expectResponse);
+        else if (Object.isFunction(this._options.onReceived))
+            return this._options.onReceived.apply(this, [message, expectResponse]);
         else
             throw 'Message received but callback not provided';
-
     },
 
     _processRequestMessage: function (message, deserialized) {
-        var response;
-
-        if (this._receiveCallback instanceof ProtoCallbackChannel)
-            response = this._receiveCallback._receiveCallback(deserialized, true);
-        else if (Object.isFunction(this._receiveCallback))
-            response = this._receiveCallback(deserialized, true);
-        else
-            throw 'Message received but callback not provided';
+        var response = this._callReceiveCallback(deserialized, true);
 
         this._sendMessage(2 /* response */, response, message.a);
     },
@@ -302,6 +300,11 @@ ProtoChannel = Class.create({
         return result;
     },
 
+    _processClosed: function () {
+        if (Object.isFunction(this._options.onClosed))
+            this._options.onClosed.apply(this);
+    },
+
     close: function () {
         this._verifyNotClosed();
 
@@ -317,7 +320,8 @@ ProtoChannel = Class.create({
                     req0_key: Object.toJSON(['close'])
                 },
                 method: 'post',
-                onFailure: this._processFailure.bind(this)
+                onFailure: this._processFailure.bind(this),
+                onSuccess: this._processClosed.bind(this)
             }
         );
     },
