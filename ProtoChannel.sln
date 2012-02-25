@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtoChannel.HttpProxy", "P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtoChannel.Web", "ProtoChannel.Web\ProtoChannel.Web.csproj", "{9768EB10-ED94-444C-BC70-36FE325B60E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtoChannel.CodeGenerator", "ProtoChannel.CodeGenerator\ProtoChannel.CodeGenerator.csproj", "{6C25D776-11E8-4F4D-92AF-6C92C8BB9AE2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Code Analysis|Any CPU = Code Analysis|Any CPU
@@ -40,6 +42,12 @@ Global
 		{9768EB10-ED94-444C-BC70-36FE325B60E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9768EB10-ED94-444C-BC70-36FE325B60E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9768EB10-ED94-444C-BC70-36FE325B60E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C25D776-11E8-4F4D-92AF-6C92C8BB9AE2}.Code Analysis|Any CPU.ActiveCfg = Release|Any CPU
+		{6C25D776-11E8-4F4D-92AF-6C92C8BB9AE2}.Code Analysis|Any CPU.Build.0 = Release|Any CPU
+		{6C25D776-11E8-4F4D-92AF-6C92C8BB9AE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C25D776-11E8-4F4D-92AF-6C92C8BB9AE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C25D776-11E8-4F4D-92AF-6C92C8BB9AE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C25D776-11E8-4F4D-92AF-6C92C8BB9AE2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
