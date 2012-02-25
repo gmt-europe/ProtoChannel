@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace ProtoChannel.CodeGenerator
@@ -8,7 +9,7 @@ namespace ProtoChannel.CodeGenerator
     internal class JavascriptClientServiceGenerator : CodeGenerator
     {
         public JavascriptClientServiceGenerator()
-            : base(GetFilename(), 2)
+            : base(GetFilename(), 4)
         {
         }
 
@@ -24,7 +25,176 @@ namespace ProtoChannel.CodeGenerator
 
         public override void Generate()
         {
-            throw new NotImplementedException();
+            var types = new List<ProtoType>();
+
+            foreach (var type in Program.ResolvedArguments.SourceAssembly.GetTypes())
+            {
+                var attribute = GetProtoMessageAttribute(type);
+
+                if (attribute == null)
+                    continue;
+
+                types.Add(new ProtoType(type, ((dynamic)attribute).MessageId));
+            }
+
+            foreach (var type in types.OrderBy(p => p.MessageId))
+            {
+                WriteMessage(type);
+
+                WriteLine();
+            }
+
+            WriteChannel();
+        }
+
+        private void WriteMessage(ProtoType type)
+        {
+            WriteLine("{0} = Class.create(ProtoMessage, {{", type.Type.Name);
+            Indent();
+
+            WriteMessageConstructor(type);
+
+            WriteLine();
+
+            WriteMessageSerialize(type);
+
+            WriteLine();
+
+            WriteMessageDeserializer(type);
+
+            Unindent();
+            WriteLine("});");
+            WriteLine();
+            WriteLine("ProtoRegistry.registerType({0}, {1});", type.Type.Name, type.MessageId);
+        }
+
+        private void WriteMessageConstructor(ProtoType type)
+        {
+            WriteLine("initialize: function ($super, values) {");
+            Indent();
+
+            if (type.Members.Count > 0)
+            {
+                foreach (var member in type.Members)
+                {
+                    WriteLine("this.{0} = null;", EncodeName(member.Name));
+                }
+
+                WriteLine();
+            }
+
+            WriteLine("$super({0}, values);", type.MessageId);
+
+            Unindent();
+            WriteLine("},");
+        }
+
+        private void WriteMessageSerialize(ProtoType type)
+        {
+            WriteLine("serialize: function () {");
+            Indent();
+
+            WriteLine("var message = {};");
+            WriteLine();
+
+            if (type.Members.Count > 0)
+            {
+                foreach (var member in type.Members)
+                {
+                    WriteLine("message[{0}] = this.{1};", member.Tag, EncodeName(member.Name));
+                }
+
+                WriteLine();
+            }
+
+            WriteLine("return message;");
+
+            Unindent();
+            WriteLine("},");
+        }
+
+        private void WriteMessageDeserializer(ProtoType type)
+        {
+            WriteLine("deserialize: function (message) {");
+            Indent();
+
+            foreach (var member in type.Members)
+            {
+                WriteLine("this.{0} = message[{1}];", EncodeName(member.Name), member.Tag);
+            }
+
+            Unindent();
+            WriteLine("}");
+        }
+
+        private void WriteChannel()
+        {
+            WriteLine("{0} = Class.create(ProtoChannel, {{", Program.Arguments.JavascriptClientServiceName);
+            Indent();
+
+            var methods = Program.ResolvedArguments.ClientCallbackServiceType.GetMethods().Where(p => GetProtoMethodAttribute(p) != null).ToArray();
+
+            for (int i = 0; i < methods.Length; i++)
+            {
+                var attribute = GetProtoMethodAttribute(methods[i]);
+
+                if (((dynamic)attribute).IsOneWay)
+                    WriteLine("{0}: function (message) {{", EncodeName(methods[i].Name));
+                else
+                    WriteLine("{0}: function (message, callback) {{", EncodeName(methods[i].Name));
+                Indent();
+
+                WriteLine("if (!(message instanceof {0}))", methods[i].GetParameters()[0].ParameterType.Name);
+                Indent();
+                WriteLine("message = new {0}(message);", methods[i].GetParameters()[0].ParameterType.Name);
+                Unindent();
+
+                WriteLine();
+
+                if (((dynamic)attribute).IsOneWay)
+                    WriteLine("this.postMessage(message);");
+                else
+                    WriteLine("this.sendMessage(message, callback);");
+
+                Unindent();
+                WriteLine("}" + (i < methods.Length - 1 ? "," : ""));
+
+                if (i < methods.Length - 1)
+                    WriteLine();
+            }
+
+            Unindent();
+            WriteLine("});");
+        }
+
+        private string EncodeName(string name)
+        {
+            if (name.Length > 0)
+                return Char.ToLower(name[0]) + name.Substring(1);
+            else
+                return "";
+        }
+
+        private object GetProtoMessageAttribute(Type type)
+        {
+            foreach (var attribute in type.GetCustomAttributes(true))
+            {
+                if (attribute.GetType().FullName == "ProtoChannel.ProtoMessageAttribute")
+                    return attribute;
+            }
+
+            return null;
+        }
+
+        private object GetProtoMethodAttribute(MethodInfo method)
+        {
+            foreach (var attribute in method.GetCustomAttributes(true))
+            {
+                if (attribute.GetType().FullName == "ProtoChannel.ProtoMethodAttribute")
+                    return attribute;
+            }
+
+            return null;
         }
     }
 }

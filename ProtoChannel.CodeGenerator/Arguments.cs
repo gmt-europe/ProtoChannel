@@ -35,7 +35,7 @@ namespace ProtoChannel.CodeGenerator
 
         public Arguments()
         {
-            _arguments = new Argument[]
+            _arguments = new[]
             {
                 _sourceAssembly,
                 _namespace,

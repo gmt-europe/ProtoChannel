@@ -17,12 +17,12 @@
             pos = document.URL.indexOf('/', pos + 3);
             var host = document.URL.substr(0, pos);
 
-            channel = new ProtoChannel(host, 0, null, receiveCallback);
+            channel = new PingPongChannel(host, 0, null, receiveCallback);
         };
 
         function submitPing() {
-            channel.sendMessage(
-                new Ping({ payload: $('payload').value }),
+            channel.ping(
+                { payload: $('payload').value },
                 function (message) {
                     alert('Received response: ' + message.payload);
                 }
@@ -32,8 +32,8 @@
         };
 
         function submitOneWayPing() {
-            channel.postMessage(
-                new OneWayPing({ payload: $('oneWay').value })
+            channel.oneWayPing(
+                { payload: $('oneWay').value }
             );
 
             return false;
