@@ -77,7 +77,7 @@ namespace ProtoChannel.CodeGenerator
             {
                 foreach (var member in type.Members)
                 {
-                    WriteLine("this.{0} = null;", EncodeName(member.Name));
+                    WriteLine("this.{0} = {1};", EncodeName(member.Name), Encode(member.DefaultValue));
                 }
 
                 WriteLine();
@@ -101,7 +101,10 @@ namespace ProtoChannel.CodeGenerator
             {
                 foreach (var member in type.Members)
                 {
+                    WriteLine("if (this.{0} !== {1})", EncodeName(member.Name), Encode(member.DefaultValue));
+                    Indent();
                     WriteLine("message[{0}] = this.{1};", member.Tag, EncodeName(member.Name));
+                    Unindent();
                 }
 
                 WriteLine();
@@ -120,7 +123,10 @@ namespace ProtoChannel.CodeGenerator
 
             foreach (var member in type.Members)
             {
+                WriteLine("if (message[{0}] !== undefined)", member.Tag);
+                Indent();
                 WriteLine("this.{0} = message[{1}];", EncodeName(member.Name), member.Tag);
+                Unindent();
             }
 
             Unindent();
@@ -195,6 +201,41 @@ namespace ProtoChannel.CodeGenerator
             }
 
             return null;
+        }
+
+        private object Encode(object value)
+        {
+            if (value == null)
+                return "null";
+            else if (value is string)
+                return EncodeString((string)value);
+            else if (value is bool)
+                return (bool)value ? "true" : "false";
+            else
+                return value.ToString();
+        }
+
+        private object EncodeString(string value)
+        {
+            var sb = new StringBuilder();
+
+            sb.Append("'");
+
+            foreach (char c in value)
+            {
+                switch (c)
+                {
+                    case '\'': sb.Append("\\'"); break;
+                    case '\\': sb.Append("\\\\"); break;
+                    case '\n': sb.Append("\\n"); break;
+                    case '\r': sb.Append("\\r"); break;
+                    default: sb.Append(c); break;
+                }
+            }
+
+            sb.Append("'");
+
+            return sb.ToString();
         }
     }
 }

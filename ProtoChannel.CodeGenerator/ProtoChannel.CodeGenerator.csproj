@@ -65,6 +65,7 @@
     <Compile Include="ProtoMember.cs" />
     <Compile Include="ResolvedArguments.cs" />
     <Compile Include="ServerCallbackServiceGenerator.cs" />
+    <Compile Include="TypeUtil.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

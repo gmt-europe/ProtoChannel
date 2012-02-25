@@ -17,13 +17,15 @@ Ping = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        message[1] = this.payload;
+        if (this.payload !== null)
+            message[1] = this.payload;
 
         return message;
     },
 
     deserialize: function (message) {
-        this.payload = message[1];
+        if (message[1] !== undefined)
+            this.payload = message[1];
     }
 });
 
@@ -39,13 +41,15 @@ Pong = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        message[1] = this.payload;
+        if (this.payload !== null)
+            message[1] = this.payload;
 
         return message;
     },
 
     deserialize: function (message) {
-        this.payload = message[1];
+        if (message[1] !== undefined)
+            this.payload = message[1];
     }
 });
 
@@ -70,7 +74,7 @@ ProtoRegistry.registerType(StreamRequest, 3);
 
 StreamResponse = Class.create(ProtoMessage, {
     initialize: function ($super, values) {
-        this.streamId = null;
+        this.streamId = 0;
 
         $super(4, values);
     },
@@ -78,13 +82,15 @@ StreamResponse = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        message[1] = this.streamId;
+        if (this.streamId !== 0)
+            message[1] = this.streamId;
 
         return message;
     },
 
     deserialize: function (message) {
-        this.streamId = message[1];
+        if (message[1] !== undefined)
+            this.streamId = message[1];
     }
 });
 
@@ -100,13 +106,15 @@ OneWayPing = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        message[1] = this.payload;
+        if (this.payload !== null)
+            message[1] = this.payload;
 
         return message;
     },
 
     deserialize: function (message) {
-        this.payload = message[1];
+        if (message[1] !== undefined)
+            this.payload = message[1];
     }
 });
 

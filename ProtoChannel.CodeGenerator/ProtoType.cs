@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -37,6 +38,7 @@ namespace ProtoChannel.CodeGenerator
 
                 members.Add(new ProtoMember(
                     property.Name,
+                    GetDefaultValue(property, property.PropertyType),
                     ((dynamic)attribute).Tag,
                     ((dynamic)attribute).IsRequired
                 ));
@@ -51,6 +53,7 @@ namespace ProtoChannel.CodeGenerator
 
                 members.Add(new ProtoMember(
                     field.Name,
+                    GetDefaultValue(field, field.FieldType),
                     ((dynamic)attribute).Tag,
                     ((dynamic)attribute).IsRequired
                 ));
@@ -59,6 +62,26 @@ namespace ProtoChannel.CodeGenerator
             members.Sort((a, b) => a.Tag.CompareTo(b.Tag));
 
             Members = new ReadOnlyCollection<ProtoMember>(members);
+        }
+
+        private object GetDefaultValue(ICustomAttributeProvider member, Type type)
+        {
+            var attribute = GetDefaultValueAttribute(member);
+
+            if (attribute != null)
+                return attribute.Value;
+
+            return TypeUtil.GetDefaultValue(type);
+        }
+
+        private DefaultValueAttribute GetDefaultValueAttribute(ICustomAttributeProvider member)
+        {
+            var attributes = member.GetCustomAttributes(typeof(DefaultValueAttribute), true);
+
+            if (attributes.Length > 0)
+                return (DefaultValueAttribute)attributes[0];
+
+            return null;
         }
 
         private object GetProtoMemberAttribute(ICustomAttributeProvider member)
