@@ -30,12 +30,15 @@ DefaultValueTests = Class.create(ProtoMessage, {
     },
 
     deserialize: function (message) {
-        if (message[1] !== undefined)
+        if (message[1] !== undefined) {
             this.stringValue = message[1];
-        if (message[2] !== undefined)
+        }
+        if (message[2] !== undefined) {
             this.intValue = message[2];
-        if (message[3] !== undefined)
+        }
+        if (message[3] !== undefined) {
             this.doubleValue = message[3];
+        }
     }
 });
 
@@ -59,8 +62,9 @@ IntArrayTest = Class.create(ProtoMessage, {
     },
 
     deserialize: function (message) {
-        if (message[1] !== undefined)
+        if (message[1] !== undefined) {
             this.values = message[1];
+        }
     }
 });
 
@@ -83,8 +87,9 @@ NestedType = Class.create(ProtoType, {
     },
 
     deserialize: function (message) {
-        if (message[1] !== undefined)
+        if (message[1] !== undefined) {
             this.value = message[1];
+        }
     }
 });
 
@@ -99,7 +104,7 @@ NestedTypeArrayTest = Class.create(ProtoMessage, {
         var message = {};
 
         if (this.values !== null && this.values.length > 0) {
-            var items = []
+            var items = [];
             for (var i = 0; i < this.values.length; i++) {
                 items.push(this.values[i].serialize());
             }
@@ -110,8 +115,14 @@ NestedTypeArrayTest = Class.create(ProtoMessage, {
     },
 
     deserialize: function (message) {
-        if (message[1] !== undefined)
-            this.values = message[1];
+        if (message[1] !== undefined) {
+            this.values = [];
+            for (var i = 0; i < message[1].length; i++) {
+                var item = new NestedType();
+                item.deserialize(message[1][i]);
+                this.values.push(item);
+            }
+        }
     }
 });
 
@@ -134,8 +145,11 @@ NestedTypeTest = Class.create(ProtoMessage, {
     },
 
     deserialize: function (message) {
-        if (message[1] !== undefined)
-            this.value = message[1];
+        if (message[1] !== undefined) {
+            var item = new NestedType();
+            item.deserialize(message[1]);
+            this.value = item;
+        }
     }
 });
 
@@ -158,8 +172,9 @@ OneWayPing = Class.create(ProtoMessage, {
     },
 
     deserialize: function (message) {
-        if (message[1] !== undefined)
+        if (message[1] !== undefined) {
             this.payload = message[1];
+        }
     }
 });
 
@@ -182,8 +197,9 @@ Ping = Class.create(ProtoMessage, {
     },
 
     deserialize: function (message) {
-        if (message[1] !== undefined)
+        if (message[1] !== undefined) {
             this.payload = message[1];
+        }
     }
 });
 
@@ -206,8 +222,9 @@ Pong = Class.create(ProtoMessage, {
     },
 
     deserialize: function (message) {
-        if (message[1] !== undefined)
+        if (message[1] !== undefined) {
             this.payload = message[1];
+        }
     }
 });
 
@@ -247,8 +264,9 @@ StreamResponse = Class.create(ProtoMessage, {
     },
 
     deserialize: function (message) {
-        if (message[1] !== undefined)
+        if (message[1] !== undefined) {
             this.streamId = message[1];
+        }
     }
 });
 
@@ -272,8 +290,9 @@ StringArrayTest = Class.create(ProtoMessage, {
     },
 
     deserialize: function (message) {
-        if (message[1] !== undefined)
+        if (message[1] !== undefined) {
             this.values = message[1];
+        }
     }
 });
 

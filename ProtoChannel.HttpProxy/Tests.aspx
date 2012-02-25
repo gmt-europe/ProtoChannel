@@ -12,6 +12,7 @@
     <script src="Tests/Setup.js" type="text/javascript"></script>
     <script src="Tests/Messages.js" type="text/javascript"></script>
     <script src="Tests/Streams.js" type="text/javascript"></script>
+    <script src="Tests/Serialization.js" type="text/javascript"></script>
     <script type="text/javascript">
         (function () {
             var jasmineEnv = jasmine.getEnv();

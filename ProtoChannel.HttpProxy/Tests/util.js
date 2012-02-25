@@ -10,3 +10,24 @@ function createChannel(protocolVersion, connectCallback, receiveCallback) {
 
     return new ProtoChannel(host, protocolVersion, connectCallback, receiveCallback);
 };
+
+function sendRequest(request) {
+    var me = this;
+
+    this.channel = createChannel(0, function () {
+        this.sendMessage(
+                request,
+                function (message) { me.response = message; }
+            );
+    });
+}
+
+function waitForResponse() {
+    return this.response !== undefined;
+}
+
+function getResponse() {
+    this.channel.close();
+
+    return this.response;
+}

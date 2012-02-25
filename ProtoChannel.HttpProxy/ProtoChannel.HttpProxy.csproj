@@ -70,6 +70,7 @@
     <Content Include="service.js" />
     <Content Include="Tests.aspx" />
     <Content Include="Tests\Messages.js" />
+    <Content Include="Tests\Serialization.js" />
     <Content Include="Tests\Setup.js" />
     <Content Include="Tests\Streams.js" />
     <Content Include="Tests\util.js" />

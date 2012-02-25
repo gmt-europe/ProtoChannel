@@ -147,7 +147,7 @@ namespace ProtoChannel.CodeGenerator
                         }
                         else
                         {
-                            WriteLine("var items = []");
+                            WriteLine("var items = [];");
                             WriteLine("for (var i = 0; i < this.{0}.length; i++) {{", EncodeName(member.Name));
                             Indent();
 
@@ -197,10 +197,36 @@ namespace ProtoChannel.CodeGenerator
 
             foreach (var member in type.Members)
             {
-                WriteLine("if (message[{0}] !== undefined)", member.Tag);
+                WriteLine("if (message[{0}] !== undefined) {{", member.Tag);
                 Indent();
-                WriteLine("this.{0} = message[{1}];", EncodeName(member.Name), member.Tag);
+
+                    if (GetProtoContractType(member.Type) == null)
+                    {
+                        WriteLine("this.{0} = message[{1}];", EncodeName(member.Name), member.Tag);
+                    }
+                    else if (member.IsCollection)
+                    {
+                        WriteLine("this.{0} = [];", EncodeName(member.Name));
+
+                        WriteLine("for (var i = 0; i < message[{0}].length; i++) {{", member.Tag);
+                        Indent();
+
+                        WriteLine("var item = new {0}();", member.Type.Name);
+                        WriteLine("item.deserialize(message[{0}][i]);", member.Tag);
+                        WriteLine("this.{0}.push(item);", EncodeName(member.Name));
+
+                        Unindent();
+                        WriteLine("}");
+                    }
+                    else
+                    {
+                        WriteLine("var item = new {0}();", member.Type.Name);
+                        WriteLine("item.deserialize(message[{0}]);", member.Tag);
+                        WriteLine("this.{0} = item;", EncodeName(member.Name));
+                    }
+
                 Unindent();
+                WriteLine("}");
             }
 
             Unindent();

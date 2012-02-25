@@ -43,6 +43,13 @@ namespace ProtoChannel.Test.Service
     [ProtoMessage(6), ProtoContract]
     public class DefaultValueTests
     {
+        public DefaultValueTests()
+        {
+            StringValue = "Default value";
+            IntValue = 1;
+            DoubleValue = 1.0;
+        }
+
         [ProtoMember(1), DefaultValue("Default value")]
         public string StringValue { get; set; }
 

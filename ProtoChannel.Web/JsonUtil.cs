@@ -87,6 +87,13 @@ namespace ProtoChannel.Web
 
                     field.Setter(instance, targetCollection);
                 }
+                else if (field.ServiceType != null)
+                {
+                    if (!reader.Read())
+                        throw new HttpException("Invalid request");
+
+                    field.Setter(instance, DeserializeMessage(reader, field.ServiceType, true));
+                }
                 else
                 {
                     if (!reader.Read())
@@ -129,7 +136,7 @@ namespace ProtoChannel.Web
                         if (field.ServiceType != null)
                             SerializeMessage(writer, field.ServiceType, item);
                         else
-                            writer.WriteValue(value);
+                            writer.WriteValue(item);
                     }
 
                     writer.WriteEndArray();
