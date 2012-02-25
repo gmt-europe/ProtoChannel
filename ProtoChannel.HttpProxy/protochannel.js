@@ -119,17 +119,24 @@ ProtoChannel = Class.create({
     },
 
     _processOneWayMessage: function (message, deserialized) {
-        if (!Object.isFunction(this._receiveCallback))
+        if (this._receiveCallback instanceof ProtoCallbackChannel)
+            this._receiveCallback._receiveCallback(deserialized, false);
+        else if (Object.isFunction(this._receiveCallback))
+            this._receiveCallback(deserialized, false);
+        else
             throw 'Message received but callback not provided';
 
-        this._receiveCallback(deserialized, false);
     },
 
     _processRequestMessage: function (message, deserialized) {
-        if (!Object.isFunction(this._receiveCallback))
-            throw 'Message received but callback not provided';
+        var response;
 
-        var response = this._receiveCallback(deserialized, true);
+        if (this._receiveCallback instanceof ProtoCallbackChannel)
+            response = this._receiveCallback._receiveCallback(deserialized, true);
+        else if (Object.isFunction(this._receiveCallback))
+            response = this._receiveCallback(deserialized, true);
+        else
+            throw 'Message received but callback not provided';
 
         this._sendMessage(2 /* response */, response, message.a);
     },
@@ -318,6 +325,21 @@ ProtoChannel = Class.create({
     _verifyNotClosed: function () {
         if (this._closed)
             throw 'Channel has been closed';
+    }
+});
+
+ProtoCallbackChannel = Class.create({
+    initialize: function (dispatchMap) {
+        this._dispatchMap = dispatchMap;
+    },
+
+    _receiveCallback: function (message, expectResponse) {
+        for (var method in this._dispatchMap) {
+            if (message instanceof this._dispatchMap[method])
+                return this[method](message, expectResponse);
+        }
+
+        throw 'No dispatcher found';
     }
 });
 

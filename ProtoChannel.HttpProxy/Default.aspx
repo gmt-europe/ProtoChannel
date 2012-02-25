@@ -6,18 +6,25 @@
     <script src="protochannel.js" type="text/javascript"></script>
     <script src="service.js" type="text/javascript"></script>
     <script type="text/javascript">
-        var channel;
+        var channel, callback;
 
-        function receiveCallback(message, expectResponse) {
-            alert('Received callback response: ' + message.payload);
-        };
+        CallbackChannel = Class.create(ServiceCallbackChannel, {
+            oneWayPing: function (message) {
+                alert('Received one way ping callback response: ' + message.payload);
+            },
+
+            ping: function (message) {
+                alert('Received ping callback response: ' + message.payload);
+            }
+        });
 
         window.onload = function () {
             var pos = document.URL.indexOf('://');
             pos = document.URL.indexOf('/', pos + 3);
             var host = document.URL.substr(0, pos);
 
-            channel = new ServiceChannel(host, 0, null, receiveCallback);
+            callback = new CallbackChannel();
+            channel = new ServiceChannel(host, 0, null, callback);
         };
 
         function submitPing() {

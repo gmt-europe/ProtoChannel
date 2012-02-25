@@ -19,6 +19,8 @@ namespace ProtoChannel.CodeGenerator
                 throw new CommandLineArgumentException("Server service type is required when generating the Javascript client service");
             if (Program.Arguments.JavascriptClientServiceName == null)
                 throw new CommandLineArgumentException("Javascript service class name is required when generating the Javascript client service");
+            if (Program.Arguments.JavascriptCallbackServiceName == null)
+                throw new CommandLineArgumentException("Javascript callback class name is required when generating the Javascript client service");
 
             return Program.Arguments.JavascriptClientServiceTarget;
         }
@@ -45,6 +47,10 @@ namespace ProtoChannel.CodeGenerator
             }
 
             WriteChannel();
+
+            WriteLine();
+
+            WriteCallbackChannel();
         }
 
         private void WriteType(ProtoType type)
@@ -281,6 +287,43 @@ namespace ProtoChannel.CodeGenerator
 
                 if (i < methods.Length - 1)
                     WriteLine();
+            }
+
+            Unindent();
+            WriteLine("});");
+        }
+
+        private void WriteCallbackChannel()
+        {
+            WriteLine("{0} = Class.create(ProtoCallbackChannel, {{", Program.Arguments.JavascriptCallbackServiceName);
+            Indent();
+
+            var methods = Program.ResolvedArguments.ClientCallbackServiceType.GetMethods().Where(p => GetProtoMethodAttribute(p) != null).ToArray();
+
+            WriteLine("initialize: function ($super) {");
+            Indent();
+            WriteLine("$super({");
+
+            Indent();
+
+            for (int i = 0; i < methods.Length; i++)
+            {
+                WriteLine("{0}: {1}{2}", EncodeName(methods[i].Name), methods[i].GetParameters()[0].ParameterType.Name, i == methods.Length - 1 ? "" : ",");
+            }
+
+            Unindent();
+            WriteLine("});");
+            Unindent();
+            WriteLine("},");
+
+            for (int i = 0; i < methods.Length; i++)
+            {
+                WriteLine();
+                WriteLine("{0}: function (message, expectResponse) {{", EncodeName(methods[i].Name));
+                Indent();
+                WriteLine("throw 'Not implemented';");
+                Unindent();
+                WriteLine("}" + (i == methods.Length - 1 ? "" : ","));
             }
 
             Unindent();

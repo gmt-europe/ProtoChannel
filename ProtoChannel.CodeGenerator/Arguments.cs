@@ -18,6 +18,7 @@ namespace ProtoChannel.CodeGenerator
         private readonly Argument<string> _serverCallbackServiceName = new Argument<string>(false, "-scn", "Server callback service class name");
         private readonly Argument<string> _javascriptClientServiceTarget = new Argument<string>(false, "-jcs", "Javascript client service target file");
         private readonly Argument<string> _javascriptClientServiceName = new Argument<string>(false, "-jcsn", "Javascript client service class name");
+        private readonly Argument<string> _javascriptCallbackServiceName = new Argument<string>(false, "-jccn", "Javascript client callback class name");
 
         private readonly Argument[] _arguments;
 
@@ -32,6 +33,7 @@ namespace ProtoChannel.CodeGenerator
         public string ServerCallbackServiceName { get { return _serverCallbackServiceName.Value; } }
         public string JavascriptClientServiceTarget { get { return _javascriptClientServiceTarget.Value; } }
         public string JavascriptClientServiceName { get { return _javascriptClientServiceName.Value; } }
+        public string JavascriptCallbackServiceName { get { return _javascriptCallbackServiceName.Value; } }
 
         public Arguments()
         {
@@ -47,7 +49,8 @@ namespace ProtoChannel.CodeGenerator
                 _serverCallbackServiceTarget,
                 _serverCallbackServiceName,
                 _javascriptClientServiceTarget,
-                _javascriptClientServiceName
+                _javascriptClientServiceName,
+                _javascriptCallbackServiceName
             };
         }
 

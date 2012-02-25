@@ -379,3 +379,20 @@ ServiceChannel = Class.create(ProtoChannel, {
         this.sendMessage(message, callback);
     }
 });
+
+ServiceCallbackChannel = Class.create(ProtoCallbackChannel, {
+    initialize: function ($super) {
+        $super({
+            ping: Ping,
+            oneWayPing: OneWayPing
+        });
+    },
+
+    ping: function (message, expectResponse) {
+        throw 'Not implemented';
+    },
+
+    oneWayPing: function (message, expectResponse) {
+        throw 'Not implemented';
+    }
+});
