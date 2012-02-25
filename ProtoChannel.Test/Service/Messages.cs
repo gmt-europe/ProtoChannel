@@ -4,24 +4,36 @@ using System.Linq;
 using System.Text;
 using ProtoBuf;
 
-namespace ProtoChannel.Test.Services.PingPong
+namespace ProtoChannel.Test.Service
 {
     [ProtoMessage(1), ProtoContract]
-    internal class Ping
+    public class Ping
     {
         [ProtoMember(1, IsRequired = true)]
         public string Payload { get; set; }
     }
 
     [ProtoMessage(2), ProtoContract]
-    internal class Pong
+    public class Pong
     {
         [ProtoMember(1, IsRequired = true)]
         public string Payload { get; set; }
     }
 
+    [ProtoMessage(3), ProtoContract]
+    public class StreamRequest
+    {
+    }
+
+    [ProtoMessage(4), ProtoContract]
+    public class StreamResponse
+    {
+        [ProtoMember(1, IsRequired = true)]
+        public uint StreamId { get; set; }
+    }
+
     [ProtoMessage(5), ProtoContract]
-    internal class OneWayPing
+    public class OneWayPing
     {
         [ProtoMember(1, IsRequired = true)]
         public string Payload { get; set; }

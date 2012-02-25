@@ -4,7 +4,7 @@
     <title>ProtoChannel HTTP proxy</title>
     <script src="prototype.js" type="text/javascript"></script>
     <script src="protochannel.js" type="text/javascript"></script>
-    <script src="pingpong.js" type="text/javascript"></script>
+    <script src="service.js" type="text/javascript"></script>
     <script type="text/javascript">
         var channel;
 
@@ -17,7 +17,7 @@
             pos = document.URL.indexOf('/', pos + 3);
             var host = document.URL.substr(0, pos);
 
-            channel = new PingPongChannel(host, 0, null, receiveCallback);
+            channel = new ServiceChannel(host, 0, null, receiveCallback);
         };
 
         function submitPing() {

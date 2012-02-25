@@ -64,14 +64,11 @@
     <Compile Include="FixtureBase.cs" />
     <Compile Include="MessageExchange\MessageExchangeFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\PingPong\ClientCallbackService.cs" />
-    <Compile Include="Services\PingPong\ClientService.cs" />
-    <Compile Include="Services\PingPong\Messages.cs" />
-    <Compile Include="Services\PingPong\ServerCallbackService.cs" />
-    <Compile Include="Services\PingPong\ServerService.cs" />
-    <Compile Include="Services\Streaming\ClientService.cs" />
-    <Compile Include="Services\Streaming\Messages.cs" />
-    <Compile Include="Services\Streaming\ServerService.cs" />
+    <Compile Include="Service\ClientCallbackService.cs" />
+    <Compile Include="Service\ClientService.cs" />
+    <Compile Include="Service\Messages.cs" />
+    <Compile Include="Service\ServerCallbackService.cs" />
+    <Compile Include="Service\ServerService.cs" />
     <Compile Include="Streaming\StreamingFixture.cs" />
     <Compile Include="Util\RingMemoryStream.cs" />
   </ItemGroup>

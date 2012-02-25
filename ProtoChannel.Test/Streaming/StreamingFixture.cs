@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using NUnit.Framework;
-using ProtoChannel.Test.Services.Streaming;
+using ProtoChannel.Test.Service;
 
 namespace ProtoChannel.Test.Streaming
 {
@@ -18,7 +18,7 @@ namespace ProtoChannel.Test.Streaming
             using (var host = new ProtoHost<ServerService>(new IPEndPoint(IPAddress.Loopback, 0)))
             using (var client = new ClientService(host.LocalEndPoint))
             {
-                var response = client.RequestStream(new StreamRequest());
+                var response = client.StreamRequest(new StreamRequest());
 
                 var stream = client.EndGetStream(client.BeginGetStream((int)response.StreamId, null, null));
 

@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using NUnit.Framework;
-using ProtoChannel.Test.Services.PingPong;
+using ProtoChannel.Test.Service;
 
 namespace ProtoChannel.Test.MessageExchange
 {

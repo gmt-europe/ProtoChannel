@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ProtoChannel.Test.Services.PingPong
+namespace ProtoChannel.Test.Service
 {
     [global::System.CodeDom.Compiler.GeneratedCode("ProtoChannel.CodeGenerator", "1.0.0.0")]
     internal partial class ClientService : global::ProtoChannel.ProtoClient
@@ -49,27 +49,51 @@ namespace ProtoChannel.Test.Services.PingPong
         }
 
         [global::System.Diagnostics.DebuggerStepThrough]
-        public global::ProtoChannel.Test.Services.PingPong.Pong Ping(global::ProtoChannel.Test.Services.PingPong.Ping message)
+        public global::ProtoChannel.Test.Service.Pong Ping(global::ProtoChannel.Test.Service.Ping message)
         {
             return EndPing(BeginPing(message, null, null));
         }
 
         [global::System.Diagnostics.DebuggerStepThrough]
-        public global::System.IAsyncResult BeginPing(global::ProtoChannel.Test.Services.PingPong.Ping message, global::System.AsyncCallback callback, object asyncState)
+        public global::System.IAsyncResult BeginPing(global::ProtoChannel.Test.Service.Ping message, global::System.AsyncCallback callback, object asyncState)
         {
-            return BeginSendMessage(message, typeof(global::ProtoChannel.Test.Services.PingPong.Pong), callback, asyncState);
+            return BeginSendMessage(message, typeof(global::ProtoChannel.Test.Service.Pong), callback, asyncState);
         }
 
         [global::System.Diagnostics.DebuggerStepThrough]
-        public global::ProtoChannel.Test.Services.PingPong.Pong EndPing(global::System.IAsyncResult asyncResult)
+        public global::ProtoChannel.Test.Service.Pong EndPing(global::System.IAsyncResult asyncResult)
         {
-            return (global::ProtoChannel.Test.Services.PingPong.Pong)EndSendMessage(asyncResult);
+            return (global::ProtoChannel.Test.Service.Pong)EndSendMessage(asyncResult);
         }
 
         [global::System.Diagnostics.DebuggerStepThrough]
-        public void OneWayPing(global::ProtoChannel.Test.Services.PingPong.OneWayPing message)
+        public void OneWayPing(global::ProtoChannel.Test.Service.OneWayPing message)
         {
             PostMessage(message);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public void StreamUpload(global::ProtoChannel.Test.Service.StreamResponse message)
+        {
+            PostMessage(message);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.StreamResponse StreamRequest(global::ProtoChannel.Test.Service.StreamRequest message)
+        {
+            return EndStreamRequest(BeginStreamRequest(message, null, null));
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::System.IAsyncResult BeginStreamRequest(global::ProtoChannel.Test.Service.StreamRequest message, global::System.AsyncCallback callback, object asyncState)
+        {
+            return BeginSendMessage(message, typeof(global::ProtoChannel.Test.Service.StreamResponse), callback, asyncState);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.StreamResponse EndStreamRequest(global::System.IAsyncResult asyncResult)
+        {
+            return (global::ProtoChannel.Test.Service.StreamResponse)EndSendMessage(asyncResult);
         }
     }
 }

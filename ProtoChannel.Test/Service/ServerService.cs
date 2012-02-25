@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace ProtoChannel.HttpProxy.Service.PingPong
+namespace ProtoChannel.Test.Service
 {
     [ProtoCallbackContract(typeof(ServerCallbackService))]
     public class ServerService

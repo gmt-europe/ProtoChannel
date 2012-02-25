@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using NUnit.Framework;
+using ProtoChannel.Test.Service;
 
 namespace ProtoChannel.Test.ChannelSetup
 {
@@ -55,7 +56,7 @@ namespace ProtoChannel.Test.ChannelSetup
             public Func<int, int, int> ProtocolChooser { get; set; }
         }
 
-        private class ClientService : Services.PingPong.ClientService
+        private class ClientService : Service.ClientService
         {
             public ClientService(IPEndPoint remoteEndPoint, ClientConfiguration configuration)
                 : base(remoteEndPoint, configuration)
@@ -76,7 +77,7 @@ namespace ProtoChannel.Test.ChannelSetup
             }
         }
 
-        private class ProtoHost : ProtoChannel.ProtoHost<Services.PingPong.ServerService>
+        private class ProtoHost : ProtoChannel.ProtoHost<ServerService>
         {
             private readonly Action<int> _chosenProtocol;
 
@@ -86,7 +87,7 @@ namespace ProtoChannel.Test.ChannelSetup
                 _chosenProtocol = chosenProtocol;
             }
 
-            protected override Services.PingPong.ServerService CreateService(int protocolNumber)
+            protected override ServerService CreateService(int protocolNumber)
             {
                 if (_chosenProtocol != null)
                     _chosenProtocol(protocolNumber);

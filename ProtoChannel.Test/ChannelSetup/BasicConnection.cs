@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using NUnit.Framework;
-using ProtoChannel.Test.Services.PingPong;
+using ProtoChannel.Test.Service;
 
 namespace ProtoChannel.Test.ChannelSetup
 {

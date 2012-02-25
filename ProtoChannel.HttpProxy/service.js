@@ -120,7 +120,7 @@ OneWayPing = Class.create(ProtoMessage, {
 
 ProtoRegistry.registerType(OneWayPing, 5);
 
-PingPongChannel = Class.create(ProtoChannel, {
+ServiceChannel = Class.create(ProtoChannel, {
     ping: function (message, callback) {
         if (!(message instanceof Ping))
             message = new Ping(message);

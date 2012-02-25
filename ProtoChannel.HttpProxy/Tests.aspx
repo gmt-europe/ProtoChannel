@@ -7,7 +7,7 @@
     <script src="Jasmine/jasmine-html.js" type="text/javascript"></script>
     <script src="prototype.js" type="text/javascript"></script>
     <script src="protochannel.js" type="text/javascript"></script>
-    <script src="pingpong.js" type="text/javascript"></script>
+    <script src="service.js" type="text/javascript"></script>
     <script src="Tests/util.js" type="text/javascript"></script>
     <script src="Tests/Setup.js" type="text/javascript"></script>
     <script src="Tests/Messages.js" type="text/javascript"></script>

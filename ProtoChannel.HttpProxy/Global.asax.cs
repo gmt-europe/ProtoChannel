@@ -6,7 +6,7 @@ using System.Web;
 using System.Web.Configuration;
 using System.Web.Security;
 using System.Web.SessionState;
-using ProtoChannel.HttpProxy.Service.PingPong;
+using ProtoChannel.Test.Service;
 using ProtoChannel.Web;
 
 namespace ProtoChannel.HttpProxy
