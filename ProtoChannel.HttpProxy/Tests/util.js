@@ -8,7 +8,7 @@ function createChannel(protocolVersion, connectCallback, receiveCallback) {
     if (protocolVersion === undefined)
         protocolVersion = 0;
 
-    return new ProtoChannel(host, protocolVersion, connectCallback, receiveCallback);
+    return new ServiceChannel(host, protocolVersion, connectCallback, receiveCallback);
 };
 
 function sendRequest(request) {

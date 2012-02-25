@@ -4,8 +4,8 @@
             var me = this;
 
             this.channel = createChannel(0, function () {
-                this.sendMessage(
-                    new Ping({ payload: 'Payload' }),
+                this.ping(
+                    { payload: 'Payload' },
                     function (message) { me.response = message; }
                 );
             });
@@ -28,9 +28,7 @@
             this.channel = createChannel(
                 0,
                 function () {
-                    this.postMessage(
-                        new OneWayPing({ payload: 'Payload' })
-                    );
+                    this.oneWayPing({ payload: 'Payload' });
                 },
                 function (message) { me.response = message; }
             );

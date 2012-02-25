@@ -25,7 +25,7 @@
                             'Content-Length': body.length
                         },
                         onSuccess: function () {
-                            me.postMessage(new StreamResponse({ streamId: aid }));
+                            me.streamUpload({ streamId: aid });
                         }
                     });
                 },
@@ -50,8 +50,8 @@
             this.channel = createChannel(
                 0,
                 function () {
-                    this.sendMessage(
-                        new StreamRequest(),
+                    this.streamRequest(
+                        {},
                         function (message) {
                             new Ajax.Request(this.getStreamUrl(message.streamId), {
                                 method: 'get',
