@@ -58,7 +58,7 @@ namespace ProtoChannel.CodeGenerator
         {
             bool hadOne = false;
 
-            foreach (var method in Program.ResolvedArguments.ServerServiceType.GetMethods())
+            foreach (var method in Program.ResolvedArguments.ClientCallbackServiceType.GetMethods())
             {
                 var attribute = GetProtoMethodAttribute(method);
 

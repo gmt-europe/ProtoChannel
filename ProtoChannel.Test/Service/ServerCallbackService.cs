@@ -35,29 +35,5 @@ namespace ProtoChannel.Test.Service
         {
             PostMessage(message);
         }
-
-        [global::System.Diagnostics.DebuggerStepThrough]
-        public void StreamUpload(global::ProtoChannel.Test.Service.StreamResponse message)
-        {
-            PostMessage(message);
-        }
-
-        [global::System.Diagnostics.DebuggerStepThrough]
-        public global::ProtoChannel.Test.Service.StreamResponse StreamRequest(global::ProtoChannel.Test.Service.StreamRequest message)
-        {
-            return EndStreamRequest(BeginStreamRequest(message, null, null));
-        }
-
-        [global::System.Diagnostics.DebuggerStepThrough]
-        public global::System.IAsyncResult BeginStreamRequest(global::ProtoChannel.Test.Service.StreamRequest message, global::System.AsyncCallback callback, object asyncState)
-        {
-            return BeginSendMessage(message, typeof(global::ProtoChannel.Test.Service.StreamResponse), callback, asyncState);
-        }
-
-        [global::System.Diagnostics.DebuggerStepThrough]
-        public global::ProtoChannel.Test.Service.StreamResponse EndStreamRequest(global::System.IAsyncResult asyncResult)
-        {
-            return (global::ProtoChannel.Test.Service.StreamResponse)EndSendMessage(asyncResult);
-        }
     }
 }
