@@ -19,12 +19,15 @@ DefaultValueTests = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        if (this.stringValue !== 'Default value')
+        if (this.stringValue !== 'Default value') {
             message[1] = this.stringValue;
-        if (this.intValue !== 1)
+        }
+        if (this.intValue !== 1) {
             message[2] = this.intValue;
-        if (this.doubleValue !== 1.0)
+        }
+        if (this.doubleValue !== 1.0) {
             message[3] = this.doubleValue;
+        }
 
         return message;
     },
@@ -80,8 +83,9 @@ NestedType = Class.create(ProtoType, {
     serialize: function () {
         var message = {};
 
-        if (this.value !== null)
+        if (this.value !== null) {
             message[1] = this.value;
+        }
 
         return message;
     },
@@ -142,12 +146,13 @@ NestedTypeTest = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        if (this.value !== null)
+        if (this.value !== null) {
             var item = this.value;
             if (!(item instanceof NestedType)) {
                 item = new NestedType(item);
             }
             message[1] = item.serialize();
+        }
 
         return message;
     },
@@ -173,8 +178,9 @@ OneWayPing = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        if (this.payload !== null)
+        if (this.payload !== null) {
             message[1] = this.payload;
+        }
 
         return message;
     },
@@ -198,8 +204,9 @@ Ping = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        if (this.payload !== null)
+        if (this.payload !== null) {
             message[1] = this.payload;
+        }
 
         return message;
     },
@@ -223,8 +230,9 @@ Pong = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        if (this.payload !== null)
+        if (this.payload !== null) {
             message[1] = this.payload;
+        }
 
         return message;
     },
@@ -265,8 +273,9 @@ StreamResponse = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        if (this.streamId !== 0)
+        if (this.streamId !== 0) {
             message[1] = this.streamId;
+        }
 
         return message;
     },

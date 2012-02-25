@@ -170,7 +170,7 @@ namespace ProtoChannel.CodeGenerator
                     }
                     else
                     {
-                        WriteLine("if (this.{0} !== {1})", EncodeName(member.Name), Encode(member.DefaultValue));
+                        WriteLine("if (this.{0} !== {1}) {{", EncodeName(member.Name), Encode(member.DefaultValue));
 
                         Indent();
 
@@ -191,6 +191,7 @@ namespace ProtoChannel.CodeGenerator
                         }
 
                         Unindent();
+                        WriteLine("}");
                     }
                 }
 
