@@ -52,4 +52,39 @@ namespace ProtoChannel.Test.Service
         [ProtoMember(3), DefaultValue(1.0)]
         public double DoubleValue { get; set; }
     }
+
+    [ProtoMessage(7), ProtoContract]
+    public class StringArrayTest
+    {
+        [ProtoMember(1)]
+        public string[] Values { get; set; }
+    }
+
+    [ProtoMessage(8), ProtoContract]
+    public class IntArrayTest
+    {
+        [ProtoMember(1)]
+        public int[] Values { get; set; }
+    }
+
+    [ProtoMessage(9), ProtoContract]
+    public class NestedTypeTest
+    {
+        [ProtoMember(1)]
+        public NestedType Value { get; set; }
+    }
+
+    [ProtoMessage(10), ProtoContract]
+    public class NestedTypeArrayTest
+    {
+        [ProtoMember(1)]
+        public NestedType[] Values { get; set; }
+    }
+
+    [ProtoContract]
+    public class NestedType
+    {
+        [ProtoMember(1)]
+        public string Value { get; set; }
+    }
 }

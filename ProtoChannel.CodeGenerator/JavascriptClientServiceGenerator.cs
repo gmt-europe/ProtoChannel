@@ -29,17 +29,17 @@ namespace ProtoChannel.CodeGenerator
 
             foreach (var type in Program.ResolvedArguments.SourceAssembly.GetTypes())
             {
-                var attribute = GetProtoMessageAttribute(type);
-
-                if (attribute == null)
+                if (GetProtoContractType(type) == null)
                     continue;
 
-                types.Add(new ProtoType(type, ((dynamic)attribute).MessageId));
+                var attribute = GetProtoMessageAttribute(type);
+
+                types.Add(new ProtoType(type, attribute == null ? null : ((dynamic)attribute).MessageId));
             }
 
-            foreach (var type in types.OrderBy(p => p.MessageId))
+            foreach (var type in types.OrderBy(p => p.Type.FullName))
             {
-                WriteMessage(type);
+                WriteType(type);
 
                 WriteLine();
             }
@@ -47,12 +47,18 @@ namespace ProtoChannel.CodeGenerator
             WriteChannel();
         }
 
-        private void WriteMessage(ProtoType type)
+        private void WriteType(ProtoType type)
         {
-            WriteLine("{0} = Class.create(ProtoMessage, {{", type.Type.Name);
+            if (type.MessageId.HasValue)
+                WriteLine("{0} = Class.create(ProtoMessage, {{", type.Type.Name);
+            else
+                WriteLine("{0} = Class.create(ProtoType, {{", type.Type.Name);
             Indent();
 
-            WriteMessageConstructor(type);
+            if (type.MessageId.HasValue)
+                WriteMessageConstructor(type);
+            else
+                WriteTypeConstructor(type);
 
             WriteLine();
 
@@ -64,8 +70,12 @@ namespace ProtoChannel.CodeGenerator
 
             Unindent();
             WriteLine("});");
-            WriteLine();
-            WriteLine("ProtoRegistry.registerType({0}, {1});", type.Type.Name, type.MessageId);
+
+            if (type.MessageId.HasValue)
+            {
+                WriteLine();
+                WriteLine("ProtoRegistry.registerType({0}, {1});", type.Type.Name, type.MessageId);
+            }
         }
 
         private void WriteMessageConstructor(ProtoType type)
@@ -84,6 +94,27 @@ namespace ProtoChannel.CodeGenerator
             }
 
             WriteLine("$super({0}, values);", type.MessageId);
+
+            Unindent();
+            WriteLine("},");
+        }
+
+        private void WriteTypeConstructor(ProtoType type)
+        {
+            WriteLine("initialize: function ($super, values) {");
+            Indent();
+
+            if (type.Members.Count > 0)
+            {
+                foreach (var member in type.Members)
+                {
+                    WriteLine("this.{0} = {1};", EncodeName(member.Name), Encode(member.DefaultValue));
+                }
+
+                WriteLine();
+            }
+
+            WriteLine("$super(values);");
 
             Unindent();
             WriteLine("},");
@@ -181,6 +212,17 @@ namespace ProtoChannel.CodeGenerator
                 return "";
         }
 
+        private object GetProtoContractType(Type type)
+        {
+            foreach (var attribute in type.GetCustomAttributes(true))
+            {
+                if (attribute.GetType().FullName == "ProtoBuf.ProtoContractAttribute")
+                    return attribute;
+            }
+
+            return null;
+        }
+
         private object GetProtoMessageAttribute(Type type)
         {
             foreach (var attribute in type.GetCustomAttributes(true))
@@ -206,13 +248,29 @@ namespace ProtoChannel.CodeGenerator
         private object Encode(object value)
         {
             if (value == null)
+            {
                 return "null";
+            }
             else if (value is string)
+            {
                 return EncodeString((string)value);
+            }
             else if (value is bool)
+            {
                 return (bool)value ? "true" : "false";
+            }
             else
-                return value.ToString();
+            {
+                string stringValue = value.ToString();
+
+                if (
+                    (value is float || value is decimal || value is double) &&
+                    !stringValue.Contains(".")
+                )
+                    stringValue += ".0";
+
+                return stringValue;
+            }
         }
 
         private object EncodeString(string value)

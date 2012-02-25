@@ -342,16 +342,10 @@ ProtoRegistry = {
     }
 };
 
-ProtoMessage = Class.create({
-    initialize: function (id, values) {
-        this._id = id;
-
+ProtoType = Class.create({
+    initialize: function (values) {
         if (values !== undefined)
             Object.extend(this, values);
-    },
-
-    getId: function () {
-        return this._id;
     },
 
     serialize: function () {
@@ -360,5 +354,17 @@ ProtoMessage = Class.create({
 
     deserialize: function () {
         throw 'Deserialize not implemented';
+    }
+});
+
+ProtoMessage = Class.create(ProtoType, {
+    initialize: function ($super, id, values) {
+        this._id = id;
+
+        $super(values);
+    },
+
+    getId: function () {
+        return this._id;
     }
 });

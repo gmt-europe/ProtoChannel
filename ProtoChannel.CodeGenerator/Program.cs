@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace ProtoChannel.CodeGenerator
 {
@@ -12,6 +14,10 @@ namespace ProtoChannel.CodeGenerator
 
         static void Main(string[] args)
         {
+            // Reset the current culture for ToString.
+
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
             try
             {
                 Arguments = new Arguments();

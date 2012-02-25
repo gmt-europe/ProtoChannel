@@ -113,5 +113,77 @@ namespace ProtoChannel.Test.Service
         {
             return (global::ProtoChannel.Test.Service.DefaultValueTests)EndSendMessage(asyncResult);
         }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.StringArrayTest StringArrayTest(global::ProtoChannel.Test.Service.StringArrayTest message)
+        {
+            return EndStringArrayTest(BeginStringArrayTest(message, null, null));
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::System.IAsyncResult BeginStringArrayTest(global::ProtoChannel.Test.Service.StringArrayTest message, global::System.AsyncCallback callback, object asyncState)
+        {
+            return BeginSendMessage(message, typeof(global::ProtoChannel.Test.Service.StringArrayTest), callback, asyncState);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.StringArrayTest EndStringArrayTest(global::System.IAsyncResult asyncResult)
+        {
+            return (global::ProtoChannel.Test.Service.StringArrayTest)EndSendMessage(asyncResult);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.IntArrayTest IntArrayTest(global::ProtoChannel.Test.Service.IntArrayTest message)
+        {
+            return EndIntArrayTest(BeginIntArrayTest(message, null, null));
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::System.IAsyncResult BeginIntArrayTest(global::ProtoChannel.Test.Service.IntArrayTest message, global::System.AsyncCallback callback, object asyncState)
+        {
+            return BeginSendMessage(message, typeof(global::ProtoChannel.Test.Service.IntArrayTest), callback, asyncState);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.IntArrayTest EndIntArrayTest(global::System.IAsyncResult asyncResult)
+        {
+            return (global::ProtoChannel.Test.Service.IntArrayTest)EndSendMessage(asyncResult);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.NestedTypeTest NestedTypeTest(global::ProtoChannel.Test.Service.NestedTypeTest message)
+        {
+            return EndNestedTypeTest(BeginNestedTypeTest(message, null, null));
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::System.IAsyncResult BeginNestedTypeTest(global::ProtoChannel.Test.Service.NestedTypeTest message, global::System.AsyncCallback callback, object asyncState)
+        {
+            return BeginSendMessage(message, typeof(global::ProtoChannel.Test.Service.NestedTypeTest), callback, asyncState);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.NestedTypeTest EndNestedTypeTest(global::System.IAsyncResult asyncResult)
+        {
+            return (global::ProtoChannel.Test.Service.NestedTypeTest)EndSendMessage(asyncResult);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.NestedTypeArrayTest NestedTypeArrayTest(global::ProtoChannel.Test.Service.NestedTypeArrayTest message)
+        {
+            return EndNestedTypeArrayTest(BeginNestedTypeArrayTest(message, null, null));
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::System.IAsyncResult BeginNestedTypeArrayTest(global::ProtoChannel.Test.Service.NestedTypeArrayTest message, global::System.AsyncCallback callback, object asyncState)
+        {
+            return BeginSendMessage(message, typeof(global::ProtoChannel.Test.Service.NestedTypeArrayTest), callback, asyncState);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.NestedTypeArrayTest EndNestedTypeArrayTest(global::System.IAsyncResult asyncResult)
+        {
+            return (global::ProtoChannel.Test.Service.NestedTypeArrayTest)EndSendMessage(asyncResult);
+        }
     }
 }

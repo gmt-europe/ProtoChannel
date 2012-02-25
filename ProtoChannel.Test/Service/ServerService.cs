@@ -63,6 +63,30 @@ namespace ProtoChannel.Test.Service
             return message;
         }
 
+        [ProtoMethod]
+        public StringArrayTest StringArrayTest(StringArrayTest message)
+        {
+            return message;
+        }
+
+        [ProtoMethod]
+        public IntArrayTest IntArrayTest(IntArrayTest message)
+        {
+            return message;
+        }
+
+        [ProtoMethod]
+        public NestedTypeTest NestedTypeTest(NestedTypeTest message)
+        {
+            return message;
+        }
+
+        [ProtoMethod]
+        public NestedTypeArrayTest NestedTypeArrayTest(NestedTypeArrayTest message)
+        {
+            return message;
+        }
+
         private class PendingGetStream
         {
             private readonly ServerCallbackService _callbackService;
