@@ -328,5 +328,54 @@ ServiceChannel = Class.create(ProtoChannel, {
             message = new OneWayPing(message);
 
         this.postMessage(message);
+    },
+
+    streamUpload: function (message) {
+        if (!(message instanceof StreamResponse))
+            message = new StreamResponse(message);
+
+        this.postMessage(message);
+    },
+
+    streamRequest: function (message, callback) {
+        if (!(message instanceof StreamRequest))
+            message = new StreamRequest(message);
+
+        this.sendMessage(message, callback);
+    },
+
+    defaultValueTest: function (message, callback) {
+        if (!(message instanceof DefaultValueTests))
+            message = new DefaultValueTests(message);
+
+        this.sendMessage(message, callback);
+    },
+
+    stringArrayTest: function (message, callback) {
+        if (!(message instanceof StringArrayTest))
+            message = new StringArrayTest(message);
+
+        this.sendMessage(message, callback);
+    },
+
+    intArrayTest: function (message, callback) {
+        if (!(message instanceof IntArrayTest))
+            message = new IntArrayTest(message);
+
+        this.sendMessage(message, callback);
+    },
+
+    nestedTypeTest: function (message, callback) {
+        if (!(message instanceof NestedTypeTest))
+            message = new NestedTypeTest(message);
+
+        this.sendMessage(message, callback);
+    },
+
+    nestedTypeArrayTest: function (message, callback) {
+        if (!(message instanceof NestedTypeArrayTest))
+            message = new NestedTypeArrayTest(message);
+
+        this.sendMessage(message, callback);
     }
 });

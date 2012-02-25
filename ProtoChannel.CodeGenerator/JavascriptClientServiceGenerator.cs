@@ -252,7 +252,7 @@ namespace ProtoChannel.CodeGenerator
             WriteLine("{0} = Class.create(ProtoChannel, {{", Program.Arguments.JavascriptClientServiceName);
             Indent();
 
-            var methods = Program.ResolvedArguments.ClientCallbackServiceType.GetMethods().Where(p => GetProtoMethodAttribute(p) != null).ToArray();
+            var methods = Program.ResolvedArguments.ServerServiceType.GetMethods().Where(p => GetProtoMethodAttribute(p) != null).ToArray();
 
             for (int i = 0; i < methods.Length; i++)
             {
