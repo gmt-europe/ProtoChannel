@@ -94,6 +94,7 @@
     <Compile Include="ServiceRegistry.cs" />
     <Compile Include="ServiceType.cs" />
     <Compile Include="ServiceTypeField.cs" />
+    <Compile Include="TypeUtil.cs" />
     <Compile Include="Util\RandomKeyGenerator.cs" />
     <Compile Include="Util\ReflectionOptimizer.cs" />
   </ItemGroup>

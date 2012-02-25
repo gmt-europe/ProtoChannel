@@ -37,39 +37,21 @@ namespace ProtoChannel.Web
 
             // See whether the field is a collection type.
 
-            if (type != typeof(string) && type != typeof(byte[]))
+            var listItemType = TypeUtil.GetCollectionType(type);
+
+            if (listItemType != null)
             {
-                Type listItemType = null;
+                // We handle two collection types: List<> and the rest.
+                // The rest we handle as an array.
 
-                if (type.IsInterface && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                {
-                    listItemType = type.GetGenericArguments()[0];
-                }
+                bool isList = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>);
+
+                if (isList)
+                    CollectionType = type;
                 else
-                {
-                    foreach (var @interface in type.GetInterfaces())
-                    {
-                        if (@interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                        {
-                            listItemType = @interface.GetGenericArguments()[0];
-                        }
-                    }
-                }
+                    CollectionType = listItemType.MakeArrayType();
 
-                if (listItemType != null)
-                {
-                    // We handle two collection types: List<> and the rest.
-                    // The rest we handle as an array.
-
-                    bool isList = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>);
-
-                    if (isList)
-                        CollectionType = type;
-                    else
-                        CollectionType = listItemType.MakeArrayType();
-
-                    Type = listItemType;
-                }
+                Type = listItemType;
             }
 
             // Build the service type if the field type is a protobuf type.

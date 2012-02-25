@@ -39,6 +39,7 @@ namespace ProtoChannel.CodeGenerator
                 members.Add(new ProtoMember(
                     property.Name,
                     GetDefaultValue(property, property.PropertyType),
+                    property.PropertyType,
                     ((dynamic)attribute).Tag,
                     ((dynamic)attribute).IsRequired
                 ));
@@ -54,6 +55,7 @@ namespace ProtoChannel.CodeGenerator
                 members.Add(new ProtoMember(
                     field.Name,
                     GetDefaultValue(field, field.FieldType),
+                    field.FieldType,
                     ((dynamic)attribute).Tag,
                     ((dynamic)attribute).IsRequired
                 ));

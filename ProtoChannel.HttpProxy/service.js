@@ -43,7 +43,7 @@ ProtoRegistry.registerType(DefaultValueTests, 6);
 
 IntArrayTest = Class.create(ProtoMessage, {
     initialize: function ($super, values) {
-        this.values = null;
+        this.values = [];
 
         $super(8, values);
     },
@@ -51,8 +51,9 @@ IntArrayTest = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        if (this.values !== null)
+        if (this.values !== null && this.values.length > 0) {
             message[1] = this.values;
+        }
 
         return message;
     },
@@ -89,7 +90,7 @@ NestedType = Class.create(ProtoType, {
 
 NestedTypeArrayTest = Class.create(ProtoMessage, {
     initialize: function ($super, values) {
-        this.values = null;
+        this.values = [];
 
         $super(10, values);
     },
@@ -97,8 +98,13 @@ NestedTypeArrayTest = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        if (this.values !== null)
-            message[1] = this.values;
+        if (this.values !== null && this.values.length > 0) {
+            var items = []
+            for (var i = 0; i < this.values.length; i++) {
+                items.push(this.values[i].serialize());
+            }
+            message[1] = items;
+        }
 
         return message;
     },
@@ -122,7 +128,7 @@ NestedTypeTest = Class.create(ProtoMessage, {
         var message = {};
 
         if (this.value !== null)
-            message[1] = this.value;
+            message[1] = this.value.serialize();
 
         return message;
     },
@@ -250,7 +256,7 @@ ProtoRegistry.registerType(StreamResponse, 4);
 
 StringArrayTest = Class.create(ProtoMessage, {
     initialize: function ($super, values) {
-        this.values = null;
+        this.values = [];
 
         $super(7, values);
     },
@@ -258,8 +264,9 @@ StringArrayTest = Class.create(ProtoMessage, {
     serialize: function () {
         var message = {};
 
-        if (this.values !== null)
+        if (this.values !== null && this.values.length > 0) {
             message[1] = this.values;
+        }
 
         return message;
     },

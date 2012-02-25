@@ -53,6 +53,7 @@ namespace ProtoChannel.CodeGenerator
                 WriteLine("{0} = Class.create(ProtoMessage, {{", type.Type.Name);
             else
                 WriteLine("{0} = Class.create(ProtoType, {{", type.Type.Name);
+
             Indent();
 
             if (type.MessageId.HasValue)
@@ -87,7 +88,10 @@ namespace ProtoChannel.CodeGenerator
             {
                 foreach (var member in type.Members)
                 {
-                    WriteLine("this.{0} = {1};", EncodeName(member.Name), Encode(member.DefaultValue));
+                    if (member.IsCollection)
+                        WriteLine("this.{0} = [];", EncodeName(member.Name));
+                    else
+                        WriteLine("this.{0} = {1};", EncodeName(member.Name), Encode(member.DefaultValue));
                 }
 
                 WriteLine();
@@ -132,10 +136,49 @@ namespace ProtoChannel.CodeGenerator
             {
                 foreach (var member in type.Members)
                 {
-                    WriteLine("if (this.{0} !== {1})", EncodeName(member.Name), Encode(member.DefaultValue));
-                    Indent();
-                    WriteLine("message[{0}] = this.{1};", member.Tag, EncodeName(member.Name));
-                    Unindent();
+                    if (member.IsCollection)
+                    {
+                        WriteLine("if (this.{0} !== null && this.{0}.length > 0) {{", EncodeName(member.Name));
+                        Indent();
+
+                        if (GetProtoContractType(member.Type) == null)
+                        {
+                            WriteLine("message[{0}] = this.{1};", member.Tag, EncodeName(member.Name));
+                        }
+                        else
+                        {
+                            WriteLine("var items = []");
+                            WriteLine("for (var i = 0; i < this.{0}.length; i++) {{", EncodeName(member.Name));
+                            Indent();
+
+                            WriteLine("items.push(this.{0}[i].serialize());", EncodeName(member.Name));
+
+                            Unindent();
+                            WriteLine("}");
+
+                            WriteLine("message[{0}] = items;", member.Tag);
+                        }
+
+                        Unindent();
+                        WriteLine("}");
+                    }
+                    else
+                    {
+                        WriteLine("if (this.{0} !== {1})", EncodeName(member.Name), Encode(member.DefaultValue));
+
+                        Indent();
+
+                        if (GetProtoContractType(member.Type) == null)
+                        {
+                            WriteLine("message[{0}] = this.{1};", member.Tag, EncodeName(member.Name));
+                        }
+                        else
+                        {
+                            WriteLine("message[{0}] = this.{1}.serialize();", member.Tag, EncodeName(member.Name));
+                        }
+
+                        Unindent();
+                    }
                 }
 
                 WriteLine();
