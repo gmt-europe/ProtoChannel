@@ -151,7 +151,13 @@ namespace ProtoChannel.CodeGenerator
                             WriteLine("for (var i = 0; i < this.{0}.length; i++) {{", EncodeName(member.Name));
                             Indent();
 
-                            WriteLine("items.push(this.{0}[i].serialize());", EncodeName(member.Name));
+                            WriteLine("var item = this.{0}[i];", EncodeName(member.Name));
+                            WriteLine("if (!(item instanceof {0})) {{", member.Type.Name);
+                            Indent();
+                            WriteLine("item = new {0}(item);", member.Type.Name);
+                            Unindent();
+                            WriteLine("}");
+                            WriteLine("items.push(item.serialize());");
 
                             Unindent();
                             WriteLine("}");
@@ -174,7 +180,14 @@ namespace ProtoChannel.CodeGenerator
                         }
                         else
                         {
-                            WriteLine("message[{0}] = this.{1}.serialize();", member.Tag, EncodeName(member.Name));
+                            WriteLine("var item = this.{0};", EncodeName(member.Name));
+                            WriteLine("if (!(item instanceof {0})) {{", member.Type.Name);
+                            Indent();
+                            WriteLine("item = new {0}(item);", member.Type.Name);
+                            Unindent();
+                            WriteLine("}");
+                            
+                            WriteLine("message[{0}] = item.serialize();", member.Tag);
                         }
 
                         Unindent();

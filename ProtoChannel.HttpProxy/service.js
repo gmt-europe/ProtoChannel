@@ -106,7 +106,11 @@ NestedTypeArrayTest = Class.create(ProtoMessage, {
         if (this.values !== null && this.values.length > 0) {
             var items = [];
             for (var i = 0; i < this.values.length; i++) {
-                items.push(this.values[i].serialize());
+                var item = this.values[i];
+                if (!(item instanceof NestedType)) {
+                    item = new NestedType(item);
+                }
+                items.push(item.serialize());
             }
             message[1] = items;
         }
@@ -139,7 +143,11 @@ NestedTypeTest = Class.create(ProtoMessage, {
         var message = {};
 
         if (this.value !== null)
-            message[1] = this.value.serialize();
+            var item = this.value;
+            if (!(item instanceof NestedType)) {
+                item = new NestedType(item);
+            }
+            message[1] = item.serialize();
 
         return message;
     },

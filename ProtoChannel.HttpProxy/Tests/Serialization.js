@@ -39,6 +39,17 @@
         expect(serialized[1][1]).toEqual('value');
     });
 
+    it('nested types are wrapped', function () {
+        var message = new NestedTypeTest();
+
+        message.value = { value: 'value' };
+
+        var serialized = message.serialize();
+
+        expect(Object.keys(serialized[1]).length).toEqual(1);
+        expect(serialized[1][1]).toEqual('value');
+    });
+
     it('nested type arrays are serialized', function () {
         var message = new NestedTypeArrayTest();
 
@@ -105,7 +116,7 @@
     it('nested type roundtrip', function () {
         runs(function () {
             var request = new NestedTypeTest({
-                value: new NestedType({ value: 'value' })
+                value: { value: 'value' }
             });
 
             sendRequest.apply(this, [request]);
@@ -124,10 +135,9 @@
 
     it('nested type array roundtrip', function () {
         runs(function () {
-            var request = new NestedTypeArrayTest();
-
-            request.values.push(new NestedType({ value: 'a' }));
-            request.values.push(new NestedType({ value: 'b' }));
+            var request = new NestedTypeArrayTest({
+                values: [{ value: 'a' }, { value: 'b' }]
+            });
 
             sendRequest.apply(this, [request]);
         });
