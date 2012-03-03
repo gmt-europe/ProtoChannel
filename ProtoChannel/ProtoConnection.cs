@@ -319,13 +319,13 @@ namespace ProtoChannel
             }
             catch (Exception ex)
             {
+                SendError(ProtocolError.ErrorProcessingRequest);
+
                 RaiseUnhandledException(ex);
             }
         }
 
-        protected virtual void RaiseUnhandledException(Exception exception)
-        {
-        }
+        protected abstract void RaiseUnhandledException(Exception exception);
 
         private void SendResponse(object result, int messageType, uint associationId)
         {
@@ -737,7 +737,12 @@ namespace ProtoChannel
         {
             Require.NotNull(asyncResult, "asyncResult");
 
-            return ((PendingMessage)asyncResult).EndInvoke();
+            var result = ((PendingMessage)asyncResult).EndInvoke();
+
+            if (result is Exception)
+                throw (Exception)result;
+
+            return result;
         }
 
         public void PostMessage(object message)
