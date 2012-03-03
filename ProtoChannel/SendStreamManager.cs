@@ -96,21 +96,6 @@ namespace ProtoChannel
                 return null;
         }
 
-        public ProtocolError? EndStream(int associationId)
-        {
-            PendingSendStream stream;
-
-            if (!_streams.TryGetValue(associationId, out stream))
-                return ProtocolError.InvalidStreamAssociationId;
-
-            RemoveStream(stream);
-
-            if (!stream.IsAccepted)
-                return ProtocolError.InvalidStreamPackageType;
-            else
-                return null;
-        }
-
         private void RemoveStream(PendingSendStream stream)
         {
             // The stream is not removed from the queue. Processing the queue
@@ -148,6 +133,8 @@ namespace ProtoChannel
 
             if (length > 0)
                 _sendQueue.Enqueue(stream);
+            else
+                RemoveStream(stream);
 
             return new StreamSendRequest(stream, length);
         }
