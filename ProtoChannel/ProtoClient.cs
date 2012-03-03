@@ -132,37 +132,59 @@ namespace ProtoChannel
 
         public IAsyncResult BeginSendMessage(object message, Type responseType, AsyncCallback callback, object asyncState)
         {
+            VerifyState();
+
             return _connection.BeginSendMessage(message, responseType, callback, asyncState);
         }
 
         public object EndSendMessage(IAsyncResult asyncResult)
         {
+            VerifyState();
+
             return _connection.EndSendMessage(asyncResult);
         }
 
         public void PostMessage(object message)
         {
+            VerifyState();
+
             _connection.PostMessage(message);
         }
 
         public int SendStream(Stream stream, string streamName, string contentType)
         {
+            VerifyState();
+
             return SendStream(stream, streamName, contentType, null);
         }
 
         internal int SendStream(Stream stream, string streamName, string contentType, int? associationId)
         {
+            VerifyState();
+
             return _connection.SendStream(stream, streamName, contentType, associationId);
         }
 
         public IAsyncResult BeginGetStream(int streamId, AsyncCallback callback, object asyncState)
         {
+            VerifyState();
+
             return _connection.BeginGetStream(streamId, callback, asyncState);
         }
 
         public ProtoStream EndGetStream(IAsyncResult asyncResult)
         {
+            VerifyState();
+
             return _connection.EndGetStream(asyncResult);
+        }
+
+        private void VerifyState()
+        {
+            if (_disposed)
+                throw new ObjectDisposedException(GetType().Name);
+            if (_unhandledException != null)
+                throw new ProtoChannelException("Client is in a faulted state", _unhandledException);
         }
 
         internal void RaiseUnhandledException(Exception exception)
@@ -192,13 +214,6 @@ namespace ProtoChannel
 
                 _disposed = true;
             }
-
-            var unhandledException = _unhandledException;
-
-            _unhandledException = null;
-
-            if (unhandledException != null)
-                throw unhandledException;
         }
     }
 }
