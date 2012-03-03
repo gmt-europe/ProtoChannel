@@ -24,6 +24,14 @@ namespace ProtoChannel.Test.Service
     [ProtoMessage(3), ProtoContract]
     public class StreamRequest
     {
+        public StreamRequest()
+        {
+            Length = -1;
+        }
+
+        [ProtoMember(1, IsRequired = false)]
+        [DefaultValue(-1)]
+        public int Length { get; set; }
     }
 
     [ProtoMessage(4), ProtoContract]
@@ -93,5 +101,10 @@ namespace ProtoChannel.Test.Service
     {
         [ProtoMember(1)]
         public string Value { get; set; }
+    }
+
+    [ProtoMessage(11), ProtoContract]
+    public class ThrowingTest
+    {
     }
 }

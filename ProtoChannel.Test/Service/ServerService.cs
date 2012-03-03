@@ -43,7 +43,12 @@ namespace ProtoChannel.Test.Service
         {
             Console.WriteLine("Stream request received");
 
-            byte[] payload = Encoding.UTF8.GetBytes("This is a stream payload");
+            byte[] payload;
+
+            if (request.Length == -1)
+                payload = Encoding.UTF8.GetBytes("This is a stream payload");
+            else
+                payload = Encoding.UTF8.GetBytes(new String('x', request.Length));
 
             var stream = new MemoryStream(payload);
 
@@ -85,6 +90,12 @@ namespace ProtoChannel.Test.Service
         public NestedTypeArrayTest NestedTypeArrayTest(NestedTypeArrayTest message)
         {
             return message;
+        }
+
+        [ProtoMethod]
+        public ThrowingTest ThrowingMethod(ThrowingTest message)
+        {
+            throw new Exception("Exception from method");
         }
 
         private class PendingGetStream

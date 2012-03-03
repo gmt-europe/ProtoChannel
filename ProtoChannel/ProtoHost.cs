@@ -241,6 +241,8 @@ namespace ProtoChannel
                 ? DateTime.Now + timeout.Value
                 : (DateTime?)null;
 
+            List<HostConnection> connectionsToDispose = null;
+
             lock (_syncRoot)
             {
                 if (State == ProtoHostState.Closed)
@@ -260,18 +262,21 @@ namespace ProtoChannel
 
                         if (mode == CloseMode.Abort)
                         {
-                            // Create a copy of the collection because disposing
-                            // the connection will remove it from the
-                            // _connections list.
+                            // We need to dispose the connections outside of the
+                            // lock because other processes may want to aquire
+                            // the lock.
 
-                            var connections = new List<HostConnection>(_connections.Keys);
-
-                            foreach (var connection in connections)
-                            {
-                                connection.Dispose();
-                            }
+                            connectionsToDispose = new List<HostConnection>(_connections.Keys);
                         }
                     }
+                }
+            }
+
+            if (connectionsToDispose != null)
+            {
+                foreach (var connection in connectionsToDispose)
+                {
+                    connection.Dispose();
                 }
             }
 

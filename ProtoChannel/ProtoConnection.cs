@@ -126,6 +126,7 @@ namespace ProtoChannel
             var exception = new ProtoChannelException((ProtocolError)error.ErrorNumber);
 
             _messageManager.SetError(exception);
+            _receiveStreamManager.SetError(exception);
 
             RaiseUnhandledException(exception);
 

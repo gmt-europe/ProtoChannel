@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
@@ -8,7 +9,7 @@ using ProtoChannel.Util;
 namespace ProtoChannel.Test.Util
 {
     [TestFixture]
-    internal class RingMemoryStreamTest
+    internal class RingMemoryStreamTest : FixtureBase
     {
         private const int SmallBufferSize = 4;
         private static readonly byte[] TestData = Encoding.UTF8.GetBytes("abcdefghijklmnopqrstuvwxyz");
@@ -374,6 +375,59 @@ namespace ProtoChannel.Test.Util
                 stream.Capacity = SmallBufferSize * 2;
 
                 stream.GetPage(0, SmallBufferSize * 2);
+            }
+        }
+
+        [Test]
+        public void CanSeek()
+        {
+            Assert.IsTrue(new RingMemoryStream(SmallBufferSize).CanSeek);
+        }
+
+        [Test]
+        public void NulLengthReadReturnsNul()
+        {
+            using (var stream = new RingMemoryStream(SmallBufferSize))
+            {
+                Assert.AreEqual(0, stream.Read(new byte[0], 0, 0));
+            }
+        }
+
+        [Test]
+        public void CanWriteNulLength()
+        {
+            using (var stream = new RingMemoryStream(SmallBufferSize))
+            {
+                stream.Write(new byte[0], 0, 0);
+            }
+        }
+
+        [Test]
+        [ExpectedException]
+        public void CannotSeekBeyondStart()
+        {
+            using (var stream = new RingMemoryStream(SmallBufferSize))
+            {
+                stream.Seek(-1, SeekOrigin.Current);
+            }
+        }
+
+        [Test]
+        [ExpectedException]
+        public void CannotSeekBeyondEnd()
+        {
+            using (var stream = new RingMemoryStream(SmallBufferSize))
+            {
+                stream.Seek(1, SeekOrigin.Current);
+            }
+        }
+
+        [Test]
+        public void CanSeekFromEnd()
+        {
+            using (var stream = new RingMemoryStream(SmallBufferSize))
+            {
+                stream.Seek(0, SeekOrigin.End);
             }
         }
     }

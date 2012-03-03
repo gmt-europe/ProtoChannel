@@ -32,7 +32,6 @@ namespace ProtoChannel.Test.ChannelSetup
         }
 
         [Test]
-        [ExpectedException]
         public void InvalidChosenProtocol()
         {
             var clientConfig = new ClientConfiguration

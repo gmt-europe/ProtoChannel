@@ -94,5 +94,13 @@ namespace ProtoChannel
 
             return stream.GetAsyncResult(callback, asyncState);
         }
+
+        public void SetError(ProtoChannelException exception)
+        {
+            foreach (var stream in _streams.Values)
+            {
+                stream.SetAsFailed(exception);
+            }
+        }
     }
 }

@@ -11,7 +11,7 @@ using TraceListeners;
 
 namespace ProtoChannel.Test
 {
-    internal class FixtureBase
+    public class FixtureBase
     {
         static FixtureBase()
         {

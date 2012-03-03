@@ -315,6 +315,23 @@ StringArrayTest = Class.create(ProtoMessage, {
 
 ProtoRegistry.registerType(StringArrayTest, 7);
 
+ThrowingTest = Class.create(ProtoMessage, {
+    initialize: function ($super, values) {
+        $super(11, values);
+    },
+
+    serialize: function () {
+        var message = {};
+
+        return message;
+    },
+
+    deserialize: function (message) {
+    }
+});
+
+ProtoRegistry.registerType(ThrowingTest, 11);
+
 ServiceChannel = Class.create(ProtoChannel, {
     ping: function (message, callback) {
         if (!(message instanceof Ping))
@@ -375,6 +392,13 @@ ServiceChannel = Class.create(ProtoChannel, {
     nestedTypeArrayTest: function (message, callback) {
         if (!(message instanceof NestedTypeArrayTest))
             message = new NestedTypeArrayTest(message);
+
+        this.sendMessage(message, callback);
+    },
+
+    throwingMethod: function (message, callback) {
+        if (!(message instanceof ThrowingTest))
+            message = new ThrowingTest(message);
 
         this.sendMessage(message, callback);
     }

@@ -185,5 +185,23 @@ namespace ProtoChannel.Test.Service
         {
             return (global::ProtoChannel.Test.Service.NestedTypeArrayTest)EndSendMessage(asyncResult);
         }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.ThrowingTest ThrowingMethod(global::ProtoChannel.Test.Service.ThrowingTest message)
+        {
+            return EndThrowingMethod(BeginThrowingMethod(message, null, null));
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::System.IAsyncResult BeginThrowingMethod(global::ProtoChannel.Test.Service.ThrowingTest message, global::System.AsyncCallback callback, object asyncState)
+        {
+            return BeginSendMessage(message, typeof(global::ProtoChannel.Test.Service.ThrowingTest), callback, asyncState);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Test.Service.ThrowingTest EndThrowingMethod(global::System.IAsyncResult asyncResult)
+        {
+            return (global::ProtoChannel.Test.Service.ThrowingTest)EndSendMessage(asyncResult);
+        }
     }
 }

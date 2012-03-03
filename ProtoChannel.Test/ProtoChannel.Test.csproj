@@ -62,6 +62,12 @@
     <Compile Include="ChannelSetup\BasicConnection.cs" />
     <Compile Include="ChannelSetup\ProtocolNumberExchange.cs" />
     <Compile Include="FixtureBase.cs" />
+    <Compile Include="Infrastructure\CloseHostFixture.cs" />
+    <Compile Include="Infrastructure\HybridStreamManagerFixture.cs" />
+    <Compile Include="Infrastructure\InvalidServerService.cs" />
+    <Compile Include="Infrastructure\OperationContextFixture.cs" />
+    <Compile Include="Infrastructure\RogueClient.cs" />
+    <Compile Include="Infrastructure\UnhandledExceptionTestFixture.cs" />
     <Compile Include="MessageExchange\MessageExchangeFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\ClientCallbackService.cs" />
@@ -70,6 +76,9 @@
     <Compile Include="Service\ServerCallbackService.cs" />
     <Compile Include="Service\ServerService.cs" />
     <Compile Include="Streaming\StreamingFixture.cs" />
+    <Compile Include="Util\ByteUtilFixture.cs" />
+    <Compile Include="Util\KeyedCollectionFixture.cs" />
+    <Compile Include="Util\ReadOnlyKeyedCollectionFixture.cs" />
     <Compile Include="Util\RingMemoryStream.cs" />
   </ItemGroup>
   <ItemGroup>
