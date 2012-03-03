@@ -22,6 +22,7 @@ namespace ProtoChannel
         ExpectedRequest,
         UnexpectedMessageType,
         InvalidStreamAssociationId,
-        CannotProcessRequestMessage
+        CannotProcessRequestMessage,
+        ErrorProcessingRequest
     }
 }
