@@ -23,12 +23,10 @@ namespace ProtoChannel
             _host = host;
 
             IsAsync = true;
-
-            Connect();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private void Connect()
+        public void Connect()
         {
             try
             {

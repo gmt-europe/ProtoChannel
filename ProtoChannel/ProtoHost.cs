@@ -109,15 +109,25 @@ namespace ProtoChannel
                 try
                 {
                     var tcpClient = _listener.EndAcceptTcpClient(asyncResult);
+                    HostConnection connection = null;
 
                     try
                     {
-                        var connection = new HostConnection(this, tcpClient, _streamManager);
+                        connection = new HostConnection(this, tcpClient, _streamManager);
 
                         _connections.Add(connection, null);
+
+                        connection.Connect();
                     }
                     catch
                     {
+                        if (connection != null)
+                        {
+                            _connections.Remove(connection);
+
+                            connection.Dispose();
+                        }
+
                         tcpClient.Close();
 
                         throw;
