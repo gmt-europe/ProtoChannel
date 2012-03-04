@@ -25,8 +25,6 @@ namespace ProtoChannel.Demo
 
             _protoServer = new ProtoHost<ProtoService.ServerService>(new IPEndPoint(IPAddress.Any, Constants.ProtoChannelPort));
 
-            _protoChannelPort.Text = Constants.ProtoChannelPort.ToString();
-
             var waitEvent = new ManualResetEvent(false);
 
             ThreadPool.QueueUserWorkItem(p =>
@@ -39,8 +37,6 @@ namespace ProtoChannel.Demo
             });
 
             waitEvent.WaitOne();
-
-            _wcfPort.Text = Constants.WcfPort.ToString();
         }
 
         private void _acceptButton_Click(object sender, EventArgs e)

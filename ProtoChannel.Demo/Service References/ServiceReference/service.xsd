@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:tns="http://tempuri.org/" elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:import namespace="http://schemas.datacontract.org/2004/07/ProtoChannel.Demo.Shared" />
+  <xs:import namespace="http://schemas.microsoft.com/Message" />
   <xs:element name="SimpleMessage">
     <xs:complexType>
       <xs:sequence>
@@ -27,6 +28,18 @@
       <xs:sequence>
         <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/ProtoChannel.Demo.Shared" minOccurs="0" name="ComplexMessageResult" nillable="true" type="q4:ComplexMessage" />
       </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ReceiveStream">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q5="http://schemas.microsoft.com/Message" name="stream" type="q5:StreamBody" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ReceiveStreamResponse">
+    <xs:complexType>
+      <xs:sequence />
     </xs:complexType>
   </xs:element>
 </xs:schema>

@@ -4,6 +4,7 @@
     <wsp:ExactlyOne>
       <wsp:All>
         <msb:BinaryEncoding xmlns:msb="http://schemas.microsoft.com/ws/06/2004/mspolicy/netbinary1" />
+        <msf:Streamed xmlns:msf="http://schemas.microsoft.com/ws/2006/05/framing/policy" />
         <wsaw:UsingAddressing />
       </wsp:All>
     </wsp:ExactlyOne>
@@ -13,6 +14,7 @@
       <xsd:import namespace="http://tempuri.org/" />
       <xsd:import namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import namespace="http://schemas.datacontract.org/2004/07/ProtoChannel.Demo.Shared" />
+      <xsd:import namespace="http://schemas.microsoft.com/Message" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="ServerService_SimpleMessage_InputMessage">
@@ -27,6 +29,12 @@
   <wsdl:message name="ServerService_ComplexMessage_OutputMessage">
     <wsdl:part name="parameters" element="tns:ComplexMessageResponse" />
   </wsdl:message>
+  <wsdl:message name="ServerService_ReceiveStream_InputMessage">
+    <wsdl:part name="parameters" element="tns:ReceiveStream" />
+  </wsdl:message>
+  <wsdl:message name="ServerService_ReceiveStream_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ReceiveStreamResponse" />
+  </wsdl:message>
   <wsdl:portType name="ServerService">
     <wsdl:operation name="SimpleMessage">
       <wsdl:input wsaw:Action="http://tempuri.org/ServerService/SimpleMessage" message="tns:ServerService_SimpleMessage_InputMessage" />
@@ -35,6 +43,10 @@
     <wsdl:operation name="ComplexMessage">
       <wsdl:input wsaw:Action="http://tempuri.org/ServerService/ComplexMessage" message="tns:ServerService_ComplexMessage_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/ServerService/ComplexMessageResponse" message="tns:ServerService_ComplexMessage_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ReceiveStream">
+      <wsdl:input wsaw:Action="http://tempuri.org/ServerService/ReceiveStream" message="tns:ServerService_ReceiveStream_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/ServerService/ReceiveStreamResponse" message="tns:ServerService_ReceiveStream_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_ServerService" type="tns:ServerService">
@@ -51,6 +63,15 @@
     </wsdl:operation>
     <wsdl:operation name="ComplexMessage">
       <soap12:operation soapAction="http://tempuri.org/ServerService/ComplexMessage" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReceiveStream">
+      <soap12:operation soapAction="http://tempuri.org/ServerService/ReceiveStream" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>

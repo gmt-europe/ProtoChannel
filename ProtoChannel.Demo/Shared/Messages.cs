@@ -38,4 +38,16 @@ namespace ProtoChannel.Demo.Shared
         [ProtoMember(3, IsRequired = true), DataMember]
         public double DoubleValue { get; set; }
     }
+
+    [ProtoMessage(3), ProtoContract]
+    public class StreamMessage
+    {
+        [ProtoMember(1, IsRequired = true)]
+        public uint StreamId { get; set; }
+    }
+
+    [ProtoMessage(4), ProtoContract]
+    public class StreamReceivedMessage
+    {
+    }
 }

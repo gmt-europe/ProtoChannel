@@ -83,5 +83,11 @@ namespace ProtoChannel.Demo.ProtoService
         {
             return (global::ProtoChannel.Demo.Shared.ComplexMessage)EndSendMessage(asyncResult);
         }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public void StreamMessage(global::ProtoChannel.Demo.Shared.StreamMessage message)
+        {
+            PostMessage(message);
+        }
     }
 }

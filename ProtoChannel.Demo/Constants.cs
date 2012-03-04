@@ -9,5 +9,6 @@ namespace ProtoChannel.Demo
     {
         public const int ProtoChannelPort = 20347;
         public const int WcfPort = 20348;
+        public const int WcfStreamPort = 20350;
     }
 }

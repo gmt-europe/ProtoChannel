@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Security;
 using System.ServiceModel;
 using System.Text;
 using ProtoChannel.Demo.ServiceReference;
+using ProtoChannel.Demo.Wcf;
 
 namespace ProtoChannel.Demo
 {
@@ -24,6 +26,8 @@ namespace ProtoChannel.Demo
         private class WcfTestClient : TestClient
         {
             private static readonly ComplexMessage _complexMessage;
+            private static readonly byte[] _smallStreamContent;
+            private static readonly byte[] _largeStreamContent;
 
             static WcfTestClient()
             {
@@ -42,6 +46,9 @@ namespace ProtoChannel.Demo
                 }
 
                 _complexMessage.Values = complexValues.ToArray();
+
+                _smallStreamContent = Encoding.UTF8.GetBytes(new string('x', 0x1000));
+                _largeStreamContent = Encoding.UTF8.GetBytes(new string('x', 0x100000));
             }
 
             private readonly ServerServiceClient _service;
@@ -69,6 +76,7 @@ namespace ProtoChannel.Demo
                                 ClientCredentialType = MessageCredentialType.None
                             }
                         }
+                        // , TransferMode = TransferMode.Streamed
                     },
                     new EndpointAddress("net.tcp://" + Settings.Host + ":" + Constants.WcfPort + "/ServerService/")
                 );
@@ -105,6 +113,19 @@ namespace ProtoChannel.Demo
                         );
                         break;
 
+                    case ClientMessageType.SmallStream:
+                    case ClientMessageType.LargeStream:
+                        _service.BeginReceiveStream(
+                            new MemoryStream(
+                                Settings.MessageType == ClientMessageType.SmallStream
+                                ? _smallStreamContent
+                                : _largeStreamContent
+                            ),
+                            BeginReceiveStreamCallback,
+                            null
+                        );
+                        break;
+
                     default:
                         throw new NotImplementedException();
                 }
@@ -122,6 +143,13 @@ namespace ProtoChannel.Demo
             private void BeginComplexMessageCallback(IAsyncResult asyncResult)
             {
                 _service.EndComplexMessage(asyncResult);
+
+                ProcessMessageSend();
+            }
+
+            private void BeginReceiveStreamCallback(IAsyncResult asyncResult)
+            {
+                _service.EndReceiveStream(asyncResult);
 
                 ProcessMessageSend();
             }

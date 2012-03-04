@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using ProtoChannel.Demo.ProtoService;
@@ -23,6 +24,8 @@ namespace ProtoChannel.Demo
         private class ProtoChannelTestClient : TestClient
         {
             private static readonly ComplexMessage _complexMessage;
+            private static readonly byte[] _smallStreamContent;
+            private static readonly byte[] _largeStreamContent;
 
             static ProtoChannelTestClient()
             {
@@ -37,9 +40,13 @@ namespace ProtoChannel.Demo
                         StringValue = i.ToString()
                     });
                 }
+
+                _smallStreamContent = Encoding.UTF8.GetBytes(new string('x', 0x1000));
+                _largeStreamContent = Encoding.UTF8.GetBytes(new string('x', 0x100000));
             }
 
             private readonly ClientService _service;
+            private readonly ClientCallbackService _callbackService;
             private int _messagesSend;
             private readonly Stopwatch _stopwatch = new Stopwatch();
             private long _lastTicks;
@@ -49,7 +56,21 @@ namespace ProtoChannel.Demo
             {
                 _stopwatch.Start();
 
-                _service = new ClientService(settings.Host, Constants.ProtoChannelPort);
+                _callbackService = new ClientCallbackService();
+
+                _callbackService.StreamReceived += _callbackService_StreamReceived;
+
+                var configuration = new ProtoClientConfiguration
+                {
+                    CallbackObject = _callbackService
+                };
+
+                _service = new ClientService(settings.Host, Constants.ProtoChannelPort, configuration);
+            }
+
+            void _callbackService_StreamReceived(object sender, EventArgs e)
+            {
+                ProcessMessageSend();
             }
 
             public override void Start()
@@ -79,6 +100,24 @@ namespace ProtoChannel.Demo
                             BeginComplexMessageCallback,
                             null
                         );
+                        break;
+
+                    case ClientMessageType.SmallStream:
+                    case ClientMessageType.LargeStream:
+                        var streamId = _service.SendStream(
+                            new MemoryStream(
+                                Settings.MessageType == ClientMessageType.SmallStream
+                                ? _smallStreamContent
+                                : _largeStreamContent
+                            ),
+                            "Small stream.dat",
+                            "application/octet-stream"
+                        );
+
+                        _service.StreamMessage(new StreamMessage
+                        {
+                            StreamId = (uint)streamId
+                        });
                         break;
 
                     default:

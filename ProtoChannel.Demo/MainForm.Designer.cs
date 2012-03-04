@@ -29,11 +29,9 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.label1 = new System.Windows.Forms.Label();
-            this._protoChannelPort = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this._wcfPort = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this._host = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
             this._requestPerClient = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this._totalClients = new System.Windows.Forms.TextBox();
@@ -50,49 +48,11 @@
             this.label3 = new System.Windows.Forms.Label();
             this._acceptButton = new System.Windows.Forms.Button();
             this._errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
-            this.label6 = new System.Windows.Forms.Label();
-            this._host = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this._errorProvider)).BeginInit();
             this.SuspendLayout();
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(15, 15);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(127, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "ProtoChannel server port:";
-            // 
-            // _protoChannelPort
-            // 
-            this._protoChannelPort.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this._protoChannelPort.Location = new System.Drawing.Point(148, 15);
-            this._protoChannelPort.Name = "_protoChannelPort";
-            this._protoChannelPort.ReadOnly = true;
-            this._protoChannelPort.Size = new System.Drawing.Size(238, 13);
-            this._protoChannelPort.TabIndex = 1;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(15, 34);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(87, 13);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "WCF server port:";
-            // 
-            // _wcfPort
-            // 
-            this._wcfPort.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this._wcfPort.Location = new System.Drawing.Point(148, 34);
-            this._wcfPort.Name = "_wcfPort";
-            this._wcfPort.ReadOnly = true;
-            this._wcfPort.Size = new System.Drawing.Size(238, 13);
-            this._wcfPort.TabIndex = 3;
             // 
             // groupBox1
             // 
@@ -106,13 +66,30 @@
             this.groupBox1.Controls.Add(this.flowLayoutPanel1);
             this.groupBox1.Controls.Add(this._concurrentClients);
             this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Location = new System.Drawing.Point(15, 53);
+            this.groupBox1.Location = new System.Drawing.Point(15, 15);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(8, 4, 8, 8);
             this.groupBox1.Size = new System.Drawing.Size(371, 281);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Client settings";
+            // 
+            // _host
+            // 
+            this._host.Location = new System.Drawing.Point(113, 73);
+            this._host.Name = "_host";
+            this._host.Size = new System.Drawing.Size(247, 20);
+            this._host.TabIndex = 2;
+            this._host.Text = "localhost";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(11, 76);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(32, 13);
+            this.label6.TabIndex = 1;
+            this.label6.Text = "Host:";
             // 
             // _requestPerClient
             // 
@@ -260,7 +237,7 @@
             // 
             // _acceptButton
             // 
-            this._acceptButton.Location = new System.Drawing.Point(296, 340);
+            this._acceptButton.Location = new System.Drawing.Point(296, 302);
             this._acceptButton.Name = "_acceptButton";
             this._acceptButton.Size = new System.Drawing.Size(90, 23);
             this._acceptButton.TabIndex = 5;
@@ -272,35 +249,14 @@
             // 
             this._errorProvider.ContainerControl = this;
             // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(11, 76);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(32, 13);
-            this.label6.TabIndex = 1;
-            this.label6.Text = "Host:";
-            // 
-            // _host
-            // 
-            this._host.Location = new System.Drawing.Point(113, 73);
-            this._host.Name = "_host";
-            this._host.Size = new System.Drawing.Size(247, 20);
-            this._host.TabIndex = 2;
-            this._host.Text = "localhost";
-            // 
             // MainForm
             // 
             this.AcceptButton = this._acceptButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(401, 378);
+            this.ClientSize = new System.Drawing.Size(401, 340);
             this.Controls.Add(this._acceptButton);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this._wcfPort);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this._protoChannelPort);
-            this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -315,16 +271,11 @@
             this.flowLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this._errorProvider)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox _protoChannelPort;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox _wcfPort;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
         private System.Windows.Forms.RadioButton _messageSimple;

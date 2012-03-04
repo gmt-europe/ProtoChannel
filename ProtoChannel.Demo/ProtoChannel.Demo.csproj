@@ -53,6 +53,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IStatistics.cs" />
+    <Compile Include="ProtoService\ClientCallbackService.cs" />
+    <Compile Include="ProtoService\ServerCallbackService.cs" />
     <Compile Include="Service References\ServiceReference\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -109,6 +111,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Service References\ServiceReference\Message.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Service References\ServiceReference\ProtoChannel.Demo.ServiceReference.ComplexMessage.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>

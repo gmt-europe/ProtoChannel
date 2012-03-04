@@ -199,6 +199,14 @@ namespace ProtoChannel.Demo.ServiceReference {
         System.IAsyncResult BeginComplexMessage(ProtoChannel.Demo.ServiceReference.ComplexMessage message, System.AsyncCallback callback, object asyncState);
         
         ProtoChannel.Demo.ServiceReference.ComplexMessage EndComplexMessage(System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ServerService/ReceiveStream", ReplyAction="http://tempuri.org/ServerService/ReceiveStreamResponse")]
+        void ReceiveStream(System.IO.Stream stream);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://tempuri.org/ServerService/ReceiveStream", ReplyAction="http://tempuri.org/ServerService/ReceiveStreamResponse")]
+        System.IAsyncResult BeginReceiveStream(System.IO.Stream stream, System.AsyncCallback callback, object asyncState);
+        
+        void EndReceiveStream(System.IAsyncResult result);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -259,6 +267,12 @@ namespace ProtoChannel.Demo.ServiceReference {
         
         private System.Threading.SendOrPostCallback onComplexMessageCompletedDelegate;
         
+        private BeginOperationDelegate onBeginReceiveStreamDelegate;
+        
+        private EndOperationDelegate onEndReceiveStreamDelegate;
+        
+        private System.Threading.SendOrPostCallback onReceiveStreamCompletedDelegate;
+        
         public ServerServiceClient() {
         }
         
@@ -281,6 +295,8 @@ namespace ProtoChannel.Demo.ServiceReference {
         public event System.EventHandler<SimpleMessageCompletedEventArgs> SimpleMessageCompleted;
         
         public event System.EventHandler<ComplexMessageCompletedEventArgs> ComplexMessageCompleted;
+        
+        public event System.EventHandler<System.ComponentModel.AsyncCompletedEventArgs> ReceiveStreamCompleted;
         
         public ProtoChannel.Demo.ServiceReference.SimpleMessage SimpleMessage(ProtoChannel.Demo.ServiceReference.SimpleMessage message) {
             return base.Channel.SimpleMessage(message);
@@ -380,6 +396,55 @@ namespace ProtoChannel.Demo.ServiceReference {
             }
             base.InvokeAsync(this.onBeginComplexMessageDelegate, new object[] {
                         message}, this.onEndComplexMessageDelegate, this.onComplexMessageCompletedDelegate, userState);
+        }
+        
+        public void ReceiveStream(System.IO.Stream stream) {
+            base.Channel.ReceiveStream(stream);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginReceiveStream(System.IO.Stream stream, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginReceiveStream(stream, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public void EndReceiveStream(System.IAsyncResult result) {
+            base.Channel.EndReceiveStream(result);
+        }
+        
+        private System.IAsyncResult OnBeginReceiveStream(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            System.IO.Stream stream = ((System.IO.Stream)(inValues[0]));
+            return this.BeginReceiveStream(stream, callback, asyncState);
+        }
+        
+        private object[] OnEndReceiveStream(System.IAsyncResult result) {
+            this.EndReceiveStream(result);
+            return null;
+        }
+        
+        private void OnReceiveStreamCompleted(object state) {
+            if ((this.ReceiveStreamCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.ReceiveStreamCompleted(this, new System.ComponentModel.AsyncCompletedEventArgs(e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void ReceiveStreamAsync(System.IO.Stream stream) {
+            this.ReceiveStreamAsync(stream, null);
+        }
+        
+        public void ReceiveStreamAsync(System.IO.Stream stream, object userState) {
+            if ((this.onBeginReceiveStreamDelegate == null)) {
+                this.onBeginReceiveStreamDelegate = new BeginOperationDelegate(this.OnBeginReceiveStream);
+            }
+            if ((this.onEndReceiveStreamDelegate == null)) {
+                this.onEndReceiveStreamDelegate = new EndOperationDelegate(this.OnEndReceiveStream);
+            }
+            if ((this.onReceiveStreamCompletedDelegate == null)) {
+                this.onReceiveStreamCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnReceiveStreamCompleted);
+            }
+            base.InvokeAsync(this.onBeginReceiveStreamDelegate, new object[] {
+                        stream}, this.onEndReceiveStreamDelegate, this.onReceiveStreamCompletedDelegate, userState);
         }
     }
 }
