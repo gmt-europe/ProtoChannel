@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using ProtoChannel.Demo.ProtoService;
+using ProtoChannel.Demo.Shared;
 
 namespace ProtoChannel.Demo
 {
@@ -21,6 +22,23 @@ namespace ProtoChannel.Demo
 
         private class ProtoChannelTestClient : TestClient
         {
+            private static readonly ComplexMessage _complexMessage;
+
+            static ProtoChannelTestClient()
+            {
+                _complexMessage = new ComplexMessage();
+
+                for (int i = 0; i < 200; i++)
+                {
+                    _complexMessage.Values.Add(new ComplexValue
+                    {
+                        IntValue = i,
+                        DoubleValue = i,
+                        StringValue = i.ToString()
+                    });
+                }
+            }
+
             private readonly ClientService _service;
             private int _messagesSend;
             private readonly Stopwatch _stopwatch = new Stopwatch();
@@ -55,6 +73,14 @@ namespace ProtoChannel.Demo
                         );
                         break;
 
+                    case ClientMessageType.Complex:
+                        _service.BeginComplexMessage(
+                            _complexMessage,
+                            BeginComplexMessageCallback,
+                            null
+                        );
+                        break;
+
                     default:
                         throw new NotImplementedException();
                 }
@@ -66,6 +92,18 @@ namespace ProtoChannel.Demo
 
                 Debug.Assert(result.Value == _messagesSend);
 
+                ProcessMessageSend();
+            }
+
+            private void BeginComplexMessageCallback(IAsyncResult asyncResult)
+            {
+                _service.EndComplexMessage(asyncResult);
+
+                ProcessMessageSend();
+            }
+
+            private void ProcessMessageSend()
+            {
                 long currentTicks = _stopwatch.ElapsedTicks;
 
                 Statistics.AddSendMessage(currentTicks - _lastTicks);

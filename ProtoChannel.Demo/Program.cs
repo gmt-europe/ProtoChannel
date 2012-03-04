@@ -14,9 +14,18 @@ namespace ProtoChannel.Demo
         {
             LogManager.Adapter = new ConsoleOutLoggerFactoryAdapter();
 
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
+        }
+
+        static void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
+        {
+            var exception = e.ExceptionObject as Exception;
+
+            MessageBox.Show(exception.Message);
         }
     }
 }

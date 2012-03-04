@@ -8,6 +8,6 @@ namespace ProtoChannel.Demo
     internal static class Constants
     {
         public const int ProtoChannelPort = 20347;
-        public static readonly StringBuilder Log = new StringBuilder();
+        public const int WcfPort = 20348;
     }
 }

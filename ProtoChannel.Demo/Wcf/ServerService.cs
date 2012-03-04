@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
-using System.Threading;
 using ProtoChannel.Demo.Shared;
 
-namespace ProtoChannel.Demo.ProtoService
+namespace ProtoChannel.Demo.Wcf
 {
+    [ServiceContract]
     public class ServerService
     {
-        [ProtoMethod]
+        [OperationContract]
         public SimpleMessage SimpleMessage(SimpleMessage message)
         {
             return message;
         }
 
-        [ProtoMethod]
+        [OperationContract]
         public ComplexMessage ComplexMessage(ComplexMessage message)
         {
             return message;

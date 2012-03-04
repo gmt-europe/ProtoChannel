@@ -4,24 +4,43 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.Security;
+using System.ServiceModel;
+using System.ServiceModel.Description;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
-using ProtoChannel.Demo.ProtoService;
 using System.Net;
 
 namespace ProtoChannel.Demo
 {
     public partial class MainForm : Form
     {
-        private ProtoHost<ServerService> _server;
+        private readonly ProtoHost<ProtoService.ServerService> _protoServer;
+        private ServiceHost _wcfServer;
 
         public MainForm()
         {
             InitializeComponent();
 
-            _server = new ProtoHost<ServerService>(new IPEndPoint(IPAddress.Any, Constants.ProtoChannelPort));
+            _protoServer = new ProtoHost<ProtoService.ServerService>(new IPEndPoint(IPAddress.Any, Constants.ProtoChannelPort));
 
-            _protoChannelPort.Text = _server.LocalEndPoint.Port.ToString();
+            _protoChannelPort.Text = Constants.ProtoChannelPort.ToString();
+
+            var waitEvent = new ManualResetEvent(false);
+
+            ThreadPool.QueueUserWorkItem(p =>
+            {
+                _wcfServer = new ServiceHost(typeof(Wcf.ServerService));
+
+                _wcfServer.Open();
+
+                waitEvent.Set();
+            });
+
+            waitEvent.WaitOne();
+
+            _wcfPort.Text = Constants.WcfPort.ToString();
         }
 
         private void _acceptButton_Click(object sender, EventArgs e)

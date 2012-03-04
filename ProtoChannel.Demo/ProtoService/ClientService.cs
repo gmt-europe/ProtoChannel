@@ -49,21 +49,39 @@ namespace ProtoChannel.Demo.ProtoService
         }
 
         [global::System.Diagnostics.DebuggerStepThrough]
-        public global::ProtoChannel.Demo.ProtoService.SimpleMessage SimpleMessage(global::ProtoChannel.Demo.ProtoService.SimpleMessage message)
+        public global::ProtoChannel.Demo.Shared.SimpleMessage SimpleMessage(global::ProtoChannel.Demo.Shared.SimpleMessage message)
         {
             return EndSimpleMessage(BeginSimpleMessage(message, null, null));
         }
 
         [global::System.Diagnostics.DebuggerStepThrough]
-        public global::System.IAsyncResult BeginSimpleMessage(global::ProtoChannel.Demo.ProtoService.SimpleMessage message, global::System.AsyncCallback callback, object asyncState)
+        public global::System.IAsyncResult BeginSimpleMessage(global::ProtoChannel.Demo.Shared.SimpleMessage message, global::System.AsyncCallback callback, object asyncState)
         {
-            return BeginSendMessage(message, typeof(global::ProtoChannel.Demo.ProtoService.SimpleMessage), callback, asyncState);
+            return BeginSendMessage(message, typeof(global::ProtoChannel.Demo.Shared.SimpleMessage), callback, asyncState);
         }
 
         [global::System.Diagnostics.DebuggerStepThrough]
-        public global::ProtoChannel.Demo.ProtoService.SimpleMessage EndSimpleMessage(global::System.IAsyncResult asyncResult)
+        public global::ProtoChannel.Demo.Shared.SimpleMessage EndSimpleMessage(global::System.IAsyncResult asyncResult)
         {
-            return (global::ProtoChannel.Demo.ProtoService.SimpleMessage)EndSendMessage(asyncResult);
+            return (global::ProtoChannel.Demo.Shared.SimpleMessage)EndSendMessage(asyncResult);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Demo.Shared.ComplexMessage ComplexMessage(global::ProtoChannel.Demo.Shared.ComplexMessage message)
+        {
+            return EndComplexMessage(BeginComplexMessage(message, null, null));
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::System.IAsyncResult BeginComplexMessage(global::ProtoChannel.Demo.Shared.ComplexMessage message, global::System.AsyncCallback callback, object asyncState)
+        {
+            return BeginSendMessage(message, typeof(global::ProtoChannel.Demo.Shared.ComplexMessage), callback, asyncState);
+        }
+
+        [global::System.Diagnostics.DebuggerStepThrough]
+        public global::ProtoChannel.Demo.Shared.ComplexMessage EndComplexMessage(global::System.IAsyncResult asyncResult)
+        {
+            return (global::ProtoChannel.Demo.Shared.ComplexMessage)EndSendMessage(asyncResult);
         }
     }
 }
