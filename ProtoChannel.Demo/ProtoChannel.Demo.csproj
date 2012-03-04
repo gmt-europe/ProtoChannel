@@ -74,6 +74,7 @@
       <DependentUpon>TestForm.cs</DependentUpon>
     </Compile>
     <Compile Include="TestMode.cs" />
+    <Compile Include="TickCounter.cs" />
     <Compile Include="WcfClientRunner.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>

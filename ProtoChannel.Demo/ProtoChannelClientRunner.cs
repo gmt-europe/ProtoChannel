@@ -24,23 +24,27 @@ namespace ProtoChannel.Demo
             private readonly ClientService _service;
             private int _messagesSend;
             private readonly Stopwatch _stopwatch = new Stopwatch();
+            private long _lastTicks;
 
             public ProtoChannelTestClient(IStatistics statistics, TestClientSettings settings)
                 : base(statistics, settings)
             {
+                _stopwatch.Start();
+
                 _service = new ClientService(settings.Host, Constants.ProtoChannelPort);
             }
 
             public override void Start()
             {
+                _lastTicks = _stopwatch.ElapsedTicks;
+
+                Statistics.AddConnectOverhead(_lastTicks);
+
                 SendMessage();
             }
 
             private void SendMessage()
             {
-                _stopwatch.Reset();
-                _stopwatch.Start();
-
                 switch (Settings.MessageType)
                 {
                     case ClientMessageType.Simple:
@@ -62,9 +66,11 @@ namespace ProtoChannel.Demo
 
                 Debug.Assert(result.Value == _messagesSend);
 
-                _stopwatch.Stop();
+                long currentTicks = _stopwatch.ElapsedTicks;
 
-                Statistics.AddSendMessage(_stopwatch.ElapsedTicks);
+                Statistics.AddSendMessage(currentTicks - _lastTicks);
+
+                _lastTicks = currentTicks;
 
                 _messagesSend++;
 
@@ -73,6 +79,8 @@ namespace ProtoChannel.Demo
                     OnCompleted(EventArgs.Empty);
 
                     _service.Dispose();
+
+                    Statistics.AddDisconnectOverhead(_stopwatch.ElapsedTicks - _lastTicks);
                 }
                 else
                 {

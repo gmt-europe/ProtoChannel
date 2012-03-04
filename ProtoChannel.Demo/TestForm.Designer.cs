@@ -38,6 +38,8 @@
             this._requestsCompleted = new System.Windows.Forms.TextBox();
             this._timePerRequest = new System.Windows.Forms.TextBox();
             this._refreshTimer = new System.Windows.Forms.Timer(this.components);
+            this._overhead = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -55,7 +57,7 @@
             this.label2.Location = new System.Drawing.Point(15, 34);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(93, 13);
-            this.label2.TabIndex = 1;
+            this.label2.TabIndex = 2;
             this.label2.Text = "Clients completed:";
             // 
             // label3
@@ -64,7 +66,7 @@
             this.label3.Location = new System.Drawing.Point(15, 53);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(107, 13);
-            this.label3.TabIndex = 2;
+            this.label3.TabIndex = 4;
             this.label3.Text = "Requests completed:";
             // 
             // label4
@@ -73,7 +75,7 @@
             this.label4.Location = new System.Drawing.Point(15, 72);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(128, 13);
-            this.label4.TabIndex = 3;
+            this.label4.TabIndex = 6;
             this.label4.Text = "Average time per request:";
             // 
             // _clientsRunning
@@ -83,7 +85,7 @@
             this._clientsRunning.Name = "_clientsRunning";
             this._clientsRunning.ReadOnly = true;
             this._clientsRunning.Size = new System.Drawing.Size(224, 13);
-            this._clientsRunning.TabIndex = 4;
+            this._clientsRunning.TabIndex = 1;
             // 
             // _clientsCompleted
             // 
@@ -92,7 +94,7 @@
             this._clientsCompleted.Name = "_clientsCompleted";
             this._clientsCompleted.ReadOnly = true;
             this._clientsCompleted.Size = new System.Drawing.Size(224, 13);
-            this._clientsCompleted.TabIndex = 4;
+            this._clientsCompleted.TabIndex = 3;
             // 
             // _requestsCompleted
             // 
@@ -101,7 +103,7 @@
             this._requestsCompleted.Name = "_requestsCompleted";
             this._requestsCompleted.ReadOnly = true;
             this._requestsCompleted.Size = new System.Drawing.Size(224, 13);
-            this._requestsCompleted.TabIndex = 4;
+            this._requestsCompleted.TabIndex = 5;
             // 
             // _timePerRequest
             // 
@@ -110,18 +112,38 @@
             this._timePerRequest.Name = "_timePerRequest";
             this._timePerRequest.ReadOnly = true;
             this._timePerRequest.Size = new System.Drawing.Size(224, 13);
-            this._timePerRequest.TabIndex = 4;
+            this._timePerRequest.TabIndex = 7;
             // 
             // _refreshTimer
             // 
             this._refreshTimer.Enabled = true;
             this._refreshTimer.Tick += new System.EventHandler(this._refreshTimer_Tick);
             // 
+            // _overhead
+            // 
+            this._overhead.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this._overhead.Location = new System.Drawing.Point(149, 91);
+            this._overhead.Name = "_overhead";
+            this._overhead.ReadOnly = true;
+            this._overhead.Size = new System.Drawing.Size(224, 13);
+            this._overhead.TabIndex = 9;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(15, 91);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(57, 13);
+            this.label5.TabIndex = 8;
+            this.label5.Text = "Overhead:";
+            // 
             // TestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(388, 101);
+            this.ClientSize = new System.Drawing.Size(388, 123);
+            this.Controls.Add(this._overhead);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this._timePerRequest);
             this.Controls.Add(this._requestsCompleted);
             this.Controls.Add(this._clientsCompleted);
@@ -157,5 +179,7 @@
         private System.Windows.Forms.TextBox _requestsCompleted;
         private System.Windows.Forms.TextBox _timePerRequest;
         private System.Windows.Forms.Timer _refreshTimer;
+        private System.Windows.Forms.TextBox _overhead;
+        private System.Windows.Forms.Label label5;
     }
 }

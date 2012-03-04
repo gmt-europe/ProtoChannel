@@ -19,9 +19,9 @@ namespace ProtoChannel.Demo
         private HashSet<TestClient> _clients = new HashSet<TestClient>();
         private int _clientsRunningValue;
         private int _clientsCompletedValue;
-        private int _requestsCompletedValue;
-        private double _timePerRequestValue;
-        private long _totalTicks;
+        private readonly TickCounter _timePerRequestValue = new TickCounter();
+        private readonly TickCounter _connectOverhead = new TickCounter();
+        private readonly TickCounter _disconnectOverhead = new TickCounter();
         private AutoResetEvent _clientCompletedEvent = new AutoResetEvent(false);
 
         internal TestForm(TestClientSettings settings, TestMode mode)
@@ -111,17 +111,32 @@ namespace ProtoChannel.Demo
         {
             _clientsRunning.Text = _clientsRunningValue.ToString();
             _clientsCompleted.Text = _clientsCompletedValue.ToString();
-            _requestsCompleted.Text = _requestsCompletedValue.ToString();
-            _timePerRequest.Text = _timePerRequestValue.ToString("0.000 ms");
+            _requestsCompleted.Text = _timePerRequestValue.Count.ToString();
+            _timePerRequest.Text = _timePerRequestValue.Value.ToString("0.000 ms");
+            _overhead.Text = (_connectOverhead.Value + _disconnectOverhead.Value).ToString("0.000 ms");
         }
 
         public void AddSendMessage(long ticks)
         {
             lock (_syncRoot)
             {
-                _totalTicks += ticks;
-                _requestsCompletedValue++;
-                _timePerRequestValue = ((double)(_totalTicks / _requestsCompletedValue) / Stopwatch.Frequency) * 1000d;
+                _timePerRequestValue.Add(ticks);
+            }
+        }
+
+        public void AddConnectOverhead(long ticks)
+        {
+            lock (_syncRoot)
+            {
+                _connectOverhead.Add(ticks);
+            }
+        }
+
+        public void AddDisconnectOverhead(long ticks)
+        {
+            lock (_syncRoot)
+            {
+                _disconnectOverhead.Add(ticks);
             }
         }
     }
