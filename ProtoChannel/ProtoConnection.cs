@@ -315,6 +315,9 @@ namespace ProtoChannel
 
                         if (!pendingRequest.IsOneWay)
                             SendResponse(result, pendingRequest.Method.Response.Id, pendingRequest.AssociationId);
+
+                        if (_pendingRequests.Count == 0)
+                            break;
                     }
                 }
             }
