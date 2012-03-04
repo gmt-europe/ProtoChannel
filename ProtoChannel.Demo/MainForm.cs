@@ -102,9 +102,23 @@ namespace ProtoChannel.Demo
             _errorProvider.SetError(_requestPerClient, error);
         }
 
-        public void AddSendMessage(long ticks)
+        private void _modeProtoChannel_CheckedChanged(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            UpdateEnabled();
+        }
+
+        private void _modeWcf_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateEnabled();
+        }
+
+        private void UpdateEnabled()
+        {
+            _messageSmallStream.Enabled = _modeProtoChannel.Checked;
+            _messageLargeStream.Enabled = _modeProtoChannel.Checked;
+
+            if (_modeWcf.Checked && (_messageSmallStream.Checked || _messageLargeStream.Checked))
+                _messageSimple.Checked = true;
         }
     }
 }

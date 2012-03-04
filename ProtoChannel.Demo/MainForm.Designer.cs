@@ -206,6 +206,7 @@
             this._modeProtoChannel.TabStop = true;
             this._modeProtoChannel.Text = "ProtoChannel";
             this._modeProtoChannel.UseVisualStyleBackColor = true;
+            this._modeProtoChannel.CheckedChanged += new System.EventHandler(this._modeProtoChannel_CheckedChanged);
             // 
             // _modeWcf
             // 
@@ -216,6 +217,7 @@
             this._modeWcf.TabIndex = 1;
             this._modeWcf.Text = "WCF";
             this._modeWcf.UseVisualStyleBackColor = true;
+            this._modeWcf.CheckedChanged += new System.EventHandler(this._modeWcf_CheckedChanged);
             // 
             // _concurrentClients
             // 
