@@ -117,7 +117,7 @@ namespace ProtoChannel.Web
 
             writer.WriteStartObject();
 
-            foreach (var field in type.Fields)
+            foreach (var field in type.Fields.Values)
             {
                 writer.WritePropertyName(field.Tag.ToString(CultureInfo.InvariantCulture));
 

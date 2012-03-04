@@ -42,9 +42,7 @@ namespace ProtoChannel
 
             // Push the version number.
 
-            var buffer = BitConverter.GetBytes((uint)Constants.ProtocolVersion);
-
-            ByteUtil.ConvertNetwork(buffer);
+            var buffer = BitConverterEx.GetNetworkBytes((uint)Constants.ProtocolVersion);
 
             Write(buffer, 0, buffer.Length);
 

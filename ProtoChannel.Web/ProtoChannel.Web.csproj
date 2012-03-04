@@ -80,6 +80,9 @@
     <Compile Include="PendingDownstreamMessage.cs" />
     <Compile Include="ProtoClient.cs" />
     <Compile Include="ProtoConfigurationSection.cs" />
+    <Compile Include="ServiceTypeByIdCollection.cs" />
+    <Compile Include="ServiceTypeByTypeCollection.cs" />
+    <Compile Include="ServiceTypeFieldCollection.cs" />
     <Compile Include="StreamDownloadRequest.cs" />
     <Compile Include="InvalidRequest.cs" />
     <Compile Include="JsonUtil.cs" />
@@ -96,7 +99,6 @@
     <Compile Include="ServiceTypeField.cs" />
     <Compile Include="TypeUtil.cs" />
     <Compile Include="Util\RandomKeyGenerator.cs" />
-    <Compile Include="Util\ReflectionOptimizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ProtoChannel\ProtoChannel-4.csproj">

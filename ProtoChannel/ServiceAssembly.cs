@@ -18,9 +18,9 @@ namespace ProtoChannel
 
         public RuntimeTypeModel TypeModel { get; private set; }
 
-        public IKeyedCollection<int, ServiceMessage> MessagesById { get; private set; }
+        public ServiceMessageByIdCollection MessagesById { get; private set; }
 
-        public IKeyedCollection<Type, ServiceMessage> MessagesByType { get; private set; }
+        public ServiceMessageByTypeCollection MessagesByType { get; private set; }
 
         public ServiceAssembly(Assembly assembly, RuntimeTypeModel typeModel, ServiceMessageByIdCollection messagesById, ServiceMessageByTypeCollection messagesByType)
         {
@@ -31,8 +31,8 @@ namespace ProtoChannel
 
             Assembly = assembly;
             TypeModel = typeModel;
-            MessagesById = new ReadOnlyKeyedCollection<int, ServiceMessage>(messagesById);
-            MessagesByType = new ReadOnlyKeyedCollection<Type, ServiceMessage>(messagesByType);
+            MessagesById = messagesById;
+            MessagesByType = messagesByType;
         }
 
         public Service GetServiceRegistration(Type serviceType)
@@ -72,13 +72,13 @@ namespace ProtoChannel
 
                 var serviceMethod = new ServiceMethod(method, methodAttribute, this);
 
-                if (methods.Contains(serviceMethod.Request))
+                if (methods.ContainsKey(serviceMethod.Request))
                     throw new ProtoChannelException(String.Format("Invalid service contract '{0}'; multiple ProtoMethod's found for message type '{1}'", serviceType, serviceMethod.Request.Type));
 
-                if (!messages.Contains(serviceMethod.Request.Id))
+                if (!messages.ContainsKey(serviceMethod.Request.Id))
                     messages.Add(serviceMethod.Request);
 
-                if (serviceMethod.Response != null && !messages.Contains(serviceMethod.Response.Id))
+                if (serviceMethod.Response != null && !messages.ContainsKey(serviceMethod.Response.Id))
                     messages.Add(serviceMethod.Response);
 
                 methods.Add(serviceMethod);

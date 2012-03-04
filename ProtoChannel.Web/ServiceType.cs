@@ -5,19 +5,18 @@ using System.Collections.Generic;
 using System;
 using ProtoBuf;
 using ProtoChannel.Util;
-using ProtoChannel.Web.Util;
 
 namespace ProtoChannel.Web
 {
     internal class ServiceType
     {
-        private readonly Dictionary<Type, IKeyedCollection<int, ServiceTypeField>> _fields = new Dictionary<Type, IKeyedCollection<int, ServiceTypeField>>();
+        private readonly Dictionary<Type, ServiceTypeFieldCollection> _fields = new Dictionary<Type, ServiceTypeFieldCollection>();
 
         public ServiceMessage Message { get; private set; }
 
         public Type Type { get; private set; }
 
-        public IKeyedCollection<int, ServiceTypeField> Fields { get; private set; }
+        public ServiceTypeFieldCollection Fields { get; private set; }
 
         public ServiceType(Type type)
         {
@@ -39,25 +38,23 @@ namespace ProtoChannel.Web
             }
         }
 
-        private IKeyedCollection<int, ServiceTypeField> BuildFields(Type type)
+        private ServiceTypeFieldCollection BuildFields(Type type)
         {
-            IKeyedCollection<int, ServiceTypeField> result;
+            ServiceTypeFieldCollection result;
 
             if (!_fields.TryGetValue(type, out result))
             {
-                var fields = new ServiceTypeFieldCollection();
+                result = new ServiceTypeFieldCollection();
 
                 foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
                 {
-                    AddMember(fields, field, field.FieldType);
+                    AddMember(result, field, field.FieldType);
                 }
 
                 foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
                 {
-                    AddMember(fields, property, property.PropertyType);
+                    AddMember(result, property, property.PropertyType);
                 }
-
-                result = new ReadOnlyKeyedCollection<int, ServiceTypeField>(fields);
 
                 _fields[type] = result;
             }
@@ -83,14 +80,6 @@ namespace ProtoChannel.Web
                 attribute.IsRequired,
                 memberType
             ));
-        }
-
-        private class ServiceTypeFieldCollection : KeyedCollection<int, ServiceTypeField>
-        {
-            protected override int GetKeyForItem(ServiceTypeField item)
-            {
-                return item.Tag;
-            }
         }
     }
 }

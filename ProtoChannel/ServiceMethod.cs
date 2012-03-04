@@ -4,19 +4,34 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using ProtoChannel.Util;
 
 namespace ProtoChannel
 {
     internal class ServiceMethod
     {
         private readonly ProtoMethodAttribute _attribute;
+        private readonly ReflectionOptimizer.MessageInvoker _invoker;
+        private readonly ReflectionOptimizer.VoidMessageInvoker _voidInvoker;
 
         public bool IsOneWay
         {
             get { return _attribute.IsOneWay; }
         }
 
-        public MethodInfo Method { get; private set; }
+        public object Invoke(object service, object message)
+        {
+            if (_invoker != null)
+            {
+                return _invoker(service, message);
+            }
+            else
+            {
+                _voidInvoker(service, message);
+
+                return null;
+            }
+        }
 
         public ServiceMessage Request { get; private set; }
 
@@ -26,8 +41,6 @@ namespace ProtoChannel
         {
             Require.NotNull(method, "method");
             Require.NotNull(attribute, "attribute");
-
-            Method = method;
 
             _attribute = attribute;
 
@@ -54,6 +67,12 @@ namespace ProtoChannel
                     throw new ProtoChannelException(String.Format("Assembly '{0}' does not contain a message type '{1}'", assembly.Assembly, method.ReturnType));
 
                 Response = response;
+
+                _invoker = ReflectionOptimizer.BuildMessageInvoker(method);
+            }
+            else
+            {
+                _voidInvoker = ReflectionOptimizer.BuildVoidMessageInvoker(method);
             }
         }
     }

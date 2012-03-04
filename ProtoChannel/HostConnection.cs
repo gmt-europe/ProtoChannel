@@ -95,9 +95,7 @@ namespace ProtoChannel
 
                     // Verify the protocol number.
 
-                    ByteUtil.ConvertNetwork(header, 4, 4);
-
-                    uint protocolVersion = BitConverter.ToUInt32(header, 4);
+                    uint protocolVersion = BitConverterEx.ToNetworkUInt32(header, 4);
 
                     if (protocolVersion != Constants.ProtocolVersion)
                     {

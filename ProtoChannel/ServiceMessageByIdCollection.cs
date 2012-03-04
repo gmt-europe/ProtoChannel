@@ -6,11 +6,11 @@ using ProtoChannel.Util;
 
 namespace ProtoChannel
 {
-    internal class ServiceMessageByIdCollection : KeyedCollection<int, ServiceMessage>
+    internal class ServiceMessageByIdCollection : Dictionary<int, ServiceMessage>
     {
-        protected override int GetKeyForItem(ServiceMessage item)
+        public void Add(ServiceMessage item)
         {
-            return item.Id;
+            Add(item.Id, item);
         }
     }
 }

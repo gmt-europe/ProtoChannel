@@ -13,9 +13,9 @@ namespace ProtoChannel
 
         public ServiceAssembly ServiceAssembly { get; private set; }
 
-        public IKeyedCollection<ServiceMessage, ServiceMethod> Methods { get; private set; }
+        public ServiceMethodCollection Methods { get; private set; }
 
-        public IKeyedCollection<int, ServiceMessage> Messages { get; private set; }
+        public ServiceMessageByIdCollection Messages { get; private set; }
 
         public Type CallbackContractType { get; private set; }
 
@@ -28,8 +28,8 @@ namespace ProtoChannel
 
             Type = serviceType;
             ServiceAssembly = serviceAssembly;
-            Methods = new ReadOnlyKeyedCollection<ServiceMessage, ServiceMethod>(methods);
-            Messages = new ReadOnlyKeyedCollection<int, ServiceMessage>(messagesById);
+            Methods = methods;
+            Messages = messagesById;
 
             var callbackAttributes = serviceType.GetCustomAttributes(typeof(ProtoCallbackContractAttribute), true);
 

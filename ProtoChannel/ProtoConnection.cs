@@ -71,9 +71,7 @@ namespace ProtoChannel
 
                 Read(buffer, 1, buffer.Length - 1);
 
-                ByteUtil.ConvertNetwork(buffer);
-
-                uint header = BitConverter.ToUInt32(buffer, 0);
+                uint header = BitConverterEx.ToNetworkUInt32(buffer, 0);
 
                 // Get the information from the header.
 
@@ -151,9 +149,7 @@ namespace ProtoChannel
 
             Read(buffer, 1, buffer.Length - 1);
 
-            ByteUtil.ConvertNetwork(buffer);
-
-            uint header = BitConverter.ToUInt32(buffer, 0);
+            uint header = BitConverterEx.ToNetworkUInt32(buffer, 0);
 
             uint messageKindNumber = header & 0x3;
             uint messageType = header >> 2;
@@ -183,9 +179,7 @@ namespace ProtoChannel
 
                 Read(buffer, 0, 2);
 
-                ByteUtil.ConvertNetwork(buffer, 0, 2);
-
-                associationId = BitConverter.ToUInt16(buffer, 0);
+                associationId = BitConverterEx.ToNetworkUInt16(buffer, 0);
             }
 
             ProcessMessage(messageKind, messageType, length, associationId);
@@ -259,49 +253,37 @@ namespace ProtoChannel
 
             // Start processing the message.
 
-            lock (SyncRoot)
-            {
-                _pendingRequests.Enqueue(new PendingRequest(message, isOneWay, associationId, method));
+            var pendingRequest = new PendingRequest(message, isOneWay, associationId, method);
 
-                if (_pendingRequests.Count == 1)
-                {
+            _pendingRequests.Enqueue(pendingRequest);
+
+            if (_pendingRequests.Count == 1)
+            {
 #if _NET_2
-                    ThreadPool.QueueUserWorkItem(ExecuteMessages, null);
+                ThreadPool.QueueUserWorkItem(ExecuteMessages, pendingRequest);
 #else
-                    Task.Factory.StartNew(ExecuteRequests, null);
+                Task.Factory.StartNew(ExecuteRequests, pendingRequest);
 #endif
-                }
             }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private void ExecuteRequests(object unused)
+        private void ExecuteRequests(object arg)
         {
+            var pendingRequest = (PendingRequest)arg;
+
             try
             {
                 while (true)
                 {
-                    PendingRequest pendingRequest;
-
-                    lock (SyncRoot)
-                    {
-                        if (IsDisposed || _pendingRequests.Count == 0)
-                            return;
-
-                        // Leave the message in the queue to not trigger a new
-                        // ExecuteRequests.
-
-                        pendingRequest = _pendingRequests.Peek();
-                    }
-
                     object result;
 
                     lock (Client.SyncRoot)
                     {
                         using (OperationContext.SetScope(new OperationContext(this, CallbackChannel)))
                         {
-                            result = pendingRequest.Method.Method.Invoke(
-                                Client.Instance, new[] { pendingRequest.Message }
+                            result = pendingRequest.Method.Invoke(
+                                Client.Instance, pendingRequest.Message
                             );
                         }
                     }
@@ -318,6 +300,8 @@ namespace ProtoChannel
 
                         if (_pendingRequests.Count == 0)
                             break;
+
+                        pendingRequest = _pendingRequests.Peek();
                     }
                 }
             }
@@ -339,17 +323,13 @@ namespace ProtoChannel
 
             uint header = (uint)MessageKind.Response | (uint)messageType << 2;
 
-            byte[] buffer = BitConverter.GetBytes(header);
-
-            ByteUtil.ConvertNetwork(buffer);
+            byte[] buffer = BitConverterEx.GetNetworkBytes(header);
 
             Write(buffer, 1, buffer.Length - 1);
 
             // Write the association ID.
 
-            buffer = BitConverter.GetBytes((ushort)associationId);
-
-            ByteUtil.ConvertNetwork(buffer);
+            buffer = BitConverterEx.GetNetworkBytes((ushort)associationId);
 
             Write(buffer, 0, buffer.Length);
 
@@ -399,9 +379,7 @@ namespace ProtoChannel
 
             Read(buffer, 1, buffer.Length - 1);
 
-            ByteUtil.ConvertNetwork(buffer);
-
-            uint header = BitConverter.ToUInt32(buffer, 0);
+            uint header = BitConverterEx.ToNetworkUInt32(buffer, 0);
 
             // Get the details from the header.
 
@@ -462,9 +440,7 @@ namespace ProtoChannel
 
             uint header = (uint)responseType | (uint)associationId << 3;
 
-            var buffer = BitConverter.GetBytes(header);
-
-            ByteUtil.ConvertNetwork(buffer);
+            var buffer = BitConverterEx.GetNetworkBytes(header);
 
             // Write the header.
 
@@ -546,9 +522,7 @@ namespace ProtoChannel
 
             uint messageHeader = (uint)messageLength << 3 | (uint)packageType;
 
-            var buffer = BitConverter.GetBytes(messageHeader);
-
-            ByteUtil.ConvertNetwork(buffer);
+            var buffer = BitConverterEx.GetNetworkBytes(messageHeader);
 
             Write(buffer, 1, buffer.Length - 1);
 
@@ -608,9 +582,7 @@ namespace ProtoChannel
         {
             uint header = (uint)streamPackageType | (uint)request.Stream.AssociationId << 3;
 
-            var buffer = BitConverter.GetBytes(header);
-
-            ByteUtil.ConvertNetwork(buffer);
+            var buffer = BitConverterEx.GetNetworkBytes(header);
 
             Write(buffer, 1, buffer.Length - 1);
         }
@@ -648,9 +620,7 @@ namespace ProtoChannel
 
                 uint header = (uint)StreamPackageType.StartStream | (uint)associationId.Value << 3;
 
-                var buffer = BitConverter.GetBytes(header);
-
-                ByteUtil.ConvertNetwork(buffer);
+                var buffer = BitConverterEx.GetNetworkBytes(header);
 
                 Write(buffer, 1, buffer.Length - 1);
 
@@ -709,9 +679,7 @@ namespace ProtoChannel
 
                 uint header = (uint)MessageKind.Request | (uint)messageType.Id << 2;
 
-                var buffer = BitConverter.GetBytes(header);
-
-                ByteUtil.ConvertNetwork(buffer);
+                var buffer = BitConverterEx.GetNetworkBytes(header);
 
                 Write(buffer, 1, buffer.Length - 1);
 
@@ -719,9 +687,7 @@ namespace ProtoChannel
 
                 var pendingMessage = _messageManager.GetPendingMessage(responseMessageType, callback, asyncState);
 
-                buffer = BitConverter.GetBytes((ushort)pendingMessage.AssociationId);
-
-                ByteUtil.ConvertNetwork(buffer);
+                buffer = BitConverterEx.GetNetworkBytes((ushort)pendingMessage.AssociationId);
 
                 Write(buffer, 0, buffer.Length);
 
@@ -766,9 +732,7 @@ namespace ProtoChannel
 
                 uint header = (uint)MessageKind.OneWay | (uint)messageType.Id << 2;
 
-                var buffer = BitConverter.GetBytes(header);
-
-                ByteUtil.ConvertNetwork(buffer);
+                var buffer = BitConverterEx.GetNetworkBytes(header);
 
                 Write(buffer, 1, buffer.Length - 1);
 

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 
-namespace ProtoChannel.Web.Util
+namespace ProtoChannel.Util
 {
     internal static class ReflectionOptimizer
     {
@@ -14,6 +14,8 @@ namespace ProtoChannel.Web.Util
 
         public delegate object Getter(object obj);
         public delegate void Setter(object obj, object value);
+        public delegate object MessageInvoker(object service, object message);
+        public delegate void VoidMessageInvoker(object service, object message);
 
         public static Getter BuildGetter(MemberInfo memberInfo)
         {
@@ -251,6 +253,84 @@ namespace ProtoChannel.Web.Util
                 return (TResult)value;
             else
                 return (TResult)System.Convert.ChangeType(value, typeof(TTarget));
+        }
+
+        public static MessageInvoker BuildMessageInvoker(MethodInfo methodInfo)
+        {
+            Require.NotNull(methodInfo, "methodInfo");
+            Require.That(methodInfo.ReturnType != typeof(void), "Method may not return void; use BuildVoidMessageInvoker instead", "methodInfo");
+
+            var parameters = methodInfo.GetParameters();
+
+            Require.That(parameters.Length == 1, "Message method must have a single parameter", "methodInfo");
+
+            var method = new DynamicMethod(
+                methodInfo.DeclaringType.Name + "_" + methodInfo.Name + "_Invoker",
+                typeof(object),
+                new[] { typeof(object), typeof(object) },
+                true
+            );
+
+            var il = method.GetILGenerator();
+
+            // Cast the target object
+
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Castclass, methodInfo.DeclaringType);
+
+            // Cast the message
+
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Castclass, parameters[0].ParameterType);
+
+            // Call the method
+
+            il.Emit(OpCodes.Callvirt, methodInfo);
+
+            // Return
+
+            il.Emit(OpCodes.Ret);
+
+            return (MessageInvoker)method.CreateDelegate(typeof(MessageInvoker));
+        }
+
+        public static VoidMessageInvoker BuildVoidMessageInvoker(MethodInfo methodInfo)
+        {
+            Require.NotNull(methodInfo, "methodInfo");
+            Require.That(methodInfo.ReturnType == typeof(void), "Method must return void; use BuildMessageInvoker instead", "methodInfo");
+
+            var parameters = methodInfo.GetParameters();
+
+            Require.That(parameters.Length == 1, "Message method must have a single parameter", "methodInfo");
+
+            var method = new DynamicMethod(
+                methodInfo.DeclaringType.Name + "_" + methodInfo.Name + "_VoidInvoker",
+                typeof(void),
+                new[] { typeof(object), typeof(object) },
+                true
+            );
+
+            var il = method.GetILGenerator();
+
+            // Cast the target object
+
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Castclass, methodInfo.DeclaringType);
+
+            // Cast the message
+
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Castclass, parameters[0].ParameterType);
+
+            // Call the method
+
+            il.Emit(OpCodes.Callvirt, methodInfo);
+
+            // Return
+
+            il.Emit(OpCodes.Ret);
+
+            return (VoidMessageInvoker)method.CreateDelegate(typeof(VoidMessageInvoker));
         }
     }
 }

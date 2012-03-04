@@ -125,10 +125,9 @@
     <Compile Include="TcpConnection.cs" />
     <Compile Include="UnhandledExceptionEventHandler.cs" />
     <Compile Include="Util\AsyncResultImpl.cs" />
+    <Compile Include="Util\BitConverterEx.cs" />
     <Compile Include="Util\ByteUtil.cs" />
-    <Compile Include="Util\IKeyedCollection.cs" />
-    <Compile Include="Util\KeyedCollection.cs" />
-    <Compile Include="Util\ReadOnlyKeyedCollection.cs" />
+    <Compile Include="Util\ReflectionOptimizer.cs" />
     <Compile Include="Util\RingMemoryBufferManager.cs" />
     <Compile Include="Util\RingMemoryPage.cs" />
     <Compile Include="Util\RingMemoryStream.cs" />

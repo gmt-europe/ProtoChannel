@@ -76,9 +76,8 @@
     <Compile Include="Service\ServerCallbackService.cs" />
     <Compile Include="Service\ServerService.cs" />
     <Compile Include="Streaming\StreamingFixture.cs" />
+    <Compile Include="Util\BitConverterExFixture.cs" />
     <Compile Include="Util\ByteUtilFixture.cs" />
-    <Compile Include="Util\KeyedCollectionFixture.cs" />
-    <Compile Include="Util\ReadOnlyKeyedCollectionFixture.cs" />
     <Compile Include="Util\RingMemoryStream.cs" />
   </ItemGroup>
   <ItemGroup>

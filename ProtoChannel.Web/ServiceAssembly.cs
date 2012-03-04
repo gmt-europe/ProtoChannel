@@ -11,19 +11,13 @@ namespace ProtoChannel.Web
 {
     internal class ServiceAssembly
     {
-        private readonly ServiceTypeByIdCollection _typesById = new ServiceTypeByIdCollection();
-        private readonly ServiceTypeByTypeCollection _typesByType = new ServiceTypeByTypeCollection();
+        public ServiceTypeByIdCollection TypesById { get; private set; }
 
-        public IKeyedCollection<int, ServiceType> TypesById { get; private set; }
-
-        public IKeyedCollection<Type, ServiceType> TypesByType { get; private set; }
+        public ServiceTypeByTypeCollection TypesByType { get; private set; }
 
         public ServiceAssembly(Assembly assembly)
         {
             Require.NotNull(assembly, "assembly");
-
-            TypesById = new ReadOnlyKeyedCollection<int, ServiceType>(_typesById);
-            TypesByType = new ReadOnlyKeyedCollection<Type, ServiceType>(_typesByType);
 
             foreach (var type in assembly.GetTypes())
             {
@@ -34,28 +28,10 @@ namespace ProtoChannel.Web
 
                 var serviceType = new ServiceType(type);
 
-                _typesByType.Add(serviceType);
+                TypesByType.Add(serviceType);
 
                 if (serviceType.Message != null)
-                    _typesById.Add(serviceType);
-            }
-        }
-
-        private class ServiceTypeByTypeCollection : KeyedCollection<Type, ServiceType>
-        {
-            protected override Type GetKeyForItem(ServiceType item)
-            {
-                return item.Type;
-            }
-        }
-
-        private class ServiceTypeByIdCollection : KeyedCollection<int, ServiceType>
-        {
-            protected override int GetKeyForItem(ServiceType item)
-            {
-                Debug.Assert(item.Message != null);
-
-                return item.Message.Id;
+                    TypesById.Add(serviceType);
             }
         }
     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ProtoBuf;
-﻿using ProtoChannel.Web.Util;
+﻿using ProtoChannel.Util;
 
 namespace ProtoChannel.Web
 {
