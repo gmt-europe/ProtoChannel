@@ -47,6 +47,8 @@ namespace ProtoChannel
             if (!_pendingMessages.TryGetValue(associationId, out result))
                 throw new ProtoChannelException("No pending message found for the provided association ID");
 
+            _pendingMessages.Remove(associationId);
+
             return result;
         }
 
