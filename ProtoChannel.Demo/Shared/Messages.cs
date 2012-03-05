@@ -1,20 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using ProtoBuf;
 
 namespace ProtoChannel.Demo.Shared
 {
-    [ProtoMessage(1), ProtoContract, DataContract]
+    [ProtoMessage(1), ProtoContract]
+#if _NET_4
+    [DataContract]
+#endif
     public class SimpleMessage
     {
-        [ProtoMember(1, IsRequired = true), DataMember]
+        [ProtoMember(1, IsRequired = true)]
+#if _NET_4
+        [DataMember]
+#endif
         public int Value { get; set; }
     }
 
-    [ProtoMessage(2), ProtoContract, DataContract]
+    [ProtoMessage(2), ProtoContract]
+#if _NET_4
+    [DataContract]
+#endif
     public class ComplexMessage
     {
         public ComplexMessage()
@@ -22,20 +30,35 @@ namespace ProtoChannel.Demo.Shared
             Values = new List<ComplexValue>();
         }
 
-        [ProtoMember(1, IsRequired = true), DataMember]
+        [ProtoMember(1, IsRequired = true)]
+#if _NET_4
+        [DataMember]
+#endif
         public List<ComplexValue> Values { get; private set; }
     }
 
-    [ProtoContract, DataContract]
+    [ProtoContract]
+#if _NET_4
+    [DataContract]
+#endif
     public class ComplexValue
     {
-        [ProtoMember(1, IsRequired = true), DataMember]
+        [ProtoMember(1, IsRequired = true)]
+#if _NET_4
+        [DataMember]
+#endif
         public int IntValue { get; set; }
 
-        [ProtoMember(2, IsRequired = true), DataMember]
+        [ProtoMember(2, IsRequired = true)]
+#if _NET_4
+        [DataMember]
+#endif
         public string StringValue { get; set; }
 
-        [ProtoMember(3, IsRequired = true), DataMember]
+        [ProtoMember(3, IsRequired = true)]
+#if _NET_4
+        [DataMember]
+#endif
         public double DoubleValue { get; set; }
     }
 

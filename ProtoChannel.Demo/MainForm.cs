@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Net.Security;
+#if _NET_4
 using System.ServiceModel;
 using System.ServiceModel.Description;
+#endif
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -17,7 +18,9 @@ namespace ProtoChannel.Demo
     public partial class MainForm : Form
     {
         private readonly ProtoHost<ProtoService.ServerService> _protoServer;
+#if _NET_4
         private ServiceHost _wcfServer;
+#endif
 
         public MainForm()
         {
@@ -25,6 +28,7 @@ namespace ProtoChannel.Demo
 
             _protoServer = new ProtoHost<ProtoService.ServerService>(new IPEndPoint(IPAddress.Any, Constants.ProtoChannelPort));
 
+#if _NET_4
             var waitEvent = new ManualResetEvent(false);
 
             ThreadPool.QueueUserWorkItem(p =>
@@ -37,6 +41,9 @@ namespace ProtoChannel.Demo
             });
 
             waitEvent.WaitOne();
+#else
+            _modeWcf.Enabled = false;
+#endif
         }
 
         private void _acceptButton_Click(object sender, EventArgs e)

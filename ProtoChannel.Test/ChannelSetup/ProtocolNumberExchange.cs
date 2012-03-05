@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -52,8 +51,10 @@ namespace ProtoChannel.Test.ChannelSetup
 
         private class ClientConfiguration : ProtoClientConfiguration
         {
-            public Func<int, int, int> ProtocolChooser { get; set; }
+            public ProtocolChooserCallback ProtocolChooser { get; set; }
         }
+
+        private delegate int ProtocolChooserCallback(int minVersion, int maxVersion);
 
         private class ClientService : Service.ClientService
         {

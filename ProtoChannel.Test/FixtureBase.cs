@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Common.Logging;
@@ -44,9 +43,20 @@ namespace ProtoChannel.Test
             using (var inputStream = GetType().Assembly.GetManifestResourceStream(resourceName))
             using (var outputStream = new MemoryStream())
             {
-                inputStream.CopyTo(outputStream);
+                CopyStream(inputStream, outputStream);
 
                 return new X509Certificate2(outputStream.ToArray());
+            }
+        }
+
+        private void CopyStream(Stream inputStream, Stream outputStream)
+        {
+            var buffer = new byte[0x1000];
+            int read;
+
+            while ((read = inputStream.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                outputStream.Write(buffer, 0, read);
             }
         }
     }

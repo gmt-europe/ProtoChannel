@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using ProtoBuf.Meta;
 using ProtoChannel.Util;
+#if _NET_4
 using System.Threading.Tasks;
+#endif
 
 namespace ProtoChannel
 {
@@ -260,7 +262,7 @@ namespace ProtoChannel
             if (_pendingRequests.Count == 1)
             {
 #if _NET_2
-                ThreadPool.QueueUserWorkItem(ExecuteMessages, pendingRequest);
+                ThreadPool.QueueUserWorkItem(ExecuteRequests, pendingRequest);
 #else
                 Task.Factory.StartNew(ExecuteRequests, pendingRequest);
 #endif

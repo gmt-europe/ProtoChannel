@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
-using System.Collections.Concurrent;
 #if _NET_4
-
+using System.Collections.Concurrent;
 #endif
 
 namespace ProtoChannel.Util

@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{AE44E74F-982E-4FD1-A0BC-7F2C01A3F8E5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ProtoChannel.Test</RootNamespace>
+    <AssemblyName>ProtoChannel.Test-4</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;_NET_4</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\Key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Common.Logging, Version=2.0.0.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\Common.Logging\Common.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\Libraries\NUnit\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>..\Libraries\Protobuf-Net\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TraceListeners">
+      <HintPath>..\Libraries\TraceListeners\TraceListeners.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ChannelSetup\BasicConnection.cs" />
+    <Compile Include="ChannelSetup\ProtocolNumberExchange.cs" />
+    <Compile Include="FixtureBase.cs" />
+    <Compile Include="Infrastructure\CloseHostFixture.cs" />
+    <Compile Include="Infrastructure\HybridStreamManagerFixture.cs" />
+    <Compile Include="Infrastructure\InvalidServerService.cs" />
+    <Compile Include="Infrastructure\OperationContextFixture.cs" />
+    <Compile Include="Infrastructure\RogueClient.cs" />
+    <Compile Include="Infrastructure\UnhandledExceptionTestFixture.cs" />
+    <Compile Include="MessageExchange\MessageExchangeFixture.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\ClientCallbackService.cs" />
+    <Compile Include="Service\ClientService.cs" />
+    <Compile Include="Service\Messages.cs" />
+    <Compile Include="Service\ServerCallbackService.cs" />
+    <Compile Include="Service\ServerService.cs" />
+    <Compile Include="Streaming\StreamingFixture.cs" />
+    <Compile Include="Util\BitConverterExFixture.cs" />
+    <Compile Include="Util\ByteUtilFixture.cs" />
+    <Compile Include="Util\RingMemoryStream.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProtoChannel\ProtoChannel-4.csproj">
+      <Project>{B43F28DC-926B-4B95-AF13-83F74F7BCC5A}</Project>
+      <Name>ProtoChannel-4</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Key.snk">
+      <Link>Key.snk</Link>
+    </None>
+    <None Include="testcert.pem" />
+    <EmbeddedResource Include="testcert.pfx" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

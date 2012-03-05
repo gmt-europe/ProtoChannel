@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -26,7 +25,7 @@ namespace ProtoChannel.Test.Infrastructure
                     host.Close(CloseMode.Gracefully, TimeSpan.FromMilliseconds(100));
                     stopwatch.Stop();
 
-                    Assert.GreaterOrEqual(stopwatch.ElapsedMilliseconds, 100);
+                    Assert.GreaterOrEqual(stopwatch.ElapsedMilliseconds, 90);
                 }
             }
         }
@@ -74,7 +73,7 @@ namespace ProtoChannel.Test.Infrastructure
                 host.Close(CloseMode.Gracefully, TimeSpan.FromMilliseconds(500));
                 stopwatch.Stop();
 
-                Assert.GreaterOrEqual(stopwatch.ElapsedMilliseconds, 100);
+                Assert.GreaterOrEqual(stopwatch.ElapsedMilliseconds, 90);
                 Assert.LessOrEqual(stopwatch.ElapsedMilliseconds, 150);
             }
         }

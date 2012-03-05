@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -16,7 +15,7 @@ namespace ProtoChannel.Demo
         private readonly object _syncRoot = new object();
         private readonly TestClientRunner _clientRunner;
         private bool _completed;
-        private HashSet<TestClient> _clients = new HashSet<TestClient>();
+        private Dictionary<TestClient, bool> _clients = new Dictionary<TestClient, bool>();
         private int _clientsRunningValue;
         private int _clientsCompletedValue;
         private readonly TickCounter _timePerRequestValue = new TickCounter();
@@ -28,8 +27,10 @@ namespace ProtoChannel.Demo
         {
             if (mode == TestMode.ProtoChannel)
                 _clientRunner = new ProtoChannelClientRunner(this, settings);
+#if _NET_4
             else
                 _clientRunner = new WcfClientRunner(this, settings);
+#endif
 
 
             InitializeComponent();
@@ -55,7 +56,7 @@ namespace ProtoChannel.Demo
                 {
                     _clientsRunningValue++;
 
-                    _clients.Add(client);
+                    _clients.Add(client, true);
                 }
 
                 client.Completed += client_Completed;
@@ -140,4 +141,8 @@ namespace ProtoChannel.Demo
             }
         }
     }
+
+#if _NET_2
+    public delegate void Action();
+#endif
 }

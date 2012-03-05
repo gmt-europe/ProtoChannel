@@ -5,20 +5,21 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{AE44E74F-982E-4FD1-A0BC-7F2C01A3F8E5}</ProjectGuid>
+    <ProjectGuid>{A92F969D-A161-4338-AB39-4D5419DF91CE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ProtoChannel.Test</RootNamespace>
-    <AssemblyName>ProtoChannel.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <AssemblyName>ProtoChannel.Test-2</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;_NET_2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -48,10 +49,6 @@
       <HintPath>..\Libraries\Protobuf-Net\protobuf-net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="TraceListeners">
@@ -81,17 +78,17 @@
     <Compile Include="Util\RingMemoryStream.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProtoChannel\ProtoChannel-4.csproj">
-      <Project>{B43F28DC-926B-4B95-AF13-83F74F7BCC5A}</Project>
-      <Name>ProtoChannel-4</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\Key.snk">
       <Link>Key.snk</Link>
     </None>
     <None Include="testcert.pem" />
     <EmbeddedResource Include="testcert.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProtoChannel\ProtoChannel-2.csproj">
+      <Project>{3B7848E6-172A-4797-BE0C-DEA3CC8D612A}</Project>
+      <Name>ProtoChannel-2</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

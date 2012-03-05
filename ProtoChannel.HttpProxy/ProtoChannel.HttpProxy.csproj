@@ -108,9 +108,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ProtoChannel.Test\ProtoChannel.Test.csproj">
+    <ProjectReference Include="..\ProtoChannel.Test\ProtoChannel.Test-4.csproj">
       <Project>{AE44E74F-982E-4FD1-A0BC-7F2C01A3F8E5}</Project>
-      <Name>ProtoChannel.Test</Name>
+      <Name>ProtoChannel.Test-4</Name>
     </ProjectReference>
     <ProjectReference Include="..\ProtoChannel.Web\ProtoChannel.Web.csproj">
       <Project>{9768EB10-ED94-444C-BC70-36FE325B60E5}</Project>
