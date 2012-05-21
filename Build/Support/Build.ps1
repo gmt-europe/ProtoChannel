@@ -81,6 +81,8 @@ Function Gather-Files
 {
     Write-Host "Gathering files"
     
+    Copy-Item ($Global:Paths.Root + "License.txt") -Destination ($Global:Paths.Distrib + "License.txt")
+    
     Copy-Release -Project "ProtoChannel" -File "ProtoChannel-2.dll" -Type "ProtoChannel"
     Copy-Release -Project "ProtoChannel" -File "ProtoChannel-4.dll" -Type "ProtoChannel"
     Copy-Release -Project "ProtoChannel" -File "protobuf-net.dll" -Type "ProtoChannel"
