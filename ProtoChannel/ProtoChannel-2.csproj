@@ -29,7 +29,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;_NET_4</DefineConstants>
+    <DefineConstants>TRACE;_NET_2</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Code Analysis|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Code Analysis\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;_NET_4</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;_NET_2</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisLogFile>bin\Debug\ProtoChannel-4.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
