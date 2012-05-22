@@ -83,8 +83,8 @@ namespace ProtoChannel.CodeGenerator
                 // Only write the file when it has changed to not trigger
                 // (certain) source control systems etc.
 
-                if (!File.Exists(_fileName) || File.ReadAllText(_fileName) != content)
-                    File.WriteAllText(_fileName, content);
+                if (!File.Exists(_fileName) || File.ReadAllText(_fileName, Encoding.UTF8) != content)
+                    File.WriteAllText(_fileName, content, Encoding.UTF8);
 
                 _disposed = true;
             }
