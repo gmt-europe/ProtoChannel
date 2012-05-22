@@ -15,7 +15,7 @@ namespace ProtoChannel
     internal abstract class ProtoConnection : TcpConnection, IProtoConnection
     {
         private static readonly byte[] FrameSpacing = new byte[3];
-        private static RuntimeTypeModel _typeModel = CreateTypeModel();
+        private static readonly RuntimeTypeModel _typeModel = CreateTypeModel();
 
         private static RuntimeTypeModel CreateTypeModel()
         {
@@ -35,6 +35,7 @@ namespace ProtoChannel
         private readonly PendingMessageManager _messageManager = new PendingMessageManager();
         private readonly ServiceAssembly _serviceAssembly;
         private readonly Queue<PendingRequest> _pendingRequests = new Queue<PendingRequest>();
+        private bool _disposed;
 
         public Client Client { get; set; }
 
@@ -746,6 +747,25 @@ namespace ProtoChannel
 
                 EndSendPackage(PackageType.Message, packageStart);
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            lock (SyncRoot)
+            {
+                if (!_disposed && disposing)
+                {
+                    if (Client != null)
+                    {
+                        Client.Dispose();
+                        Client = null;
+                    }
+
+                    _disposed = true;
+                }
+            }
+
+            base.Dispose(disposing);
         }
 
         private class DispatchMessage
