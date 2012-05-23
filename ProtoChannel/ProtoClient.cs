@@ -164,6 +164,11 @@ namespace ProtoChannel
             return _connection.SendStream(stream, streamName, contentType, associationId);
         }
 
+        public ProtoStream GetStream(int streamId)
+        {
+            return EndGetStream(BeginGetStream(streamId, null, null));
+        }
+
         public IAsyncResult BeginGetStream(int streamId, AsyncCallback callback, object asyncState)
         {
             VerifyState();
