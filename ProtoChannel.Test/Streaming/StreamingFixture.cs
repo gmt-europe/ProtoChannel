@@ -19,11 +19,13 @@ namespace ProtoChannel.Test.Streaming
             {
                 var response = client.StreamRequest(new StreamRequest());
 
-                var stream = client.EndGetStream(client.BeginGetStream((int)response.StreamId, null, null));
-
-                using (var reader = new StreamReader(stream.Stream))
+                using (var protoStream = client.EndGetStream(client.BeginGetStream((int)response.StreamId, null, null)))
                 {
-                    Console.WriteLine(reader.ReadToEnd());
+                    using (var stream = protoStream.DetachStream())
+                    using (var reader = new StreamReader(stream))
+                    {
+                        Console.WriteLine(reader.ReadToEnd());
+                    }
                 }
             }
         }

@@ -31,18 +31,22 @@ namespace ProtoChannel.Web
 
         private void BeginGetStreamCallback(IAsyncResult asyncResult)
         {
-            var stream = _client.Client.EndGetStream(asyncResult);
+            using (var protoStream = _client.Client.EndGetStream(asyncResult))
+            {
+                _client.Touch();
 
-            _client.Touch();
+                string disposition = Context.Request.QueryString["disposition"] ?? "inline";
 
-            string disposition = Context.Request.QueryString["disposition"] ?? "inline";
+                Context.Response.ContentType = protoStream.ContentType;
+                Context.Response.Headers["Content-Disposition"] = disposition + "; filename=" + protoStream.StreamName;
 
-            Context.Response.ContentType = stream.ContentType;
-            Context.Response.Headers["Content-Disposition"] = disposition + "; filename=" + stream.StreamName;
+                using (var stream = protoStream.DetachStream())
+                {
+                    stream.CopyTo(Context.Response.OutputStream);
+                }
 
-            stream.Stream.CopyTo(Context.Response.OutputStream);
-
-            SetAsCompleted(null, false);
+                SetAsCompleted(null, false);
+            }
         }
     }
 }

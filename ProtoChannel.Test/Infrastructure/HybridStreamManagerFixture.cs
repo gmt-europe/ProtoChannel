@@ -38,9 +38,10 @@ namespace ProtoChannel.Test.Infrastructure
             {
                 var response = client.StreamRequest(new StreamRequest { Length = 10 });
 
-                using (var stream = client.EndGetStream(client.BeginGetStream((int)response.StreamId, null, null)))
+                using (var protoStream = client.EndGetStream(client.BeginGetStream((int)response.StreamId, null, null)))
+                using (var stream = protoStream.DetachStream())
                 {
-                    Assert.That(stream.Stream, Is.InstanceOf<MemoryStream>());
+                    Assert.That(stream, Is.InstanceOf<MemoryStream>());
                 }
             }
         }
@@ -58,9 +59,10 @@ namespace ProtoChannel.Test.Infrastructure
             {
                 var response = client.StreamRequest(new StreamRequest { Length = 100 });
 
-                using (var stream = client.EndGetStream(client.BeginGetStream((int)response.StreamId, null, null)))
+                using (var protoStream = client.EndGetStream(client.BeginGetStream((int)response.StreamId, null, null)))
+                using (var stream = protoStream.DetachStream())
                 {
-                    Assert.That(stream.Stream, Is.InstanceOf<FileStream>());
+                    Assert.That(stream, Is.InstanceOf<FileStream>());
                 }
             }
         }

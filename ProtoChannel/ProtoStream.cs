@@ -15,24 +15,34 @@ namespace ProtoChannel
 
         public string ContentType { get; private set; }
 
-        public Stream Stream { get; private set; }
+        private Stream _stream;
 
         public ProtoStream(long length, string streamName, string contentType, Stream stream)
         {
             Length = length;
             StreamName = streamName;
             ContentType = contentType;
-            Stream = stream;
+
+            _stream = stream;
+        }
+
+        public Stream DetachStream()
+        {
+            var stream = _stream;
+
+            _stream = null;
+
+            return stream;
         }
 
         public void Dispose()
         {
             if (!_disposed)
             {
-                if (Stream != null)
+                if (_stream != null)
                 {
-                    Stream.Dispose();
-                    Stream = null;
+                    _stream.Dispose();
+                    _stream = null;
                 }
 
                 _disposed = true;
