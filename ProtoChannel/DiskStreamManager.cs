@@ -20,6 +20,8 @@ namespace ProtoChannel
         {
             Require.NotNull(path, "path");
 
+            path = Environment.ExpandEnvironmentVariables(path);
+
             if (!Directory.Exists(path))
                 throw new ArgumentException("Path does not exist", "path");
 
