@@ -136,7 +136,7 @@
     it('nested type array roundtrip', function () {
         runs(function () {
             var request = new NestedTypeArrayTest({
-                values: [{ value: 'a' }, { value: 'b' }]
+                values: [{ value: 'a' }, { value: 'b'}]
             });
 
             sendRequest.apply(this, [request]);
@@ -151,6 +151,53 @@
             expect(response.values.length).toEqual(2);
             expect(response.values[0].value).toEqual('a');
             expect(response.values[1].value).toEqual('b');
+        });
+    });
+
+    it('enum roundtrip', function () {
+        runs(function () {
+            var request = new MessageWithEnum({
+                gender: Gender.Female
+            });
+
+            sendRequest.apply(this, [request]);
+        });
+
+        waitsFor(waitForResponse);
+
+        runs(function () {
+            var response = getResponse.apply(this);
+
+            expect(response instanceof MessageWithEnum).toBeTruthy();
+            expect(response.gender).toEqual(Gender.Female);
+        });
+    });
+
+    it('nested type roundtrip', function () {
+        runs(function () {
+            sendRequest.apply(this, [new MessageWithNestedTypes()]);
+        });
+
+        waitsFor(waitForResponse);
+
+        runs(function () {
+            var response = getResponse.apply(this);
+
+            expect(response instanceof MessageWithNestedTypes).toBeTruthy();
+        });
+    });
+
+    it('circular reference type', function () {
+        runs(function () {
+            sendRequest.apply(this, [new MessageWithCircularReference()]);
+        });
+
+        waitsFor(waitForResponse);
+
+        runs(function () {
+            var response = getResponse.apply(this);
+
+            expect(response instanceof MessageWithCircularReference).toBeTruthy();
         });
     });
 });

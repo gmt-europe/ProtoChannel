@@ -10,8 +10,6 @@ namespace ProtoChannel.Web
 {
     internal class ServiceType
     {
-        private readonly Dictionary<Type, ServiceTypeFieldCollection> _fields = new Dictionary<Type, ServiceTypeFieldCollection>();
-
         public ServiceMessage Message { get; private set; }
 
         public Type Type { get; private set; }
@@ -23,46 +21,42 @@ namespace ProtoChannel.Web
             Require.NotNull(type, "type");
 
             Type = type;
+        }
 
-            Fields = BuildFields(Type);
+        public void Build(ServiceAssembly assembly)
+        {
+            Fields = BuildFields(assembly, Type);
 
-            var messageAttributes = type.GetCustomAttributes(typeof(ProtoMessageAttribute), true);
+            var messageAttributes = Type.GetCustomAttributes(typeof(ProtoMessageAttribute), true);
 
             if (messageAttributes.Length > 0)
             {
                 Debug.Assert(messageAttributes.Length == 1);
 
-                Message = ProtoChannel.ServiceRegistry.GetAssemblyRegistration(type.Assembly).MessagesById[
+                Message = ProtoChannel.ServiceRegistry.GetAssemblyRegistration(Type.Assembly).MessagesById[
                     ((ProtoMessageAttribute)messageAttributes[0]).MessageId
                 ];
             }
         }
 
-        private ServiceTypeFieldCollection BuildFields(Type type)
+        private ServiceTypeFieldCollection BuildFields(ServiceAssembly assembly, Type type)
         {
-            ServiceTypeFieldCollection result;
+            var result = new ServiceTypeFieldCollection();
 
-            if (!_fields.TryGetValue(type, out result))
+            foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
             {
-                result = new ServiceTypeFieldCollection();
+                AddMember(assembly, result, field, field.FieldType);
+            }
 
-                foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                {
-                    AddMember(result, field, field.FieldType);
-                }
-
-                foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                {
-                    AddMember(result, property, property.PropertyType);
-                }
-
-                _fields[type] = result;
+            foreach (var property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+            {
+                AddMember(assembly, result, property, property.PropertyType);
             }
 
             return result;
         }
 
-        private static void AddMember(ServiceTypeFieldCollection result, MemberInfo member, Type memberType)
+        private static void AddMember(ServiceAssembly assembly, ServiceTypeFieldCollection result, MemberInfo member, Type memberType)
         {
             var attributes = member.GetCustomAttributes(typeof(ProtoMemberAttribute), true);
 
@@ -74,6 +68,7 @@ namespace ProtoChannel.Web
             var attribute = (ProtoMemberAttribute)attributes[0];
 
             result.Add(new ServiceTypeField(
+                assembly,
                 ReflectionOptimizer.BuildGetter(member),
                 ReflectionOptimizer.BuildSetter(member, true),
                 attribute.Tag,

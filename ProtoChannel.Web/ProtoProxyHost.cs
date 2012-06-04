@@ -42,7 +42,7 @@ namespace ProtoChannel.Web
 
             configuration.CallbackObject = new CallbackChannel(this, key);
 
-            var client = new ProtoClient(_hostname, _hostPort, configuration, protocolVersion);
+            var client = ProtoClient.CreateClient(_hostname, _hostPort, configuration, protocolVersion);
 
             lock (_syncRoot)
             {

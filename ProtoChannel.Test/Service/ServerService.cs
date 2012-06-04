@@ -97,6 +97,24 @@ namespace ProtoChannel.Test.Service
             throw new Exception("Exception from method");
         }
 
+        [ProtoMethod]
+        public MessageWithEnum EnumTest(MessageWithEnum message)
+        {
+            return message;
+        }
+
+        [ProtoMethod]
+        public MessageWithNestedTypes NestedClassTypeTest(MessageWithNestedTypes message)
+        {
+            return message;
+        }
+
+        [ProtoMethod]
+        public MessageWithCircularReference CircularReference(MessageWithCircularReference message)
+        {
+            return message;
+        }
+
         private class PendingGetStream
         {
             private readonly ServerCallbackService _callbackService;

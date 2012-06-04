@@ -66,7 +66,7 @@ namespace ProtoChannel.Web
                         if (reader.TokenType == JsonToken.EndArray)
                             break;
 
-                        if (field.ServiceType != null)
+                        if (field.ServiceType != null && !field.ServiceType.Type.IsEnum)
                             collection.Add(DeserializeMessage(reader, field.ServiceType, true));
                         else
                             collection.Add(Convert.ChangeType(reader.Value, field.Type));
@@ -87,7 +87,7 @@ namespace ProtoChannel.Web
 
                     field.Setter(instance, targetCollection);
                 }
-                else if (field.ServiceType != null)
+                else if (field.ServiceType != null && !field.ServiceType.Type.IsEnum)
                 {
                     if (!reader.Read())
                         throw new HttpException("Invalid request");
@@ -133,7 +133,7 @@ namespace ProtoChannel.Web
 
                     foreach (object item in (IEnumerable)value)
                     {
-                        if (field.ServiceType != null)
+                        if (field.ServiceType != null && !field.ServiceType.Type.IsEnum)
                             SerializeMessage(writer, field.ServiceType, item);
                         else
                             writer.WriteValue(item);
@@ -143,7 +143,7 @@ namespace ProtoChannel.Web
                 }
                 else 
                 {
-                    if (field.ServiceType != null)
+                    if (field.ServiceType != null && !field.ServiceType.Type.IsEnum)
                         SerializeMessage(writer, field.ServiceType, value);
                     else
                         writer.WriteValue(value);

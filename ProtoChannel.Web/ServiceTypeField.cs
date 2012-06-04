@@ -23,7 +23,7 @@ namespace ProtoChannel.Web
 
         public Type CollectionType { get; private set; }
 
-        public ServiceTypeField(ReflectionOptimizer.Getter getter, ReflectionOptimizer.Setter setter, int tag, bool isRequired, Type type)
+        public ServiceTypeField(ServiceAssembly assembly, ReflectionOptimizer.Getter getter, ReflectionOptimizer.Setter setter, int tag, bool isRequired, Type type)
         {
             Require.NotNull(getter, "getter");
             Require.NotNull(setter, "setter");
@@ -59,7 +59,7 @@ namespace ProtoChannel.Web
             var typeAttributes = Type.GetCustomAttributes(typeof(ProtoContractAttribute), true);
 
             if (typeAttributes.Length > 0)
-                ServiceType = new ServiceType(Type);
+                ServiceType = assembly.GetServiceType(Type);
         }
     }
 }

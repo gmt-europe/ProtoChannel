@@ -250,6 +250,8 @@ namespace ProtoChannel.Util
                 return default(TResult);
             else if (value is TTarget)
                 return (TResult)value;
+            else if (typeof(TTarget).IsEnum)
+                return (TResult)Enum.ToObject(typeof(TTarget), value);
             else
                 return (TResult)System.Convert.ChangeType(value, typeof(TTarget));
         }

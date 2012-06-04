@@ -23,7 +23,7 @@
             pos = document.URL.indexOf('/', pos + 3);
             var host = document.URL.substr(0, pos);
 
-            channel = new ServiceChannel(host, 0, { onReceived: new CallbackChannel() });
+            channel = new ServiceChannel(host, 1, { onReceived: new CallbackChannel() });
         };
 
         function submitPing() {

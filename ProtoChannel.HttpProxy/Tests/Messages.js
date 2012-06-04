@@ -3,7 +3,7 @@
         runs(function () {
             var me = this;
 
-            this.channel = createChannel(0, function () {
+            this.channel = createChannel(1, function () {
                 this.ping(
                     { payload: 'Payload' },
                     function (message) { me.response = message; }
@@ -26,7 +26,7 @@
             var me = this;
 
             this.channel = createChannel(
-                0,
+                1,
                 function () {
                     this.oneWayPing({ payload: 'Payload' });
                 },

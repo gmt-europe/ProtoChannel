@@ -21,14 +21,18 @@ ProtoChannel = Class.create({
         this._lastDownstreamTime = null;
         this._closed = false;
 
-        new Ajax.Request(
-            this._getUrl('channel', { PVER: protocol }),
-            {
-                method: 'get',
-                onSuccess: this._processConnect.bind(this),
-                onFailure: this._processFailure.bind(this)
-            }
-        );
+        if (this._options.channelId !== undefined) {
+            this._processChannelId(this._options.channelid);
+        } else {
+            new Ajax.Request(
+                this._getUrl('channel', { PVER: protocol }),
+                {
+                    method: 'get',
+                    onSuccess: this._processConnect.bind(this),
+                    onFailure: this._processFailure.bind(this)
+                }
+            );
+        }
     },
 
     _processFailure: function () {
@@ -44,7 +48,11 @@ ProtoChannel = Class.create({
         if (json.c === undefined)
             this._processFailure(transport);
 
-        this._cid = json.c;
+        this._processChannelId(json.c);
+    },
+
+    _processChannelId: function (channelId) {
+        this._cid = channelId;
 
         ProtoChannel._channels[this._cid] = this;
 
@@ -111,7 +119,11 @@ ProtoChannel = Class.create({
 
         var deserialized = new type;
 
-        deserialized.deserialize(message.p);
+        try {
+            deserialized.deserialize(message.p);
+        } catch (e) {
+            this._processFailure(e);
+        }
 
         switch (message.r) {
             case 0: this._processOneWayMessage(message, deserialized); break;
@@ -329,6 +341,10 @@ ProtoChannel = Class.create({
     _verifyNotClosed: function () {
         if (this._closed)
             throw 'Channel has been closed';
+    },
+
+    getChannelId: function () {
+        return this._cid;
     }
 });
 

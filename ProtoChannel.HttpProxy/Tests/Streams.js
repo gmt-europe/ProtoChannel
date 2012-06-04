@@ -4,7 +4,7 @@
             var me = this;
 
             this.channel = createChannel(
-                0,
+                1,
                 function () {
                     var me = this;
                     var aid = this.getSendStreamAid();
@@ -48,7 +48,7 @@
             var me = this;
 
             this.channel = createChannel(
-                0,
+                1,
                 function () {
                     this.streamRequest(
                         {},

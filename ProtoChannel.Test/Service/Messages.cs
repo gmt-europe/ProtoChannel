@@ -106,4 +106,49 @@ namespace ProtoChannel.Test.Service
     public class ThrowingTest
     {
     }
+
+    [ProtoContract]
+    public enum Gender
+    {
+        [ProtoEnum]
+        Male = 1,
+
+        [ProtoEnum]
+        Female = 2
+    }
+
+    [ProtoMessage(12), ProtoContract]
+    public class MessageWithEnum
+    {
+        [ProtoMember(1)]
+        public Gender Gender { get; set; }
+    }
+
+    [ProtoMessage(13), ProtoContract]
+    public class MessageWithNestedTypes
+    {
+        [ProtoMember(1)]
+        public NestedType NestedTypeMember { get; set; }
+
+        [ProtoContract]
+        public class NestedType
+        {
+            [ProtoMember(1)]
+            public NestedSubType NestedSubTypeMember { get; set; }
+
+            [ProtoContract]
+            public class NestedSubType
+            {
+                [ProtoMember(1)]
+                public int Value { get; set; }
+            }
+        }
+    }
+
+    [ProtoMessage(14), ProtoContract]
+    public class MessageWithCircularReference
+    {
+        [ProtoMember(1)]
+        public MessageWithCircularReference Message { get; set; }
+    }
 }

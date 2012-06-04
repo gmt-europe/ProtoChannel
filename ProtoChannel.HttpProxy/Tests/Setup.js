@@ -5,7 +5,7 @@
 
             this.connected = false;
             this.channel = createChannel(
-                0,
+                1,
                 function () { me.connected = true; }
             );
         });

@@ -17,6 +17,8 @@ namespace ProtoChannel.CodeGenerator
         {
             if (Program.ResolvedArguments.ServerServiceType == null)
                 throw new CommandLineArgumentException("Server service type is required when generating the Javascript client service");
+            if (Program.ResolvedArguments.ClientCallbackServiceType == null)
+                throw new CommandLineArgumentException("Client callback service type is required when generating the Javascript client service");
             if (Program.Arguments.JavascriptClientServiceName == null)
                 throw new CommandLineArgumentException("Javascript service class name is required when generating the Javascript client service");
             if (Program.Arguments.JavascriptCallbackServiceName == null)
@@ -41,7 +43,10 @@ namespace ProtoChannel.CodeGenerator
 
             foreach (var type in types.OrderBy(p => p.Type.FullName))
             {
-                WriteType(type);
+                if (type.Type.IsEnum)
+                    WriteEnumType(type);
+                else
+                    WriteType(type);
 
                 WriteLine();
             }
@@ -53,12 +58,27 @@ namespace ProtoChannel.CodeGenerator
             WriteCallbackChannel();
         }
 
+        private void WriteEnumType(ProtoType type)
+        {
+            WriteLine("{0} = {{", type.Type.Name);
+
+            var values = Enum.GetValues(type.Type);
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                WriteLine("    {0}: {1}{2}", values.GetValue(i), (int)values.GetValue(i), i < values.Length - 1 ? "," : "");
+            }
+
+            WriteLine("};");
+        }
+
         private void WriteType(ProtoType type)
         {
             if (type.MessageId.HasValue)
                 WriteLine("{0} = Class.create(ProtoMessage, {{", type.Type.Name);
             else
-                WriteLine("{0} = Class.create(ProtoType, {{", type.Type.Name);
+                WriteLine("{0} = Class.create(ProtoType" +
+                    ", {{", type.Type.Name);
 
             Indent();
 
@@ -157,13 +177,22 @@ namespace ProtoChannel.CodeGenerator
                             WriteLine("for (var i = 0; i < this.{0}.length; i++) {{", EncodeName(member.Name));
                             Indent();
 
-                            WriteLine("var item = this.{0}[i];", EncodeName(member.Name));
-                            WriteLine("if (!(item instanceof {0})) {{", member.Type.Name);
-                            Indent();
-                            WriteLine("item = new {0}(item);", member.Type.Name);
-                            Unindent();
-                            WriteLine("}");
-                            WriteLine("items.push(item.serialize());");
+                            if (member.Type.IsEnum)
+                            {
+                                WriteLine("items.push(this.{0}[i].serialize());", EncodeName(member.Name));
+                            }
+                            else
+                            {
+                                WriteLine("var item = this.{0}[i];", EncodeName(member.Name));
+
+                                WriteLine("if (!(item instanceof {0})) {{", member.Type.Name);
+                                Indent();
+                                WriteLine("item = new {0}(item);", member.Type.Name);
+                                Unindent();
+                                WriteLine("}");
+
+                                WriteLine("items.push(item.serialize());");
+                            }
 
                             Unindent();
                             WriteLine("}");
@@ -180,7 +209,7 @@ namespace ProtoChannel.CodeGenerator
 
                         Indent();
 
-                        if (GetProtoContractType(member.Type) == null)
+                        if (GetProtoContractType(member.Type) == null || member.Type.IsEnum)
                         {
                             WriteLine("message[{0}] = this.{1};", member.Tag, EncodeName(member.Name));
                         }
@@ -220,7 +249,7 @@ namespace ProtoChannel.CodeGenerator
                 WriteLine("if (message[{0}] !== undefined) {{", member.Tag);
                 Indent();
 
-                    if (GetProtoContractType(member.Type) == null)
+                    if (GetProtoContractType(member.Type) == null || member.Type.IsEnum)
                     {
                         WriteLine("this.{0} = message[{1}];", EncodeName(member.Name), member.Tag);
                     }
@@ -231,18 +260,44 @@ namespace ProtoChannel.CodeGenerator
                         WriteLine("for (var i = 0; i < message[{0}].length; i++) {{", member.Tag);
                         Indent();
 
+                        WriteLine("var value = message[{0}][i];", member.Tag);
+
+                        WriteLine("if (value === null) {");
+                        Indent();
+
+                        WriteLine("this.{0}.push(null);", EncodeName(member.Name));
+
+                        Unindent();
+                        WriteLine("} else {");
+                        Indent();
+
                         WriteLine("var item = new {0}();", member.Type.Name);
-                        WriteLine("item.deserialize(message[{0}][i]);", member.Tag);
+                        WriteLine("item.deserialize(value);");
                         WriteLine("this.{0}.push(item);", EncodeName(member.Name));
+
+                        Unindent();
+                        WriteLine("}");
 
                         Unindent();
                         WriteLine("}");
                     }
                     else
                     {
+                        WriteLine("if (message[{0}] === null) {{", member.Tag);
+                        Indent();
+
+                        WriteLine("this.{0} = null;", EncodeName(member.Name));
+
+                        Unindent();
+                        WriteLine("} else {");
+                        Indent();
+
                         WriteLine("var item = new {0}();", member.Type.Name);
                         WriteLine("item.deserialize(message[{0}]);", member.Tag);
                         WriteLine("this.{0} = item;", EncodeName(member.Name));
+
+                        Unindent();
+                        WriteLine("}");
                     }
 
                 Unindent();
@@ -376,6 +431,13 @@ namespace ProtoChannel.CodeGenerator
             if (value == null)
             {
                 return "null";
+            }
+            else if (value.GetType().IsEnum)
+            {
+                if (Enum.IsDefined(value.GetType(), value))
+                    return value.GetType().Name + "." + value;
+                else
+                    return Encode(0);
             }
             else if (value is string)
             {

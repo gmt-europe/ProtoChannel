@@ -17,7 +17,11 @@ namespace ProtoChannel.HttpProxy
 
         protected void Application_Start(object sender, EventArgs e)
         {
-            _host = new ProtoHost<ServerService>(new IPEndPoint(IPAddress.Loopback, 0));
+            _host = new ProtoHost<ServerService>(new IPEndPoint(IPAddress.Loopback, 0), new ProtoHostConfiguration
+            {
+                MinimumProtocolNumber = 1,
+                MaximumProtocolNumber = 1
+            });
 
             WebConfigurationManager.AppSettings["protochannel.host"] = _host.LocalEndPoint.ToString();
         }

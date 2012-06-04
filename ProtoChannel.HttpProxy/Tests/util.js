@@ -4,7 +4,7 @@
     var host = document.URL.substr(0, pos);
 
     if (protocolVersion === undefined)
-        protocolVersion = 0;
+        protocolVersion = 1;
 
     return new ServiceChannel(host, protocolVersion, {
         onConnected: connectCallback,
@@ -15,7 +15,7 @@
 function sendRequest(request) {
     var me = this;
 
-    this.channel = createChannel(0, function () {
+    this.channel = createChannel(1, function () {
         this.sendMessage(
                 request,
                 function (message) { me.response = message; }
