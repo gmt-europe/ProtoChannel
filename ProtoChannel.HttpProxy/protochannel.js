@@ -20,26 +20,30 @@ ProtoChannel = Class.create({
         this._downstreamId = 0;
         this._lastDownstreamTime = null;
         this._closed = false;
+        this._failed = false;
 
-        if (this._options.channelId !== undefined) {
-            this._processChannelId(this._options.channelid);
-        } else {
-            new Ajax.Request(
-                this._getUrl('channel', { PVER: protocol }),
-                {
-                    method: 'get',
-                    onSuccess: this._processConnect.bind(this),
-                    onFailure: this._processFailure.bind(this)
-                }
-            );
-        }
+        new Ajax.Request(
+            this._getUrl('channel', { PVER: protocol }),
+            {
+                method: 'get',
+                onSuccess: this._processConnect.bind(this),
+                onFailure: this._processFailure.bind(this),
+                onException: this._processException.bind(this)
+            }
+        );
     },
 
-    _processFailure: function () {
+    _processFailure: function (e) {
+        this._failed = true;
+
         if (Object.isFunction(this._options.onFailure))
-            this._options.onFailure.apply(this);
+            this._options.onFailure.apply(this, [e]);
         else
-            alert('Protocol failure');
+            alert('Protocol failure (' + e + ')');
+    },
+
+    _processException: function (connection, e) {
+        this._processFailure(e);
     },
 
     _processConnect: function (transport) {
@@ -48,11 +52,7 @@ ProtoChannel = Class.create({
         if (json.c === undefined)
             this._processFailure(transport);
 
-        this._processChannelId(json.c);
-    },
-
-    _processChannelId: function (channelId) {
-        this._cid = channelId;
+        this._cid = json.c;
 
         ProtoChannel._channels[this._cid] = this;
 
@@ -212,7 +212,8 @@ ProtoChannel = Class.create({
                 method: 'get',
                 onInteractive: function (transport) { me._processDownstreamProgress(transport, downstreamId); },
                 onSuccess: function (transport) { me._processDownstreamCompleted(transport, downstreamId); },
-                onFailure: this._processFailure.bind(this)
+                onFailure: this._processFailure.bind(this),
+                onException: this._processException.bind(this)
             }
         );
     },
@@ -250,7 +251,8 @@ ProtoChannel = Class.create({
                     })
                 },
                 method: 'post',
-                onFailure: this._processFailure.bind(this)
+                onFailure: this._processFailure.bind(this),
+                onException: this._processException.bind(this)
             }
         );
     },
@@ -272,7 +274,12 @@ ProtoChannel = Class.create({
         if (disposition === undefined)
             disposition = 'inline';
 
-        return this._getUrl('stream', { CID: this._cid, AID: aid, disposition: disposition });
+        var args = { CID: this._cid, disposition: disposition };
+
+        if (aid !== undefined)
+            args.AID = aid;
+
+        return this._getUrl('stream', args);
     },
 
     downloadStream: function (aid) {
@@ -332,13 +339,16 @@ ProtoChannel = Class.create({
                     req0_key: Object.toJSON(['close'])
                 },
                 method: 'post',
+                onSuccess: this._processClosed.bind(this),
                 onFailure: this._processFailure.bind(this),
-                onSuccess: this._processClosed.bind(this)
+                onException: this._processException.bind(this)
             }
         );
     },
 
     _verifyNotClosed: function () {
+        if (this._failed)
+            throw 'Connection is in a failed state';
         if (this._closed)
             throw 'Channel has been closed';
     },
