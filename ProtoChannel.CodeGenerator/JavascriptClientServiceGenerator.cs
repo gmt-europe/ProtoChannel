@@ -31,6 +31,22 @@ namespace ProtoChannel.CodeGenerator
         {
             var types = new List<ProtoType>();
 
+            if (Program.Arguments.JavascriptNamespace != null)
+            {
+                var sb = new StringBuilder();
+
+                foreach (string part in Program.Arguments.JavascriptNamespace.Split('.'))
+                {
+                    if (sb.Length > 0)
+                        sb.Append('.');
+                    sb.Append(part);
+
+                    WriteLine("if ({0} === undefined) {0} = {{}};", sb);
+                }
+
+                WriteLine();
+            }
+
             foreach (var type in Program.ResolvedArguments.SourceAssembly.GetTypes())
             {
                 if (GetProtoContractType(type) == null)
@@ -60,7 +76,7 @@ namespace ProtoChannel.CodeGenerator
 
         private void WriteEnumType(ProtoType type)
         {
-            WriteLine("{0} = {{", type.Type.Name);
+            WriteLine("{0} = {{", TypeName(type.Type));
 
             var values = Enum.GetValues(type.Type);
 
@@ -75,10 +91,9 @@ namespace ProtoChannel.CodeGenerator
         private void WriteType(ProtoType type)
         {
             if (type.MessageId.HasValue)
-                WriteLine("{0} = Class.create(ProtoMessage, {{", type.Type.Name);
+                WriteLine("{0} = Class.create(ProtoMessage, {{", TypeName(type.Type));
             else
-                WriteLine("{0} = Class.create(ProtoType" +
-                    ", {{", type.Type.Name);
+                WriteLine("{0} = Class.create(ProtoType, {{", TypeName(type.Type));
 
             Indent();
 
@@ -101,7 +116,7 @@ namespace ProtoChannel.CodeGenerator
             if (type.MessageId.HasValue)
             {
                 WriteLine();
-                WriteLine("ProtoRegistry.registerType({0}, {1});", type.Type.Name, type.MessageId);
+                WriteLine("ProtoRegistry.registerType({0}, {1});", TypeName(type.Type), type.MessageId);
             }
         }
 
@@ -138,7 +153,10 @@ namespace ProtoChannel.CodeGenerator
             {
                 foreach (var member in type.Members)
                 {
-                    WriteLine("this.{0} = {1};", EncodeName(member.Name), Encode(member.DefaultValue));
+                    if (member.IsCollection)
+                        WriteLine("this.{0} = [];", EncodeName(member.Name));
+                    else
+                        WriteLine("this.{0} = {1};", EncodeName(member.Name), Encode(member.DefaultValue));
                 }
 
                 WriteLine();
@@ -185,9 +203,9 @@ namespace ProtoChannel.CodeGenerator
                             {
                                 WriteLine("var item = this.{0}[i];", EncodeName(member.Name));
 
-                                WriteLine("if (!(item instanceof {0})) {{", member.Type.Name);
+                                WriteLine("if (!(item instanceof {0})) {{", TypeName(member.Type));
                                 Indent();
-                                WriteLine("item = new {0}(item);", member.Type.Name);
+                                WriteLine("item = new {0}(item);", TypeName(member.Type));
                                 Unindent();
                                 WriteLine("}");
 
@@ -216,9 +234,9 @@ namespace ProtoChannel.CodeGenerator
                         else
                         {
                             WriteLine("var item = this.{0};", EncodeName(member.Name));
-                            WriteLine("if (!(item instanceof {0})) {{", member.Type.Name);
+                            WriteLine("if (!(item instanceof {0})) {{", TypeName(member.Type));
                             Indent();
-                            WriteLine("item = new {0}(item);", member.Type.Name);
+                            WriteLine("item = new {0}(item);", TypeName(member.Type));
                             Unindent();
                             WriteLine("}");
                             
@@ -271,7 +289,7 @@ namespace ProtoChannel.CodeGenerator
                         WriteLine("} else {");
                         Indent();
 
-                        WriteLine("var item = new {0}();", member.Type.Name);
+                        WriteLine("var item = new {0}();", TypeName(member.Type));
                         WriteLine("item.deserialize(value);");
                         WriteLine("this.{0}.push(item);", EncodeName(member.Name));
 
@@ -292,7 +310,7 @@ namespace ProtoChannel.CodeGenerator
                         WriteLine("} else {");
                         Indent();
 
-                        WriteLine("var item = new {0}();", member.Type.Name);
+                        WriteLine("var item = new {0}();", TypeName(member.Type));
                         WriteLine("item.deserialize(message[{0}]);", member.Tag);
                         WriteLine("this.{0} = item;", EncodeName(member.Name));
 
@@ -310,7 +328,7 @@ namespace ProtoChannel.CodeGenerator
 
         private void WriteChannel()
         {
-            WriteLine("{0} = Class.create(ProtoChannel, {{", Program.Arguments.JavascriptClientServiceName);
+            WriteLine("{0} = Class.create(ProtoChannel, {{", TypeName(Program.Arguments.JavascriptClientServiceName));
             Indent();
 
             var methods = Program.ResolvedArguments.ServerServiceType.GetMethods().Where(p => GetProtoMethodAttribute(p) != null).ToArray();
@@ -325,9 +343,9 @@ namespace ProtoChannel.CodeGenerator
                     WriteLine("{0}: function (message, callback) {{", EncodeName(methods[i].Name));
                 Indent();
 
-                WriteLine("if (!(message instanceof {0}))", methods[i].GetParameters()[0].ParameterType.Name);
+                WriteLine("if (!(message instanceof {0}))", TypeName(methods[i].GetParameters()[0].ParameterType));
                 Indent();
-                WriteLine("message = new {0}(message);", methods[i].GetParameters()[0].ParameterType.Name);
+                WriteLine("message = new {0}(message);", TypeName(methods[i].GetParameters()[0].ParameterType));
                 Unindent();
 
                 WriteLine();
@@ -350,7 +368,7 @@ namespace ProtoChannel.CodeGenerator
 
         private void WriteCallbackChannel()
         {
-            WriteLine("{0} = Class.create(ProtoCallbackChannel, {{", Program.Arguments.JavascriptCallbackServiceName);
+            WriteLine("{0} = Class.create(ProtoCallbackChannel, {{", TypeName(Program.Arguments.JavascriptCallbackServiceName));
             Indent();
 
             var methods = Program.ResolvedArguments.ClientCallbackServiceType.GetMethods().Where(p => GetProtoMethodAttribute(p) != null).ToArray();
@@ -363,7 +381,7 @@ namespace ProtoChannel.CodeGenerator
 
             for (int i = 0; i < methods.Length; i++)
             {
-                WriteLine("{0}: {1}{2}", EncodeName(methods[i].Name), methods[i].GetParameters()[0].ParameterType.Name, i == methods.Length - 1 ? "" : ",");
+                WriteLine("{0}: {1}{2}", EncodeName(methods[i].Name), TypeName(methods[i].GetParameters()[0].ParameterType), i == methods.Length - 1 ? "" : ",");
             }
 
             Unindent();
@@ -435,7 +453,7 @@ namespace ProtoChannel.CodeGenerator
             else if (value.GetType().IsEnum)
             {
                 if (Enum.IsDefined(value.GetType(), value))
-                    return value.GetType().Name + "." + value;
+                    return TypeName(value.GetType()) + "." + value;
                 else
                     return Encode(0);
             }
@@ -482,6 +500,26 @@ namespace ProtoChannel.CodeGenerator
             sb.Append("'");
 
             return sb.ToString();
+        }
+
+        private string TypeName(string name)
+        {
+            if (Program.Arguments.JavascriptNamespace != null)
+                return Program.Arguments.JavascriptNamespace + "." + name;
+            else
+                return name;
+        }
+
+        private string TypeName(Type type)
+        {
+            string name = type.FullName;
+
+            int pos = name.LastIndexOf('.');
+
+            if (pos != -1)
+                name = name.Substring(pos + 1);
+
+            return TypeName(name.Replace('+', '.'));
         }
     }
 }
