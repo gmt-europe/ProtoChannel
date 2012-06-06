@@ -14,6 +14,19 @@ namespace ProtoChannel.Web
     {
         internal static ProtoProxyHost Proxy { get; private set; }
 
+        public static ProtoChannel.ProtoClient FindClient(string channelId)
+        {
+            if (channelId == null)
+                throw new ArgumentNullException("channelId");
+
+            var client = Proxy.FindClient(channelId);
+
+            if (client != null)
+                return client.Client;
+
+            return null;
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1065:DoNotRaiseExceptionsInUnexpectedLocations", Justification = "Cannot continue without configuration")]
         static ProtoHandler()
         {
