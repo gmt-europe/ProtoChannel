@@ -24,12 +24,12 @@ namespace ProtoChannel.Web
         {
             Require.NotNull(context, "context");
 
-            switch (context.Request.Path)
-            {
-                case "/pchx/channel": return CreateChannelRequest(context, asyncCallback, extraData);
-                case "/pchx/stream": return CreateStreamRequest(context, asyncCallback, extraData);
-                default: return new InvalidRequest(context, asyncCallback, extraData, "Invalid request");
-            }
+            if (context.Request.Path.EndsWith("/pchx/channel"))
+                return CreateChannelRequest(context, asyncCallback, extraData);
+            if (context.Request.Path.EndsWith("/pchx/stream"))
+                return CreateStreamRequest(context, asyncCallback, extraData);
+            else
+                return new InvalidRequest(context, asyncCallback, extraData, "Invalid request");
         }
 
         private static Request CreateChannelRequest(HttpContext context, AsyncCallback asyncCallback, object extraData)

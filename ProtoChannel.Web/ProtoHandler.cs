@@ -68,7 +68,7 @@ namespace ProtoChannel.Web
         public static void BeginRequest()
         {
             if (
-                HttpContext.Current.Request.Path == "/pchx/channel" &&
+                HttpContext.Current.Request.Path.EndsWith("/pchx/channel") &&
                 HttpContext.Current.Request.HttpMethod == "GET")
             {
                 // Disable GZip compression for the channel.
