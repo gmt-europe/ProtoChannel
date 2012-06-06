@@ -34,5 +34,10 @@ namespace ProtoChannel.HttpProxy
                 _host.Dispose();
             }
         }
+
+        protected void Application_BeginRequest(object sender, EventArgs e)
+        {
+            ProtoHandler.BeginRequest();
+        }
     }
 }

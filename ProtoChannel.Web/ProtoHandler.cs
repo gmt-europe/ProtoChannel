@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -50,7 +51,8 @@ namespace ProtoChannel.Web
                     if (
                         int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out port) &&
                         port > 0
-                    ) {
+                    )
+                    {
                         hostName = parts[0];
                         hostPort = port;
                     }
@@ -61,6 +63,41 @@ namespace ProtoChannel.Web
                 throw new ProtoChannelException("No host and port have been provided; specify them either in the protoChannel config section or through the protochannel.host appSetting");
 
             Proxy = new ProtoProxyHost(hostName, hostPort, Assembly.Load(config.ServiceAssembly));
+        }
+
+        public static void BeginRequest()
+        {
+            if (
+                HttpContext.Current.Request.Path == "/pchx/channel" &&
+                HttpContext.Current.Request.HttpMethod == "GET")
+            {
+                // Disable GZip compression for the channel.
+
+                string acceptEncoding = HttpContext.Current.Request.Headers["Accept-Encoding"];
+
+                if (acceptEncoding != null)
+                {
+                    var sb = new StringBuilder();
+
+                    foreach (string part in acceptEncoding.Split(','))
+                    {
+                        switch (part.Trim().ToLowerInvariant())
+                        {
+                            case "gzip":
+                            case "deflate":
+                                break;
+
+                            default:
+                                if (sb.Length > 0)
+                                    sb.Append(',');
+                                sb.Append(part);
+                                break;
+                        }
+                    }
+
+                    HttpContext.Current.Request.Headers["Accept-Encoding"] = sb.ToString();
+                }
+            }
         }
 
         public void ProcessRequest(HttpContext context)
