@@ -109,13 +109,20 @@ namespace ProtoChannel.Web
                 return new InvalidRequest(context, asyncCallback, extraData, "Invalid VER query string parameter");
 
             string associationIdString = context.Request.QueryString["AID"];
-            int associationId;
+            int? associationId = null;
 
-            if (
-                associationIdString == null ||
-                !int.TryParse(associationIdString, NumberStyles.None, CultureInfo.InvariantCulture, out associationId) ||
-                associationId < 0
-            )
+            if (associationIdString != null)
+            {
+                int value;
+
+                if (
+                    int.TryParse(associationIdString, NumberStyles.None, CultureInfo.InvariantCulture, out value) &&
+                    value >= 0
+                )
+                    associationId = value;
+            }
+
+            if (!associationId.HasValue && context.Request.HttpMethod != "POST")
                 return new InvalidRequest(context, asyncCallback, extraData, "Invalid AID query string parameter");
 
             var client = FindClient(context);
@@ -125,7 +132,7 @@ namespace ProtoChannel.Web
 
             switch (context.Request.HttpMethod)
             {
-                case "GET": return new StreamDownloadRequest(context, asyncCallback, extraData, client, associationId);
+                case "GET": return new StreamDownloadRequest(context, asyncCallback, extraData, client, associationId.Value);
                 case "POST": return new StreamUploadRequest(context, asyncCallback, extraData, client, associationId);
                 default: return new InvalidRequest(context, asyncCallback, extraData, "Cannot process request method");
             }

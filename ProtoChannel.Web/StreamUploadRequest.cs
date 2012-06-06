@@ -10,9 +10,9 @@ namespace ProtoChannel.Web
     internal class StreamUploadRequest : Request
     {
         private readonly ProtoProxyClient _client;
-        private readonly int _associationId;
+        private readonly int? _associationId;
 
-        public StreamUploadRequest(HttpContext context, AsyncCallback asyncCallback, object extraData, ProtoProxyClient client, int associationId)
+        public StreamUploadRequest(HttpContext context, AsyncCallback asyncCallback, object extraData, ProtoProxyClient client, int? associationId)
             : base(context, asyncCallback, extraData)
         {
             Require.NotNull(client, "client");
@@ -29,14 +29,32 @@ namespace ProtoChannel.Web
 
         private void HandleRequest()
         {
-            if (Context.Request.Files.Count != 1)
-                throw new HttpException("Expected exactly one file upload");
+            if (Context.Request.Files.Count > 1 && _associationId.HasValue)
+                throw new HttpException("AID must be provided in request with multiple file uploads");
 
-            var file = Context.Request.Files[0];
+            for (int i = 0; i < Context.Request.Files.Count; i++)
+            {
+                var file = Context.Request.Files[i];
 
-            int associationId = _client.Client.SendStream(file.InputStream, file.FileName, file.ContentType, _associationId);
+                string associationIdString = Context.Request.Form["AID_" + i];
 
-            Debug.Assert(_associationId == associationId);
+                if (
+                    associationIdString == null &&
+                    (!_associationId.HasValue || Context.Request.Form.Count > 1)
+                )
+                    throw new HttpException("AID wasn't provided in the request");
+
+                int associationId;
+
+                if (_associationId.HasValue)
+                    associationId = _associationId.Value;
+                else if (!int.TryParse(associationIdString, out associationId))
+                    throw new HttpException("Invalid AID");
+
+                int responseId = _client.Client.SendStream(file.InputStream, file.FileName, file.ContentType, associationId);
+
+                Debug.Assert(associationId == responseId);
+            }
         }
     }
 }
