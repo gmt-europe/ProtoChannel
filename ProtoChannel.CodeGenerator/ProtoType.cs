@@ -29,7 +29,7 @@ namespace ProtoChannel.CodeGenerator
 
             var members = new List<ProtoMember>();
 
-            foreach (var property in type.GetProperties())
+            foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
                 var attribute = GetProtoMemberAttribute(property);
 
@@ -45,7 +45,7 @@ namespace ProtoChannel.CodeGenerator
                 ));
             }
 
-            foreach (var field in type.GetFields())
+            foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
             {
                 var attribute = GetProtoMemberAttribute(field);
 
