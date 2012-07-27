@@ -13,6 +13,8 @@ namespace ProtoChannel.Web
 
         public ReflectionOptimizer.Setter Setter { get; private set; }
 
+        public ReflectionOptimizer.ShouldSerializeInvoker ShouldSerializeMethod { get; private set; }
+
         public int Tag { get; private set; }
 
         public bool IsRequired { get; private set; }
@@ -23,7 +25,7 @@ namespace ProtoChannel.Web
 
         public Type CollectionType { get; private set; }
 
-        public ServiceTypeField(ServiceAssembly assembly, ReflectionOptimizer.Getter getter, ReflectionOptimizer.Setter setter, int tag, bool isRequired, Type type)
+        public ServiceTypeField(ServiceAssembly assembly, ReflectionOptimizer.Getter getter, ReflectionOptimizer.Setter setter, ReflectionOptimizer.ShouldSerializeInvoker shouldSerializeMethod, int tag, bool isRequired, Type type)
         {
             Require.NotNull(getter, "getter");
             Require.NotNull(setter, "setter");
@@ -31,6 +33,7 @@ namespace ProtoChannel.Web
 
             Getter = getter;
             Setter = setter;
+            ShouldSerializeMethod = shouldSerializeMethod;
             Tag = tag;
             IsRequired = isRequired;
             Type = type;

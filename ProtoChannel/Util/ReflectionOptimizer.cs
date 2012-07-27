@@ -15,6 +15,7 @@ namespace ProtoChannel.Util
         public delegate void Setter(object obj, object value);
         public delegate object MessageInvoker(object service, object message);
         public delegate void VoidMessageInvoker(object service, object message);
+        public delegate bool ShouldSerializeInvoker(object message);
 
         public static Getter BuildGetter(MemberInfo memberInfo)
         {
@@ -332,6 +333,40 @@ namespace ProtoChannel.Util
             il.Emit(OpCodes.Ret);
 
             return (VoidMessageInvoker)method.CreateDelegate(typeof(VoidMessageInvoker));
+        }
+
+        public static ShouldSerializeInvoker BuildShouldSerializeInvoker(MethodInfo methodInfo)
+        {
+            Require.NotNull(methodInfo, "methodInfo");
+            Require.That(methodInfo.ReturnType == typeof(bool), "Method must return bool", "methodInfo");
+
+            var parameters = methodInfo.GetParameters();
+
+            Require.That(parameters.Length == 0, "Should serialize method may not have parameters", "methodInfo");
+
+            var method = new DynamicMethod(
+                methodInfo.DeclaringType.Name + "_" + methodInfo.Name + "_ShouldSerializeInvoker",
+                typeof(bool),
+                new[] { typeof(object) },
+                true
+            );
+
+            var il = method.GetILGenerator();
+
+            // Cast the target object
+
+            il.Emit(OpCodes.Ldarg_0);
+            il.Emit(OpCodes.Castclass, methodInfo.DeclaringType);
+
+            // Call the method
+
+            il.Emit(OpCodes.Callvirt, methodInfo);
+
+            // Return
+
+            il.Emit(OpCodes.Ret);
+
+            return (ShouldSerializeInvoker)method.CreateDelegate(typeof(ShouldSerializeInvoker));
         }
     }
 }

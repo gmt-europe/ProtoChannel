@@ -119,6 +119,12 @@ namespace ProtoChannel.Web
 
             foreach (var field in type.Fields.Values)
             {
+                if (
+                    field.ShouldSerializeMethod != null &&
+                    !field.ShouldSerializeMethod(message)
+                )
+                    continue;
+
                 writer.WritePropertyName(field.Tag.ToString(CultureInfo.InvariantCulture));
 
                 object value = field.Getter(message);

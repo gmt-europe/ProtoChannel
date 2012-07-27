@@ -45,6 +45,15 @@ namespace ProtoChannel.Test.Service
     {
         [ProtoMember(1, IsRequired = true)]
         public string Payload { get; set; }
+
+        public bool ShouldSerializeCalled { get; private set; }
+
+        internal bool ShouldSerializePayload()
+        {
+            ShouldSerializeCalled = true;
+
+            return true;
+        }
     }
 
     [ProtoMessage(6), ProtoContract]

@@ -37,7 +37,11 @@ namespace ProtoChannel.Test.MessageExchange
             using (var host = new ProtoHost<ServerService>(new IPEndPoint(IPAddress.Loopback, 0)))
             using (var client = new ClientService(host.LocalEndPoint, clientConfig))
             {
-                client.OneWayPing(new OneWayPing());
+                var response = new OneWayPing();
+
+                client.OneWayPing(response);
+
+                Assert.IsTrue(response.ShouldSerializeCalled);
 
                 callback.CallbackReceivedEvent.WaitOne();
             }

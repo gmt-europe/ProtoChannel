@@ -67,10 +67,16 @@ namespace ProtoChannel.Web
 
             var attribute = (ProtoMemberAttribute)attributes[0];
 
+            var shouldSerializeMember = member.DeclaringType.GetMethod(
+                "ShouldSerialize" + member.Name,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
+            );
+
             result.Add(new ServiceTypeField(
                 assembly,
                 ReflectionOptimizer.BuildGetter(member),
                 ReflectionOptimizer.BuildSetter(member, true),
+                shouldSerializeMember == null ? null : ReflectionOptimizer.BuildShouldSerializeInvoker(shouldSerializeMember),
                 attribute.Tag,
                 attribute.IsRequired,
                 memberType
