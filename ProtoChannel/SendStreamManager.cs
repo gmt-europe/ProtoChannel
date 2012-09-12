@@ -21,7 +21,11 @@ namespace ProtoChannel
             if (_streams.Count == MaxAssociationId)
                 throw new ProtoChannelException("No stream association ID's are available");
 
-            stream.Position = 0;
+            // Setting the position throws when the stream cannot be seeked,
+            // even when the position already is 0.
+
+            if (stream.Position != 0)
+                stream.Position = 0;
 
             var protoStream = new PendingSendStream(
                 stream.Length, streamName, contentType, GetNextAssociationId(associationId), stream
