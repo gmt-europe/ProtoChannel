@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("ProtoChannel.Web")]
@@ -17,5 +16,5 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("1abf9546-b6e3-4b2d-b3db-5746f1685a62")]
 
-[assembly: AssemblyVersion("1.2.1.0")]
-[assembly: AssemblyFileVersion("1.2.1.0")]
+[assembly: AssemblyVersion("1.3.0.0")]
+[assembly: AssemblyFileVersion("1.3.0.0")]
