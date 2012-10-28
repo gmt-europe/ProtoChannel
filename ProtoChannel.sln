@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtoChannel-4", "ProtoChannel\ProtoChannel-4.csproj", "{B43F28DC-926B-4B95-AF13-83F74F7BCC5A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProtoChannel.Test-4", "ProtoChannel.Test\ProtoChannel.Test-4.csproj", "{AE44E74F-982E-4FD1-A0BC-7F2C01A3F8E5}"
