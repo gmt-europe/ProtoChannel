@@ -262,7 +262,7 @@ namespace ProtoChannel
 
             if (_pendingRequests.Count == 1)
             {
-#if _NET_2
+#if _NET_2 || _NET_MD
                 ThreadPool.QueueUserWorkItem(ExecuteRequests, pendingRequest);
 #else
                 Task.Factory.StartNew(ExecuteRequests, pendingRequest);

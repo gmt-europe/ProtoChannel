@@ -85,6 +85,7 @@ Function Gather-Files
     
     Copy-Release -Project "ProtoChannel" -File "ProtoChannel-2.dll" -Type "ProtoChannel"
     Copy-Release -Project "ProtoChannel" -File "ProtoChannel-4.dll" -Type "ProtoChannel"
+    Copy-Release -Project "ProtoChannel" -File "ProtoChannel-MD.dll" -Type "ProtoChannel"
     Copy-Release -Project "ProtoChannel" -File "protobuf-net.dll" -Type "ProtoChannel"
     Copy-Release -Project "ProtoChannel" -File "Common.Logging.dll" -Type "ProtoChannel"
     Copy-Release -Project "ProtoChannel.CodeGenerator" -File "codegen.exe" -Type "Tools"

@@ -5,13 +5,17 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+#if !_NET_MD
 using Common.Logging;
+#endif
 
 namespace ProtoChannel
 {
     public abstract class ProtoHost : IDisposable
     {
+#if !_NET_MD
         private static readonly ILog Log = LogManager.GetLogger(typeof(ProtoHost<>));
+#endif
 
         public const int ProtocolVersion = Constants.ProtocolVersion;
 
@@ -81,7 +85,9 @@ namespace ProtoChannel
 
         private void Start()
         {
+#if !_NET_MD
             Log.InfoFormat("Setting up host at {0}", LocalEndPoint);
+#endif
 
             State = ProtoHostState.Listening;
 
@@ -92,7 +98,9 @@ namespace ProtoChannel
 
             _listener.BeginAcceptTcpClient(AcceptTcpClientCallback, null);
 
+#if !_NET_MD
             Log.InfoFormat("Listening for incoming connections at {0}", LocalEndPoint);
+#endif
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
@@ -134,7 +142,9 @@ namespace ProtoChannel
                 }
                 catch (Exception ex)
                 {
+#if !_NET_MD
                     Log.Info("Failed to accept TCP client", ex);
+#endif
                 }
 
                 try
@@ -143,7 +153,9 @@ namespace ProtoChannel
                 }
                 catch (Exception ex)
                 {
+#if !_NET_MD
                     Log.Warn("BeginAcceptTcpClient failed", ex);
+#endif
 
                     Close();
                 }
@@ -162,7 +174,9 @@ namespace ProtoChannel
             }
             catch (Exception ex)
             {
+#if !_NET_MD
                 Log.Warn("Exception from UnhandledException event", ex);
+#endif
             }
 
             try
@@ -171,7 +185,9 @@ namespace ProtoChannel
             }
             catch (Exception ex)
             {
+#if !_NET_MD
                 Log.Warn("Disposing connection failed", ex);
+#endif
             }
         }
 
@@ -208,7 +224,9 @@ namespace ProtoChannel
                 }
                 catch (Exception ex)
                 {
+#if !_NET_MD
                     Log.Error("Failed to create service", ex);
+#endif
                 }
 
                 if (client != null)

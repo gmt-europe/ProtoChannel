@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BA0CD91B-700B-4661-B585-C1526A0F2BA6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ProtoChannel</RootNamespace>
+    <AssemblyName>ProtoChannel-MD</AssemblyName>
+    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;_NET_MD</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;_NET_MD</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>..\Key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Code Analysis|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Code Analysis\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;_NET_MD</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Debug\ProtoChannel-4.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>..\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="protobuf-net">
+      <HintPath>..\Libraries\Protobuf-Net\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CloseMode.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="Client.cs" />
+    <Compile Include="HybridStreamManager.cs" />
+    <Compile Include="IProtoConnection.cs" />
+    <Compile Include="IProtoMessageDispatcher.cs" />
+    <Compile Include="IStreamManager.cs" />
+    <Compile Include="MemoryStreamManager.cs" />
+    <Compile Include="MessageKind.cs" />
+    <Compile Include="Messages\Error.cs" />
+    <Compile Include="Messages\HandshakeRequest.cs" />
+    <Compile Include="Messages\HandshakeResponse.cs" />
+    <Compile Include="Require.cs" />
+    <Compile Include="Messages\StartStream.cs" />
+    <Compile Include="OperationContext.cs" />
+    <Compile Include="PackageType.cs" />
+    <Compile Include="PendingMessage.cs" />
+    <Compile Include="PendingMessageManager.cs" />
+    <Compile Include="PendingPackage.cs" />
+    <Compile Include="PendingReceiveStream.cs" />
+    <Compile Include="PendingRequest.cs" />
+    <Compile Include="PendingSendStream.cs" />
+    <Compile Include="PendingStream.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProtoCallbackChannel.cs" />
+    <Compile Include="ProtoCallbackContract.cs" />
+    <Compile Include="ProtoChannelException.cs" />
+    <Compile Include="ProtoClient.cs" />
+    <Compile Include="ProtoClientConfiguration.cs" />
+    <Compile Include="ClientConnection.cs" />
+    <Compile Include="ProtocolError.cs" />
+    <Compile Include="ProtoConnection.cs" />
+    <Compile Include="ProtoHost.cs" />
+    <Compile Include="ProtoHostConfiguration.cs" />
+    <Compile Include="HostConnection.cs" />
+    <Compile Include="ProtoHostState.cs" />
+    <Compile Include="ProtoMessageAttribute.cs" />
+    <Compile Include="ProtoMethodAttribute.cs" />
+    <Compile Include="ProtoStream.cs" />
+    <Compile Include="SendStreamManager.cs" />
+    <Compile Include="Service.cs" />
+    <Compile Include="ServiceAssembly.cs" />
+    <Compile Include="ServiceMessage.cs" />
+    <Compile Include="ServiceMessageByIdCollection.cs" />
+    <Compile Include="ServiceMessageByTypeCollection.cs" />
+    <Compile Include="ServiceMethod.cs" />
+    <Compile Include="ServiceMethodCollection.cs" />
+    <Compile Include="ServiceRegistry.cs" />
+    <Compile Include="ReceiveStreamManager.cs" />
+    <Compile Include="StreamPackageType.cs" />
+    <Compile Include="DiskStreamManager.cs" />
+    <Compile Include="StreamSendRequest.cs" />
+    <Compile Include="TcpConnection.cs" />
+    <Compile Include="UnhandledExceptionEventHandler.cs" />
+    <Compile Include="Util\AsyncResultImpl.cs" />
+    <Compile Include="Util\BitConverterEx.cs" />
+    <Compile Include="Util\ByteUtil.cs" />
+    <Compile Include="Util\ReflectionOptimizer.cs" />
+    <Compile Include="Util\RingMemoryBufferManager.cs" />
+    <Compile Include="Util\RingMemoryPage.cs" />
+    <Compile Include="Util\RingMemoryStream.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Key.snk">
+      <Link>Key.snk</Link>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
