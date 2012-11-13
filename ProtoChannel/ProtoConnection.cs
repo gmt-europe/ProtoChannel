@@ -281,14 +281,30 @@ namespace ProtoChannel
                 {
                     object result;
 
-                    lock (Client.SyncRoot)
+                    var client = Client;
+
+                    if (client != null)
                     {
-                        using (OperationContext.SetScope(new OperationContext(this, CallbackChannel)))
+                        lock (client.SyncRoot)
                         {
-                            result = pendingRequest.Method.Invoke(
-                                Client.Instance, pendingRequest.Message
-                            );
+                            if (!client.IsDisposed)
+                            {
+                                using (OperationContext.SetScope(new OperationContext(this, CallbackChannel)))
+                                {
+                                    result = pendingRequest.Method.Invoke(
+                                        client.Instance, pendingRequest.Message
+                                    );
+                                }
+                            }
+                            else
+                            {
+                                return;
+                            }
                         }
+                    }
+                    else
+                    {
+                        return;
                     }
 
                     lock (SyncRoot)
