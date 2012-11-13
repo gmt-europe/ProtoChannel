@@ -267,6 +267,8 @@ namespace ProtoChannel.CodeGenerator
                 WriteLine("if (message[{0}] !== undefined) {{", member.Tag);
                 Indent();
 
+                    WriteLine("this.{0}Provided = true;", EncodeName(member.Name));
+
                     if (GetProtoContractType(member.Type) == null || member.Type.IsEnum)
                     {
                         WriteLine("this.{0} = message[{1}];", EncodeName(member.Name), member.Tag);
