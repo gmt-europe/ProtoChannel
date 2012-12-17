@@ -1328,6 +1328,26 @@
             The runtime version for the generated assembly
             </summary>
         </member>
+        <member name="P:ProtoBuf.Meta.RuntimeTypeModel.CompilerOptions.Accessibility">
+            <summary>
+            The acecssibility of the generated serializer
+            </summary>
+        </member>
+        <member name="T:ProtoBuf.Meta.RuntimeTypeModel.Accessibility">
+            <summary>
+            Type accessibility
+            </summary>
+        </member>
+        <member name="F:ProtoBuf.Meta.RuntimeTypeModel.Accessibility.Public">
+            <summary>
+            Available to all callers
+            </summary>
+        </member>
+        <member name="F:ProtoBuf.Meta.RuntimeTypeModel.Accessibility.Internal">
+            <summary>
+            Available to all callers in the same assembly, or assemblies specified via [InternalsVisibleTo(...)]
+            </summary>
+        </member>
         <member name="T:ProtoBuf.Meta.LockContentedEventArgs">
             <summary>
             Contains the stack-trace of the owning code when a lock-contention scenario is detected
