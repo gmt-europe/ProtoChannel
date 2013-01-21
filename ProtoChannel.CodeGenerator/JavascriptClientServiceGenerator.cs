@@ -11,6 +11,8 @@ namespace ProtoChannel.CodeGenerator
         public JavascriptClientServiceGenerator()
             : base(GetFilename(), 4)
         {
+            WriteLine("// ReSharper disable DuplicatingLocalDeclaration, UnusedParameter");
+            WriteLine();
         }
 
         private static string GetFilename()
