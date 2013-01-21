@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("GMT Europe B.V.")]
 [assembly: AssemblyProduct("ProtoChannel-4")]
-[assembly: AssemblyCopyright("GMT Europe B.V. © 2012")]
+[assembly: AssemblyCopyright("GMT Europe B.V. © 2012-2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -16,5 +16,5 @@ using System.Runtime.InteropServices;
 
 [assembly: Guid("2308e5b0-219b-4209-91be-eec9bb0e02dd")]
 
-[assembly: AssemblyVersion("1.7.0.0")]
-[assembly: AssemblyFileVersion("1.7.0.0")]
+[assembly: AssemblyVersion("1.8.0.0")]
+[assembly: AssemblyFileVersion("1.8.0.0")]
