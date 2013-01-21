@@ -96,5 +96,10 @@ namespace ProtoChannel.CodeGenerator
 
             return null;
         }
+
+        public override string ToString()
+        {
+            return Type.FullName;
+        }
     }
 }
