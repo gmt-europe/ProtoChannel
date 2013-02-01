@@ -7,6 +7,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+// ReSharper disable DuplicatingLocalDeclaration, UnusedParameter
+
 DefaultValueTests = Class.create(ProtoMessage, {
     initialize: function ($super, values) {
         this.stringValue = 'Default value';
@@ -34,12 +36,15 @@ DefaultValueTests = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.stringValueProvided = true;
             this.stringValue = message[1];
         }
         if (message[2] !== undefined) {
+            this.intValueProvided = true;
             this.intValue = message[2];
         }
         if (message[3] !== undefined) {
+            this.doubleValueProvided = true;
             this.doubleValue = message[3];
         }
     }
@@ -71,6 +76,7 @@ IntArrayTest = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.valuesProvided = true;
             this.values = message[1];
         }
     }
@@ -101,6 +107,7 @@ MessageWithCircularReference = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.messageProvided = true;
             if (message[1] === null) {
                 this.message = null;
             } else {
@@ -133,6 +140,7 @@ MessageWithEnum = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.genderProvided = true;
             this.gender = message[1];
         }
     }
@@ -152,8 +160,8 @@ MessageWithNestedTypes = Class.create(ProtoMessage, {
 
         if (this.nestedTypeMember !== null) {
             var item = this.nestedTypeMember;
-            if (!(item instanceof NestedType)) {
-                item = new NestedType(item);
+            if (!(item instanceof MessageWithNestedTypes.NestedType)) {
+                item = new MessageWithNestedTypes.NestedType(item);
             }
             message[1] = item.serialize();
         }
@@ -163,10 +171,11 @@ MessageWithNestedTypes = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.nestedTypeMemberProvided = true;
             if (message[1] === null) {
                 this.nestedTypeMember = null;
             } else {
-                var item = new NestedType();
+                var item = new MessageWithNestedTypes.NestedType();
                 item.deserialize(message[1]);
                 this.nestedTypeMember = item;
             }
@@ -176,7 +185,7 @@ MessageWithNestedTypes = Class.create(ProtoMessage, {
 
 ProtoRegistry.registerType(MessageWithNestedTypes, 13);
 
-NestedType = Class.create(ProtoType, {
+MessageWithNestedTypes.NestedType = Class.create(ProtoType, {
     initialize: function ($super, values) {
         this.nestedSubTypeMember = null;
 
@@ -188,8 +197,8 @@ NestedType = Class.create(ProtoType, {
 
         if (this.nestedSubTypeMember !== null) {
             var item = this.nestedSubTypeMember;
-            if (!(item instanceof NestedSubType)) {
-                item = new NestedSubType(item);
+            if (!(item instanceof MessageWithNestedTypes.NestedType.NestedSubType)) {
+                item = new MessageWithNestedTypes.NestedType.NestedSubType(item);
             }
             message[1] = item.serialize();
         }
@@ -199,10 +208,11 @@ NestedType = Class.create(ProtoType, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.nestedSubTypeMemberProvided = true;
             if (message[1] === null) {
                 this.nestedSubTypeMember = null;
             } else {
-                var item = new NestedSubType();
+                var item = new MessageWithNestedTypes.NestedType.NestedSubType();
                 item.deserialize(message[1]);
                 this.nestedSubTypeMember = item;
             }
@@ -210,7 +220,7 @@ NestedType = Class.create(ProtoType, {
     }
 });
 
-NestedSubType = Class.create(ProtoType, {
+MessageWithNestedTypes.NestedType.NestedSubType = Class.create(ProtoType, {
     initialize: function ($super, values) {
         this.value = 0;
 
@@ -229,6 +239,7 @@ NestedSubType = Class.create(ProtoType, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.valueProvided = true;
             this.value = message[1];
         }
     }
@@ -253,6 +264,7 @@ NestedType = Class.create(ProtoType, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.valueProvided = true;
             this.value = message[1];
         }
     }
@@ -285,11 +297,17 @@ NestedTypeArrayTest = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.valuesProvided = true;
             this.values = [];
             for (var i = 0; i < message[1].length; i++) {
-                var item = new NestedType();
-                item.deserialize(message[1][i]);
-                this.values.push(item);
+                var value = message[1][i];
+                if (value === null) {
+                    this.values.push(null);
+                } else {
+                    var item = new NestedType();
+                    item.deserialize(value);
+                    this.values.push(item);
+                }
             }
         }
     }
@@ -320,6 +338,7 @@ NestedTypeTest = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.valueProvided = true;
             if (message[1] === null) {
                 this.value = null;
             } else {
@@ -352,6 +371,7 @@ OneWayPing = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.payloadProvided = true;
             this.payload = message[1];
         }
     }
@@ -378,6 +398,7 @@ Ping = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.payloadProvided = true;
             this.payload = message[1];
         }
     }
@@ -404,6 +425,7 @@ Pong = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.payloadProvided = true;
             this.payload = message[1];
         }
     }
@@ -430,6 +452,7 @@ StreamRequest = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.lengthProvided = true;
             this.length = message[1];
         }
     }
@@ -456,6 +479,7 @@ StreamResponse = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.streamIdProvided = true;
             this.streamId = message[1];
         }
     }
@@ -482,12 +506,40 @@ StringArrayTest = Class.create(ProtoMessage, {
 
     deserialize: function (message) {
         if (message[1] !== undefined) {
+            this.valuesProvided = true;
             this.values = message[1];
         }
     }
 });
 
 ProtoRegistry.registerType(StringArrayTest, 7);
+
+StringTest = Class.create(ProtoMessage, {
+    initialize: function ($super, values) {
+        this.value = null;
+
+        $super(15, values);
+    },
+
+    serialize: function () {
+        var message = {};
+
+        if (this.value !== null) {
+            message[1] = this.value;
+        }
+
+        return message;
+    },
+
+    deserialize: function (message) {
+        if (message[1] !== undefined) {
+            this.valueProvided = true;
+            this.value = message[1];
+        }
+    }
+});
+
+ProtoRegistry.registerType(StringTest, 15);
 
 ThrowingTest = Class.create(ProtoMessage, {
     initialize: function ($super, values) {

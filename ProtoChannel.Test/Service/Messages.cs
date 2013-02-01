@@ -160,4 +160,11 @@ namespace ProtoChannel.Test.Service
         [ProtoMember(1)]
         public MessageWithCircularReference Message { get; set; }
     }
+
+    [ProtoMessage(15), ProtoContract]
+    public class StringTest
+    {
+        [ProtoMember(1)]
+        public string Value { get; set; }
+    }
 }

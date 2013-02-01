@@ -200,4 +200,23 @@
             expect(response instanceof MessageWithCircularReference).toBeTruthy();
         });
     });
+
+    it('date like strings are untouched', function () {
+        runs(function () {
+            var request = new StringTest({
+                value: '2011-01-01T00:00:00'
+            });
+
+            sendRequest.apply(this, [request]);
+        });
+
+        waitsFor(waitForResponse);
+
+        runs(function () {
+            var response = getResponse.apply(this);
+
+            expect(response instanceof StringTest).toBeTruthy();
+            expect(response.value).toEqual('2011-01-01T00:00:00');
+        });
+    });
 });

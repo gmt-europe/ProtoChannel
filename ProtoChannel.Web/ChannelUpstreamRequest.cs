@@ -57,6 +57,8 @@ namespace ProtoChannel.Web
             using (var stringReader = new StringReader(request))
             using (var reader = new JsonTextReader(stringReader))
             {
+                reader.DateParseHandling = DateParseHandling.None;
+
                 // Messages parsed as a dictionary with the following
                 // parameters:
                 //

@@ -115,6 +115,12 @@ namespace ProtoChannel.Test.Service
             return message;
         }
 
+        [ProtoMethod]
+        public StringTest StringTest(StringTest message)
+        {
+            return message;
+        }
+
         private class PendingGetStream
         {
             private readonly ServerCallbackService _callbackService;
