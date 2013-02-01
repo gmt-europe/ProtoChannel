@@ -648,6 +648,13 @@ ServiceChannel = Class.create(ProtoChannel, {
             message = new MessageWithCircularReference(message);
 
         this.sendMessage(message, callback);
+    },
+
+    stringTest: function (message, callback) {
+        if (!(message instanceof StringTest))
+            message = new StringTest(message);
+
+        this.sendMessage(message, callback);
     }
 });
 
