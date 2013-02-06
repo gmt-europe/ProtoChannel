@@ -194,8 +194,8 @@ ProtoChannel = Class.create({
     _startIeDownstream: function (downstreamId) {
         if (this._downstreamFrame === undefined) {
             this._downstreamFrame = document.createElement('iframe');
-            this._downstreamFrame.setAttribute('style', 'display:none');
-            document.appendChild(this._downstreamFrame);
+            this._downstreamFrame.style.display = 'none';
+            document.body.appendChild(this._downstreamFrame);
         }
 
         // DID query string parameter triggers the IFrame behavior.
