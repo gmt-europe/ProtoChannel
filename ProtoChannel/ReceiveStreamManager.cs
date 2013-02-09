@@ -98,7 +98,8 @@ namespace ProtoChannel
         {
             foreach (var stream in _streams.Values)
             {
-                stream.SetAsFailed(exception);
+                if (!stream.IsCompleted)
+                    stream.SetAsFailed(exception);
             }
         }
     }

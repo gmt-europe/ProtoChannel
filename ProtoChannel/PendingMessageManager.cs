@@ -55,7 +55,8 @@ namespace ProtoChannel
         {
             foreach (var message in _pendingMessages.Values)
             {
-                message.SetAsCompleted(exception, false);
+                if (!message.IsCompleted)
+                    message.SetAsCompleted(exception, false);
             }
         }
     }
