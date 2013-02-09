@@ -22,7 +22,8 @@ namespace ProtoChannel
         private readonly object _syncRoot = new object();
         private TcpListener _listener;
         private bool _disposed;
-        private readonly Dictionary<HostConnection, object> _connections = new Dictionary<HostConnection, object>();
+        private readonly Dictionary<HostConnection, Client> _connections = new Dictionary<HostConnection, Client>();
+        private readonly Dictionary<object, HostConnection> _clients = new Dictionary<object, HostConnection>();
         private readonly IStreamManager _streamManager;
         private AutoResetEvent _stateChangedEvent = new AutoResetEvent(false);
         private ProtoHostState _state;
@@ -197,7 +198,19 @@ namespace ProtoChannel
 
             lock (_syncRoot)
             {
-                _connections.Remove(connection);
+                Client hostClient;
+
+                if (_connections.TryGetValue(connection, out hostClient))
+                {
+                    _connections.Remove(connection);
+
+                    if (hostClient != null)
+                    {
+                        bool removed = _clients.Remove(hostClient.Instance);
+
+                        Debug.Assert(removed);
+                    }
+                }
 
                 // We progress to the closed state when all connections have
                 // been closed.
@@ -234,6 +247,7 @@ namespace ProtoChannel
                     var hostClient = new Client(client, ServiceAssembly, Service);
 
                     _connections[connection] = hostClient;
+                    _clients[client] = connection;
 
                     return hostClient;
                 }
@@ -245,6 +259,23 @@ namespace ProtoChannel
         }
 
         internal abstract object CreateServiceCore(int protocolNumber);
+
+        public bool CloseClient(object client)
+        {
+            Require.NotNull(client, "client");
+
+            HostConnection connection;
+
+            lock (_syncRoot)
+            {
+                if (!_clients.TryGetValue(client, out connection))
+                    return false;
+            }
+
+            connection.Dispose();
+
+            return true;
+        }
 
         public void Close()
         {
