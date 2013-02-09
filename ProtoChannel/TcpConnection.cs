@@ -7,6 +7,9 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+#if !_NET_MD
+using Common.Logging;
+#endif
 using ProtoBuf.Meta;
 using ProtoChannel.Util;
 
@@ -14,6 +17,10 @@ namespace ProtoChannel
 {
     internal abstract class TcpConnection : IDisposable
     {
+#if !_NET_MD
+        private static readonly ILog Log = LogManager.GetLogger(typeof(TcpConnection));
+#endif
+
         private bool _sending;
         private SslStream _sslStream;
         private RingMemoryStream _receiveStream;
@@ -254,8 +261,12 @@ namespace ProtoChannel
 
                     ReadAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
+#if !_NET_MD
+                    Log.Warn("Unexpected exception on read callback", ex);
+#endif
+
                     Dispose();
                 }
             }
@@ -400,8 +411,12 @@ namespace ProtoChannel
 
                     ProcessSendRequests();
                 }
-                catch
+                catch (Exception ex)
                 {
+#if !_NET_MD
+                    Log.Warn("Unexpected exception on write callback", ex);
+#endif
+
                     Dispose();
                 }
             }
