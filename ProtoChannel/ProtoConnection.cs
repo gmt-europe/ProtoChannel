@@ -776,6 +776,13 @@ namespace ProtoChannel
             {
                 if (!_disposed && disposing)
                 {
+                    // Cancel all outstanding requests.
+
+                    var disconnectException = new ProtoChannelException("Channel disconnected");
+
+                    _messageManager.SetError(disconnectException);
+                    _receiveStreamManager.SetError(disconnectException);
+
                     if (Client != null)
                     {
                         Client.Dispose();
