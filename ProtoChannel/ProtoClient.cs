@@ -9,13 +9,18 @@ namespace ProtoChannel
 {
     public class ProtoClient : IDisposable, IProtoConnection
     {
-        private bool _disposed;
         private ClientConnection _connection;
         private Exception _unhandledException;
+        private bool _disposed;
 
         public const int ProtocolVersion = Constants.ProtocolVersion;
 
         public ProtoClientConfiguration Configuration { get; private set; }
+
+        public bool IsDisposed
+        {
+            get { return _disposed || _connection == null; }
+        }
 
         public event EventHandler Disposed;
 
@@ -185,7 +190,7 @@ namespace ProtoChannel
 
         private void VerifyState()
         {
-            if (_disposed)
+            if (_disposed || _connection == null)
                 throw new ObjectDisposedException(GetType().Name);
             if (_unhandledException != null)
                 throw new ProtoChannelException("Client is in a faulted state", _unhandledException);
