@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ProtoChannel
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false, Inherited = true)]
     public sealed class ProtoCallbackContractAttribute : Attribute
     {
         public Type Type { get; private set; }
