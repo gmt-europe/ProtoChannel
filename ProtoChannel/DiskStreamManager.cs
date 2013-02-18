@@ -29,11 +29,9 @@ namespace ProtoChannel
             MaxStreamSize = maxStreamSize;
         }
 
-        public Stream GetStream(ProtoStream stream)
+        public Stream GetStream(long length)
         {
-            Require.NotNull(stream, "stream");
-
-            if (stream.Length > MaxStreamSize)
+            if (length > MaxStreamSize)
                 return null;
 
             while (true)

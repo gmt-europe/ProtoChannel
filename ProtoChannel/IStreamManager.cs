@@ -7,6 +7,6 @@ namespace ProtoChannel
 {
     public interface IStreamManager
     {
-        Stream GetStream(ProtoStream stream);
+        Stream GetStream(long length);
     }
 }

@@ -39,17 +39,15 @@ namespace ProtoChannel
             _memoryStreamManager = new MemoryStreamManager(maxMemoryStreamSize);
         }
 
-        public Stream GetStream(ProtoStream stream)
+        public Stream GetStream(long length)
         {
-            Require.NotNull(stream, "stream");
-
-            if (stream.Length > MaxStreamSize)
+            if (length > MaxStreamSize)
                 return null;
 
-            if (stream.Length > MaxMemoryStreamSize)
-                return _diskStreamManager.GetStream(stream);
+            if (length > MaxMemoryStreamSize)
+                return _diskStreamManager.GetStream(length);
             else
-                return _memoryStreamManager.GetStream(stream);
+                return _memoryStreamManager.GetStream(length);
         }
     }
 }
