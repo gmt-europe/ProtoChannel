@@ -17,6 +17,7 @@ namespace ProtoChannel
         private Assembly _serviceAssembly;
         private IStreamManager _streamManager;
         private object _callbackObject;
+        private TimeSpan? _keepAlive = TimeSpan.FromSeconds(30);
 
         public ProtoClientConfiguration()
         {
@@ -100,6 +101,17 @@ namespace ProtoChannel
                 VerifyNotFrozen();
 
                 _callbackObject = value;
+            }
+        }
+
+        public TimeSpan? KeepAlive
+        {
+            get { return _keepAlive; }
+            set
+            {
+                VerifyNotFrozen();
+
+                _keepAlive = value;
             }
         }
 

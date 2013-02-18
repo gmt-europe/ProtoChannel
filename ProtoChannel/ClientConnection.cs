@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using ProtoChannel.Util;
 
 namespace ProtoChannel
@@ -12,6 +13,7 @@ namespace ProtoChannel
         private readonly string _hostname;
         private bool _connected;
         private bool _disposed;
+        private Timer _timer;
 
         public ClientConnection(ProtoClient client, TcpClient tcpClient, string hostname, IStreamManager streamManager)
             : base(tcpClient, streamManager, client.ServiceAssembly, client)
@@ -107,6 +109,31 @@ namespace ProtoChannel
             IsAsync = true;
 
             Read();
+
+            // And start the keep alive timer.
+
+            StartKeepAliveTimer();
+        }
+
+        private void StartKeepAliveTimer()
+        {
+            if (!_client.Configuration.KeepAlive.HasValue)
+                return;
+
+            int keepAlive = (int)_client.Configuration.KeepAlive.Value.TotalMilliseconds;
+
+            _timer = new Timer(SendKeepAlive, null, keepAlive, keepAlive);
+        }
+
+        private void SendKeepAlive(object state)
+        {
+            lock (SyncRoot)
+            {
+                if (IsDisposed)
+                    return;
+
+                EndSendPackage(PackageType.Ping, BeginSendPackage());
+            }
         }
 
         protected override void RaiseUnhandledException(Exception exception)
@@ -119,11 +146,16 @@ namespace ProtoChannel
             if (!_disposed)
             {
                 var client = _client;
-
                 _client = null;
 
                 if (client != null)
                     client.Dispose();
+
+                var timer = _timer;
+                _timer = null;
+
+                if (timer != null)
+                    timer.Dispose();
 
                 _disposed = true;
             }

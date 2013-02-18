@@ -10,6 +10,8 @@ namespace ProtoChannel
         Error = 1,
         Handshake = 2,
         Message = 3,
-        Stream = 4
+        Stream = 4,
+        Ping = 5,
+        Pong = 6
     }
 }

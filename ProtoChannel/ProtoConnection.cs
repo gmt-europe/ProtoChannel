@@ -108,7 +108,8 @@ namespace ProtoChannel
                     break;
 
                 case PackageType.NoOp:
-                    // No-op's are just dropped.
+                case PackageType.Pong:
+                    // No-op's and pongs are just dropped.
                     break;
 
                 case PackageType.Message:
@@ -117,6 +118,10 @@ namespace ProtoChannel
 
                 case PackageType.Stream:
                     ProcessStreamPackage(package);
+                    break;
+
+                case PackageType.Ping:
+                    EndSendPackage(PackageType.Pong, BeginSendPackage());
                     break;
 
                 default:
