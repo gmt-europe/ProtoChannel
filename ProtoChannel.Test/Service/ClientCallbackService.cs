@@ -8,6 +8,7 @@ namespace ProtoChannel.Test.Service
     internal class ClientCallbackService
     {
         public ManualResetEvent CallbackReceivedEvent { get; private set; }
+        public string OneWayPingPayload { get; private set; }
 
         public ClientCallbackService()
         {
@@ -25,6 +26,8 @@ namespace ProtoChannel.Test.Service
         [ProtoMethod(IsOneWay = true)]
         public void OneWayPing(OneWayPing message)
         {
+            OneWayPingPayload = message.Payload;
+
             Console.WriteLine("One way ping received");
 
             CallbackReceivedEvent.Set();

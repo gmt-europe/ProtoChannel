@@ -2,11 +2,20 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+#if _NET_MD
+#pragma warning disable 0168
+#else
+using Common.Logging;
+#endif
 
 namespace ProtoChannel
 {
     internal class PendingSendStream : PendingStream
     {
+#if !_NET_MD
+        private static readonly ILog Log = LogManager.GetLogger(typeof(PendingSendStream));
+#endif
+
         private bool _disposed;
 
         public Stream Stream { get; private set; }
@@ -29,7 +38,17 @@ namespace ProtoChannel
             {
                 if (Stream != null)
                 {
-                    Stream.Dispose();
+                    try
+                    {
+                        Stream.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+#if !_NET_MD
+                        Log.Warn("Disposing send stream failed", ex);
+#endif
+                    }
+
                     Stream = null;
                 }
 

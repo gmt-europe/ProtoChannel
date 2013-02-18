@@ -18,7 +18,7 @@ namespace ProtoChannel.Test.Util
         {
             var result = new byte[TestData.Length];
 
-            using (var stream = new ProtoChannel.Util.RingMemoryStream(SmallBufferSize))
+            using (var stream = new RingMemoryStream(SmallBufferSize))
             {
                 stream.Write(TestData, 0, TestData.Length);
                 stream.Position = 0;
@@ -427,6 +427,28 @@ namespace ProtoChannel.Test.Util
             using (var stream = new RingMemoryStream(SmallBufferSize))
             {
                 stream.Seek(0, SeekOrigin.End);
+            }
+        }
+
+        [Test]
+        public void CanDecreaseLength()
+        {
+            using (var stream = new RingMemoryStream(SmallBufferSize))
+            {
+                stream.WriteByte(0);
+                stream.Position = 0;
+                stream.SetLength(0);
+            }
+        }
+
+        [Test]
+        [ExpectedException]
+        public void CannotDecreaseBeyondPosition()
+        {
+            using (var stream = new RingMemoryStream(SmallBufferSize))
+            {
+                stream.WriteByte(0);
+                stream.SetLength(0);
             }
         }
     }

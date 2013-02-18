@@ -62,7 +62,7 @@ namespace ProtoChannel.Demo.Shared
         public double DoubleValue { get; set; }
     }
 
-    [ProtoMessage(3), ProtoContract]
+    [ProtoMessage(3), ProtoContract, CLSCompliant(false)]
     public class StreamMessage
     {
         [ProtoMember(1, IsRequired = true)]

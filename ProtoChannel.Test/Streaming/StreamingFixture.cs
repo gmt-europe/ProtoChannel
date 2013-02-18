@@ -54,5 +54,96 @@ namespace ProtoChannel.Test.Streaming
                 Assert.True(callback.CallbackReceivedEvent.WaitOne(TimeSpan.FromSeconds(1)));
             }
         }
+
+        [Test]
+        public void LargeSendStream()
+        {
+            var callback = new ClientCallbackService();
+
+            var configuration = new ProtoClientConfiguration
+            {
+                CallbackObject = callback
+            };
+
+            using (var host = new ProtoHost<ServerService>(new IPEndPoint(IPAddress.Loopback, 0)))
+            using (var client = new ClientService(host.LocalEndPoint, configuration))
+            {
+                int streamId = client.SendStream(
+                    new MemoryStream(new byte[1 << 20]),
+                    "Payload.txt",
+                    "text/plain"
+                );
+
+                client.StreamUpload(new StreamResponse { StreamId = (uint)streamId });
+
+                Assert.True(callback.CallbackReceivedEvent.WaitOne(TimeSpan.FromSeconds(1)));
+            }
+        }
+
+        [Test]
+        public void SendStreamWithInitialReadFailure()
+        {
+            SendWithStreamFailure(1 << 20, StreamFailureType.InitialRead, true);
+        }
+
+        [Test]
+        public void SendStreamWithReadSecondBlockFailure()
+        {
+            SendWithStreamFailure(1 << 20, StreamFailureType.ReadSecondBlock, true);
+        }
+
+        [Test]
+        public void SendStreamWithDisposeFailure()
+        {
+            SendWithStreamFailure(1 << 20, StreamFailureType.Dispose, false);
+        }
+
+        [Test]
+        [ExpectedException]
+        public void SendStreamWithReadPositionFailure()
+        {
+            SendWithStreamFailure(1 << 20, StreamFailureType.ReadPosition, true);
+        }
+
+        [Test]
+        public void SendStreamWithInitialReadAndDisposeFailure()
+        {
+            SendWithStreamFailure(1 << 20, StreamFailureType.InitialRead | StreamFailureType.Dispose, true);
+        }
+
+        [Test]
+        public void SendStreamWithReadSecondBlockAndDisposeFailure()
+        {
+            SendWithStreamFailure(1 << 20, StreamFailureType.ReadSecondBlock | StreamFailureType.Dispose, true);
+        }
+
+        private void SendWithStreamFailure(long length, StreamFailureType type, bool expectFailure)
+        {
+            var callback = new ClientCallbackService();
+
+            var configuration = new ProtoClientConfiguration
+            {
+                CallbackObject = callback
+            };
+
+            using (var host = new ProtoHost<ServerService>(new IPEndPoint(IPAddress.Loopback, 0)))
+            using (var client = new ClientService(host.LocalEndPoint, configuration))
+            {
+                int streamId = client.SendStream(
+                    new FailingStream(length, type),
+                    "Payload.txt",
+                    "text/plain"
+                );
+
+                client.StreamUpload(new StreamResponse { StreamId = (uint)streamId });
+
+                Assert.True(callback.CallbackReceivedEvent.WaitOne(TimeSpan.FromSeconds(1)));
+
+                if (expectFailure)
+                    Assert.AreEqual("Receive stream failed", callback.OneWayPingPayload);
+                else
+                    Assert.AreNotEqual("Receive stream failed", callback.OneWayPingPayload);
+            }
+        }
     }
 }

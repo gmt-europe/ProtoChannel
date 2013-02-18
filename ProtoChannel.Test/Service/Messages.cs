@@ -33,7 +33,7 @@ namespace ProtoChannel.Test.Service
         public int Length { get; set; }
     }
 
-    [ProtoMessage(4), ProtoContract]
+    [ProtoMessage(4), ProtoContract, CLSCompliant(false)]
     public class StreamResponse
     {
         [ProtoMember(1, IsRequired = true)]

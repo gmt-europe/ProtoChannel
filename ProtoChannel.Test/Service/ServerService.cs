@@ -25,7 +25,7 @@ namespace ProtoChannel.Test.Service
             });
         }
 
-        [ProtoMethod(IsOneWay = true)]
+        [ProtoMethod(IsOneWay = true), CLSCompliant(false)]
         public void StreamUpload(StreamResponse stream)
         {
             Console.WriteLine("Stream response received");
@@ -37,7 +37,7 @@ namespace ProtoChannel.Test.Service
             callbackService.BeginGetStream((int)stream.StreamId, pendingStream.BeginGetStreamCallback, null);
         }
 
-        [ProtoMethod]
+        [ProtoMethod, CLSCompliant(false)]
         public StreamResponse StreamRequest(StreamRequest request)
         {
             Console.WriteLine("Stream request received");
@@ -132,12 +132,22 @@ namespace ProtoChannel.Test.Service
 
             public void BeginGetStreamCallback(IAsyncResult asyncResult)
             {
-                var stream = _callbackService.EndGetStream(asyncResult);
-
-                _callbackService.OneWayPing(new OneWayPing
+                try
                 {
-                    Payload = String.Format("Received stream: {0}, {1}, {2}", stream.StreamName, stream.Length, stream.ContentType)
-                });
+                    var stream = _callbackService.EndGetStream(asyncResult);
+
+                    _callbackService.OneWayPing(new OneWayPing
+                    {
+                        Payload = String.Format("Received stream: {0}, {1}, {2}", stream.StreamName, stream.Length, stream.ContentType)
+                    });
+                }
+                catch
+                {
+                    _callbackService.OneWayPing(new OneWayPing
+                    {
+                        Payload = String.Format("Receive stream failed")
+                    });
+                }
             }
         }
     }

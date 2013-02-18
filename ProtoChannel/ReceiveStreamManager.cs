@@ -51,14 +51,17 @@ namespace ProtoChannel
             return null;
         }
 
-        public ProtocolError? EndStream(int associationId)
+        public ProtocolError? EndStream(int associationId, bool success)
         {
             PendingReceiveStream stream;
 
             if (!_streams.TryGetValue(associationId, out stream))
                 return ProtocolError.InvalidStreamAssociationId;
 
-            stream.SetAsCompleted();
+            if (success)
+                stream.SetAsCompleted();
+            else
+                stream.SetAsFailed(new ProtoChannelException("Stream transfer failed"));
 
             bool wasDisposed = stream.IsDisposed;
 

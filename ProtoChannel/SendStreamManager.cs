@@ -99,14 +99,19 @@ namespace ProtoChannel
                 return null;
         }
 
-        private void RemoveStream(PendingSendStream stream)
+        public void RemoveStream(PendingSendStream stream)
         {
-            // The stream is not removed from the queue. Processing the queue
-            // knows that it should skip disposed streams.
+            Require.NotNull(stream, "stream");
 
-            _streams.Remove(stream.AssociationId);
+            if (_streams.ContainsKey(stream.AssociationId))
+            {
+                // The stream is not removed from the queue. Processing the queue
+                // knows that it should skip disposed streams.
 
-            stream.Dispose();
+                _streams.Remove(stream.AssociationId);
+
+                stream.Dispose();
+            }
         }
 
         public StreamSendRequest? GetSendRequest()
@@ -121,7 +126,7 @@ namespace ProtoChannel
                     break;
             }
 
-            if (stream == null)
+            if (stream == null || stream.IsDisposed)
                 return null;
 
             Debug.Assert(stream.IsAccepted);

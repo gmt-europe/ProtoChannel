@@ -315,7 +315,7 @@ namespace ProtoChannel.Util
         {
             VerifyNotDisposed();
 
-            Require.That(value >= _length, "Length cannot be decreased", "value");
+            Require.That(value >= _position, "Length cannot be less than the position", "value");
 
             _length = value;
 

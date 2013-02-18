@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
-using System.Threading;
 using ProtoChannel.Demo.Shared;
 
 namespace ProtoChannel.Demo.ProtoService
@@ -22,7 +20,7 @@ namespace ProtoChannel.Demo.ProtoService
             return message;
         }
 
-        [ProtoMethod(IsOneWay = true)]
+        [ProtoMethod(IsOneWay = true), CLSCompliant(false)]
         public void StreamMessage(StreamMessage message)
         {
             var callbackService = OperationContext.Current.GetCallbackChannel<ServerCallbackService>();

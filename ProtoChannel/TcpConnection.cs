@@ -7,7 +7,9 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-#if !_NET_MD
+#if _NET_MD
+#pragma warning disable 0168
+#else
 using Common.Logging;
 #endif
 using ProtoBuf.Meta;
@@ -43,6 +45,12 @@ namespace ProtoChannel
         {
             get { return _sendStream.Position; }
             set { _sendStream.Position = value; }
+        }
+
+        protected long WriteLength
+        {
+            get { return _sendStream.Length; }
+            set { _sendStream.SetLength(value); }
         }
 
         protected TcpConnection(TcpClient tcpClient)
@@ -205,7 +213,8 @@ namespace ProtoChannel
 
                 int read = stream.Read(page.Buffer, page.Offset, page.Count);
 
-                Debug.Assert(read == page.Count);
+                if (read != page.Count)
+                    throw new ProtoChannelException("Reading from stream did not read the expected number of bytes");
 
                 // Move the position forward to correspond with the data
                 // we've just written.

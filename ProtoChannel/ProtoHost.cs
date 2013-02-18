@@ -5,7 +5,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-#if !_NET_MD
+#if _NET_MD
+#pragma warning disable 0168
+#else
 using Common.Logging;
 #endif
 

@@ -3,17 +3,27 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using ProtoBuf.Meta;
 using ProtoChannel.Util;
 #if _NET_4
 using System.Threading.Tasks;
+#else
+using System.Threading;
+#endif
+#if _NET_MD
+#pragma warning disable 0168
+#else
+using Common.Logging;
 #endif
 
 namespace ProtoChannel
 {
     internal abstract class ProtoConnection : TcpConnection, IProtoConnection
     {
+#if !_NET_MD
+        private static readonly ILog Log = LogManager.GetLogger(typeof(ProtoConnection));
+#endif
+
         private static readonly byte[] FrameSpacing = new byte[3];
         private static readonly RuntimeTypeModel _typeModel = CreateTypeModel();
 
@@ -405,12 +415,6 @@ namespace ProtoChannel
             uint streamPackageTypeNumber = header & 0x7;
             int associationId = (int)(header >> 3);
 
-            if (streamPackageTypeNumber > 4)
-            {
-                SendError(ProtocolError.InvalidStreamPackageType);
-                return;
-            }
-
             // Process the stream package.
 
             switch ((StreamPackageType)streamPackageTypeNumber)
@@ -432,7 +436,12 @@ namespace ProtoChannel
                     break;
 
                 case StreamPackageType.EndStream:
-                    ProcessEndStreamPackage(associationId);
+                case StreamPackageType.StreamFailed:
+                    ProcessEndStreamPackage(associationId, (StreamPackageType)streamPackageTypeNumber != StreamPackageType.StreamFailed);
+                    break;
+
+                default:
+                    SendError(ProtocolError.InvalidStreamPackageType);
                     break;
             }
         }
@@ -507,9 +516,9 @@ namespace ProtoChannel
             ReadStream(stream.Stream, length);
         }
 
-        private void ProcessEndStreamPackage(int associationId)
+        private void ProcessEndStreamPackage(int associationId, bool success)
         {
-            var error = _receiveStreamManager.EndStream(associationId);
+            var error = _receiveStreamManager.EndStream(associationId, success);
 
             if (error.HasValue)
                 SendError(error.Value);
@@ -565,17 +574,19 @@ namespace ProtoChannel
             if (sendRequest.HasValue)
             {
                 if (sendRequest.Value.IsCompleted)
-                    SendStreamEnd(sendRequest.Value);
+                    SendStreamEnd(sendRequest.Value, true);
                 else
                     SendStreamData(sendRequest.Value);
             }
         }
 
-        private void SendStreamEnd(StreamSendRequest request)
+        private void SendStreamEnd(StreamSendRequest request, bool success)
         {
+            _sendStreamManager.RemoveStream(request.Stream);
+
             long packageStart = BeginSendPackage();
 
-            WriteStreamPackageHeader(request, StreamPackageType.EndStream);
+            WriteStreamPackageHeader(request, success ? StreamPackageType.EndStream : StreamPackageType.StreamFailed);
 
             EndSendPackage(PackageType.Stream, packageStart, false);
         }
@@ -588,9 +599,28 @@ namespace ProtoChannel
 
             WriteStreamPackageHeader(request, StreamPackageType.StreamData);
 
-            // Write the stream data.
+            // Write the stream data. If this fails, we send a stream
+            // failure instead.
 
-            WriteStream(request.Stream.Stream, request.Length);
+            try
+            {
+                WriteStream(request.Stream.Stream, request.Length);
+            }
+            catch (Exception ex)
+            {
+                // If the send stream failed, back up and send the stream
+                // failed package.
+
+#if !_NET_MD
+                Log.Warn("Exception while reading from stream", ex);
+#endif
+
+                WriteLength = WritePosition = packageStart;
+
+                SendStreamEnd(request, false);
+
+                return;
+            }
 
             request.Stream.Position += request.Length;
 

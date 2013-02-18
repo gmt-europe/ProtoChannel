@@ -72,6 +72,8 @@
     <Compile Include="Service\Messages.cs" />
     <Compile Include="Service\ServerCallbackService.cs" />
     <Compile Include="Service\ServerService.cs" />
+    <Compile Include="Streaming\FailingStream.cs" />
+    <Compile Include="Streaming\StreamFailureType.cs" />
     <Compile Include="Streaming\StreamingFixture.cs" />
     <Compile Include="Util\BitConverterExFixture.cs" />
     <Compile Include="Util\ByteUtilFixture.cs" />
