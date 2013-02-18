@@ -13,13 +13,11 @@ namespace ProtoChannel
         private bool _disposed;
 
         public Stream Stream { get; private set; }
-
         public bool IsAccepted { get; set; }
+        public override long Position { get; set; }
 
-        public long Position { get; set; }
-
-        public PendingSendStream(long length, string streamName, string contentType, int associationId, Stream stream)
-            : base(length, streamName, contentType, associationId)
+        public PendingSendStream(long length, string streamName, string contentType, StreamDisposition disposition, int associationId, Stream stream)
+            : base(length, streamName, contentType, disposition, associationId)
         {
             Require.NotNull(stream, "stream");
 

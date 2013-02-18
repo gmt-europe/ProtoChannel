@@ -22,6 +22,8 @@ namespace ProtoChannel.Demo
         private readonly TickCounter _connectOverhead = new TickCounter();
         private readonly TickCounter _disconnectOverhead = new TickCounter();
         private AutoResetEvent _clientCompletedEvent = new AutoResetEvent(false);
+        private Queue<StreamTransferItem> _pendingTransfers = new Queue<StreamTransferItem>();
+        private readonly Dictionary<TransferKey, ListViewItem> _transferItems = new Dictionary<TransferKey, ListViewItem>();
 
         internal TestForm(TestClientSettings settings, TestMode mode)
         {
@@ -31,7 +33,6 @@ namespace ProtoChannel.Demo
             else
                 _clientRunner = new WcfClientRunner(this, settings);
 #endif
-
 
             InitializeComponent();
         }
@@ -59,9 +60,18 @@ namespace ProtoChannel.Demo
                     _clients.Add(client, true);
                 }
 
+                client.StreamTransfer += client_StreamTransfer;
                 client.Completed += client_Completed;
 
                 client.Start();
+            }
+        }
+
+        void client_StreamTransfer(object sender, StreamTransferEventArgs e)
+        {
+            lock (_syncRoot)
+            {
+                _pendingTransfers.Enqueue(new StreamTransferItem((TestClient)sender, e));
             }
         }
 
@@ -138,6 +148,142 @@ namespace ProtoChannel.Demo
             lock (_syncRoot)
             {
                 _disconnectOverhead.Add(ticks);
+            }
+        }
+
+        private void _updateTransferring_Tick(object sender, EventArgs e)
+        {
+            _listView.BeginUpdate();
+
+            Queue<StreamTransferItem> queue;
+
+            lock (_syncRoot)
+            {
+                queue = _pendingTransfers;
+                _pendingTransfers = new Queue<StreamTransferItem>();
+            }
+
+            foreach (var item in queue)
+            {
+                switch (item.EventArgs.EventType)
+                {
+                    case StreamTransferEventType.Start:
+                        ProcessStartEvent(item);
+                        break;
+
+                    case StreamTransferEventType.Transfer:
+                        ProcessTransferEvent(item);
+                        break;
+
+                    case StreamTransferEventType.End:
+                        ProcessEndEvent(item);
+                        break;
+                }
+            }
+
+            _listView.EndUpdate();
+        }
+
+        private void ProcessStartEvent(StreamTransferItem item)
+        {
+            var key = new TransferKey(item.Client, item.EventArgs.StreamId);
+
+            if (_transferItems.ContainsKey(key))
+            {
+                Debug.Fail("Did not expect the item to already exist");
+                return;
+            }
+
+            var listViewItem = new ListViewItem
+            {
+                Text = item.EventArgs.StreamId.ToString(),
+                SubItems =
+                {
+                    item.EventArgs.StreamName,
+                    "",
+                    ""
+                }
+            };
+
+            UpdateListViewItem(listViewItem, item.EventArgs);
+
+            _transferItems.Add(key, listViewItem);
+
+            _listView.Items.Add(listViewItem);
+        }
+
+        private void UpdateListViewItem(ListViewItem listViewItem, StreamTransferEventArgs eventArgs)
+        {
+            listViewItem.SubItems[2].Text = eventArgs.Length.ToString();
+            listViewItem.SubItems[3].Text = (eventArgs.Transferred * 100 / eventArgs.Length).ToString() + " %";
+        }
+
+        private void ProcessTransferEvent(StreamTransferItem item)
+        {
+            var key = new TransferKey(item.Client, item.EventArgs.StreamId);
+            ListViewItem listViewItem;
+
+            if (!_transferItems.TryGetValue(key, out listViewItem))
+            {
+                Debug.Fail("Expected a transfer");
+                return;
+            }
+
+            UpdateListViewItem(listViewItem, item.EventArgs);
+        }
+
+        private void ProcessEndEvent(StreamTransferItem item)
+        {
+            var key = new TransferKey(item.Client, item.EventArgs.StreamId);
+            ListViewItem listViewItem;
+
+            if (!_transferItems.TryGetValue(key, out listViewItem))
+            {
+                Debug.Fail("Expected a transfer");
+                return;
+            }
+
+            _transferItems.Remove(key);
+
+            listViewItem.Remove();
+        }
+
+        private struct TransferKey
+        {
+            private readonly TestClient _client;
+            private readonly int _id;
+
+            public TransferKey(TestClient client, int id)
+            {
+                _client = client;
+                _id = id;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (!(obj is TransferKey))
+                    return false;
+
+                var other = (TransferKey)obj;
+
+                return _client == other._client && _id == other._id;
+            }
+
+            public override int GetHashCode()
+            {
+                return _client.GetHashCode() ^ _id.GetHashCode();
+            }
+        }
+
+        private class StreamTransferItem
+        {
+            public TestClient Client { get; private set; }
+            public StreamTransferEventArgs EventArgs { get; private set; }
+
+            public StreamTransferItem(TestClient client, StreamTransferEventArgs eventArgs)
+            {
+                Client = client;
+                EventArgs = eventArgs;
             }
         }
     }

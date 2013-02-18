@@ -10,11 +10,17 @@ namespace ProtoChannel
     {
         private const int MaxAssociationId = 0x1fffff; // 21 bits
 
+        private readonly IStreamTransferListener _streamTransferListener;
         private int _nextAssociationId;
         private readonly Queue<PendingSendStream> _sendQueue = new Queue<PendingSendStream>();
         private readonly Dictionary<int, PendingSendStream> _streams = new Dictionary<int, PendingSendStream>();
 
-        public int RegisterStream(Stream stream, string streamName, string contentType, int? associationId)
+        public SendStreamManager(IStreamTransferListener streamTransferListener)
+        {
+            _streamTransferListener = streamTransferListener;
+        }
+
+        public int RegisterStream(Stream stream, string streamName, string contentType, StreamDisposition disposition, int? associationId)
         {
             Require.NotNull(stream, "stream");
 
@@ -28,7 +34,7 @@ namespace ProtoChannel
                 stream.Position = 0;
 
             var protoStream = new PendingSendStream(
-                stream.Length, streamName, contentType, GetNextAssociationId(associationId), stream
+                stream.Length, streamName, contentType, disposition, GetNextAssociationId(associationId), stream
             );
 
             _streams.Add(protoStream.AssociationId, protoStream);
@@ -77,6 +83,8 @@ namespace ProtoChannel
             stream.IsAccepted = true;
 
             _sendQueue.Enqueue(stream);
+
+            RaiseEvent(stream, StreamTransferEventType.Start);
 
             return null;
         }
@@ -145,6 +153,12 @@ namespace ProtoChannel
                 RemoveStream(stream);
 
             return new StreamSendRequest(stream, length);
+        }
+
+        private void RaiseEvent(PendingStream stream, StreamTransferEventType eventType)
+        {
+            if (_streamTransferListener != null)
+                _streamTransferListener.RaiseStreamTransfer(stream, eventType);
         }
     }
 }

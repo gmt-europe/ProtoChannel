@@ -19,6 +19,20 @@ namespace ProtoChannel.Demo
                 ev(this, e);
         }
 
+        public event StreamTransferEventHandler StreamTransfer;
+
+        protected virtual void OnStreamTransfer(StreamTransferEventArgs e)
+        {
+            var ev = StreamTransfer;
+            if (ev != null)
+                ev(this, e);
+        }
+
+        public void RaiseStreamTransfer(StreamTransferEventArgs e)
+        {
+            OnStreamTransfer(e);
+        }
+
         protected TestClient(IStatistics statistics, TestClientSettings settings)
         {
             if (settings == null)

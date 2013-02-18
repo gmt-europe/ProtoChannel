@@ -4,11 +4,14 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Common.Logging;
 
 namespace ProtoChannel
 {
-    public class ProtoClient : IDisposable, IProtoConnection
+    public class ProtoClient : IDisposable, IProtoConnection, IStreamTransferListener
     {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(ProtoClient));
+
         private ClientConnection _connection;
         private Exception _unhandledException;
         private bool _disposed;
@@ -27,9 +30,31 @@ namespace ProtoChannel
         protected virtual void OnDisposed(EventArgs e)
         {
             var ev = Disposed;
-
             if (ev != null)
                 ev(this, e);
+        }
+
+        public event StreamTransferEventHandler StreamTransfer;
+
+        protected virtual void OnStreamTransfer(StreamTransferEventArgs e)
+        {
+            var ev = StreamTransfer;
+            if (ev != null)
+                ev(this, e);
+        }
+
+        void IStreamTransferListener.RaiseStreamTransfer(PendingStream stream, StreamTransferEventType eventType)
+        {
+            Require.NotNull(stream, "stream");
+
+            try
+            {
+                OnStreamTransfer(new StreamTransferEventArgs(stream, eventType));
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Exception while raising StreamTransfer event", ex);
+            }
         }
 
         internal ServiceAssembly ServiceAssembly { get; private set; }

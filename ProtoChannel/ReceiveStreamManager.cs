@@ -7,13 +7,15 @@ namespace ProtoChannel
     internal class ReceiveStreamManager
     {
         private readonly IStreamManager _streamManager;
+        private readonly IStreamTransferListener _streamTransferListener;
         private readonly Dictionary<int, PendingReceiveStream> _streams = new Dictionary<int, PendingReceiveStream>();
 
-        public ReceiveStreamManager(IStreamManager streamManager)
+        public ReceiveStreamManager(IStreamManager streamManager, IStreamTransferListener streamTransferListener)
         {
             Require.NotNull(streamManager, "streamManager");
 
             _streamManager = streamManager;
+            _streamTransferListener = streamTransferListener;
         }
 
         public bool RegisterStream(int associationId, Messages.StartStream message)
@@ -33,6 +35,8 @@ namespace ProtoChannel
             );
 
             _streams.Add(pendingStream.AssociationId, pendingStream);
+
+            RaiseEvent(pendingStream, StreamTransferEventType.Start);
 
             return true;
         }
@@ -70,10 +74,9 @@ namespace ProtoChannel
 
             RemoveStream(stream);
 
-            if (wasDisposed)
-                return ProtocolError.InvalidStreamPackageType;
-            else
-                return null;
+            RaiseEvent(stream, StreamTransferEventType.End);
+
+            return wasDisposed ? (ProtocolError?)ProtocolError.InvalidStreamPackageType : null;
         }
 
         private void RemoveStream(PendingReceiveStream stream)
@@ -107,6 +110,12 @@ namespace ProtoChannel
                 if (!stream.IsCompleted)
                     stream.SetAsFailed(exception);
             }
+        }
+
+        private void RaiseEvent(PendingStream pendingStream, StreamTransferEventType eventType)
+        {
+            if (_streamTransferListener != null)
+                _streamTransferListener.RaiseStreamTransfer(pendingStream, eventType);
         }
     }
 }

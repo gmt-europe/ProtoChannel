@@ -78,6 +78,7 @@
     <Compile Include="IProtoMessageDispatcher.cs" />
     <Compile Include="IStreamManager.cs" />
     <Compile Include="DummyLogging.cs" />
+    <Compile Include="IStreamTransferListener.cs" />
     <Compile Include="MemoryStreamManager.cs" />
     <Compile Include="MessageKind.cs" />
     <Compile Include="Messages\Error.cs" />
@@ -124,6 +125,9 @@
     <Compile Include="StreamPackageType.cs" />
     <Compile Include="DiskStreamManager.cs" />
     <Compile Include="StreamSendRequest.cs" />
+    <Compile Include="StreamTransferEventHandler.cs" />
+    <Compile Include="StreamTransferEventType.cs" />
+    <Compile Include="StreamType.cs" />
     <Compile Include="TcpConnection.cs" />
     <Compile Include="UnhandledExceptionEventHandler.cs" />
     <Compile Include="Util\AsyncResultImpl.cs" />

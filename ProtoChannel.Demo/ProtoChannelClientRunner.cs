@@ -65,6 +65,7 @@ namespace ProtoChannel.Demo
                 };
 
                 _service = new ClientService(settings.Host, Constants.ProtoChannelPort, configuration);
+                _service.StreamTransfer += (s, e) => RaiseStreamTransfer(e);
             }
 
             void _callbackService_StreamReceived(object sender, EventArgs e)
@@ -109,7 +110,7 @@ namespace ProtoChannel.Demo
                                 ? _smallStreamContent
                                 : _largeStreamContent
                             ),
-                            "Small stream.dat",
+                            Settings.MessageType == ClientMessageType.SmallStream ? "Small stream.dat" : "Large stream.dat",
                             "application/octet-stream"
                         );
 

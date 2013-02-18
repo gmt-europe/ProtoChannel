@@ -38,6 +38,7 @@ namespace ProtoChannel
         private readonly ReceiveStreamManager _receiveStreamManager;
         private readonly PendingMessageManager _messageManager = new PendingMessageManager();
         private readonly ServiceAssembly _serviceAssembly;
+        private readonly IStreamTransferListener _streamTransferListener;
         private readonly Queue<PendingRequest> _pendingRequests = new Queue<PendingRequest>();
         private bool _disposed;
 
@@ -50,15 +51,16 @@ namespace ProtoChannel
             get { return _typeModel; }
         }
 
-        protected ProtoConnection(TcpClient tcpClient, IStreamManager streamManager, ServiceAssembly serviceAssembly)
+        protected ProtoConnection(TcpClient tcpClient, IStreamManager streamManager, ServiceAssembly serviceAssembly, IStreamTransferListener streamTransferListener)
             : base(tcpClient)
         {
             Require.NotNull(streamManager, "streamManager");
             Require.NotNull(serviceAssembly, "serviceAssembly");
 
             _serviceAssembly = serviceAssembly;
-            _sendStreamManager = new SendStreamManager();
-            _receiveStreamManager = new ReceiveStreamManager(streamManager);
+            _streamTransferListener = streamTransferListener;
+            _sendStreamManager = new SendStreamManager(streamTransferListener);
+            _receiveStreamManager = new ReceiveStreamManager(streamManager, streamTransferListener);
         }
 
         protected override bool ProcessInput()
@@ -508,6 +510,8 @@ namespace ProtoChannel
             }
 
             ReadStream(stream.Stream, length);
+
+            RaiseEvent(stream, StreamTransferEventType.Transfer);
         }
 
         private void ProcessEndStreamPackage(int associationId, bool success)
@@ -583,6 +587,8 @@ namespace ProtoChannel
             WriteStreamPackageHeader(request, success ? StreamPackageType.EndStream : StreamPackageType.StreamFailed);
 
             EndSendPackage(PackageType.Stream, packageStart, false);
+
+            RaiseEvent(request.Stream, StreamTransferEventType.End);
         }
 
         private void SendStreamData(StreamSendRequest request)
@@ -599,6 +605,8 @@ namespace ProtoChannel
             try
             {
                 WriteStream(request.Stream.Stream, request.Length);
+
+                RaiseEvent(request.Stream, StreamTransferEventType.Transfer);
             }
             catch (Exception ex)
             {
@@ -662,7 +670,7 @@ namespace ProtoChannel
             lock (SyncRoot)
             {
                 associationId = _sendStreamManager.RegisterStream(
-                    stream, streamName, contentType, associationId
+                    stream, streamName, contentType, disposition, associationId
                 );
 
                 // Send the start of the stream.
@@ -803,6 +811,12 @@ namespace ProtoChannel
 
                 EndSendPackage(PackageType.Message, packageStart);
             }
+        }
+
+        private void RaiseEvent(PendingStream pendingStream, StreamTransferEventType eventType)
+        {
+            if (_streamTransferListener != null)
+                _streamTransferListener.RaiseStreamTransfer(pendingStream, eventType);
         }
 
         protected override void Dispose(bool disposing)

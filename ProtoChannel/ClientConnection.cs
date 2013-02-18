@@ -14,7 +14,7 @@ namespace ProtoChannel
         private bool _disposed;
 
         public ClientConnection(ProtoClient client, TcpClient tcpClient, string hostname, IStreamManager streamManager)
-            : base(tcpClient, streamManager, client.ServiceAssembly)
+            : base(tcpClient, streamManager, client.ServiceAssembly, client)
         {
             Require.NotNull(client, "client");
             Require.NotNull(hostname, "hostname");
