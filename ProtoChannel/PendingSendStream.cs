@@ -13,6 +13,8 @@ namespace ProtoChannel
 
         public bool IsAccepted { get; set; }
 
+        public long Position { get; set; }
+
         public PendingSendStream(long length, string streamName, string contentType, int associationId, Stream stream)
             : base(length, streamName, contentType, associationId)
         {

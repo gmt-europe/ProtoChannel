@@ -592,6 +592,8 @@ namespace ProtoChannel
 
             WriteStream(request.Stream.Stream, request.Length);
 
+            request.Stream.Position += request.Length;
+
             // And send the package.
 
             EndSendPackage(PackageType.Stream, packageStart, false);

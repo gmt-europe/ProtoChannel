@@ -127,7 +127,7 @@ namespace ProtoChannel
             Debug.Assert(stream.IsAccepted);
 
             long length = Math.Min(
-                stream.Stream.Length - stream.Stream.Position,
+                stream.Length - stream.Position,
                 Constants.StreamDataSize
             );
 
