@@ -31,6 +31,9 @@ namespace ProtoChannel.Test.Service
         [ProtoMember(1, IsRequired = false)]
         [DefaultValue(-1)]
         public int Length { get; set; }
+
+        [ProtoMember(2, IsRequired = false)]
+        public bool Attachment { get; set; }
     }
 
     [ProtoMessage(4), ProtoContract, CLSCompliant(false)]

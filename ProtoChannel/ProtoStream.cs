@@ -15,13 +15,16 @@ namespace ProtoChannel
 
         public string ContentType { get; private set; }
 
+        public StreamDisposition Disposition { get; set; }
+
         private Stream _stream;
 
-        public ProtoStream(long length, string streamName, string contentType, Stream stream)
+        public ProtoStream(long length, string streamName, string contentType, StreamDisposition disposition, Stream stream)
         {
             Length = length;
             StreamName = streamName;
             ContentType = contentType;
+            Disposition = disposition;
 
             _stream = stream;
         }

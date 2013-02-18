@@ -120,6 +120,7 @@
     <Compile Include="ServiceMethodCollection.cs" />
     <Compile Include="ServiceRegistry.cs" />
     <Compile Include="ReceiveStreamManager.cs" />
+    <Compile Include="StreamDisposition.cs" />
     <Compile Include="StreamPackageType.cs" />
     <Compile Include="DiskStreamManager.cs" />
     <Compile Include="StreamSendRequest.cs" />

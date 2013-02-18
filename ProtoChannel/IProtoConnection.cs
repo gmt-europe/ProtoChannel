@@ -9,6 +9,8 @@ namespace ProtoChannel
     {
         int SendStream(Stream stream, string streamName, string contentType);
 
+        int SendStream(Stream stream, string streamName, string contentType, StreamDisposition disposition);
+
         ProtoStream GetStream(int streamId);
 
         IAsyncResult BeginGetStream(int streamId, AsyncCallback callback, object asyncState);

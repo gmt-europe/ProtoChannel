@@ -16,5 +16,8 @@ namespace ProtoChannel.Messages
 
         [ProtoMember(3)]
         public string ContentType { get; set; }
+
+        [ProtoMember(4)]
+        public bool Attachment { get; set; }
     }
 }

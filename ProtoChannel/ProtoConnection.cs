@@ -644,10 +644,20 @@ namespace ProtoChannel
 
         public int SendStream(Stream stream, string streamName, string contentType)
         {
-            return SendStream(stream, streamName, contentType, null);
+            return SendStream(stream, streamName, contentType, StreamDisposition.Attachment);
+        }
+
+        public int SendStream(Stream stream, string streamName, string contentType, StreamDisposition disposition)
+        {
+            return SendStream(stream, streamName, contentType, disposition, null);
         }
 
         public int SendStream(Stream stream, string streamName, string contentType, int? associationId)
+        {
+            return SendStream(stream, streamName, contentType, StreamDisposition.Attachment, associationId);
+        }
+
+        public int SendStream(Stream stream, string streamName, string contentType, StreamDisposition disposition, int? associationId)
         {
             lock (SyncRoot)
             {
@@ -673,7 +683,8 @@ namespace ProtoChannel
                 {
                     Length = (uint)stream.Length,
                     StreamName = streamName,
-                    ContentType = contentType
+                    ContentType = contentType,
+                    Attachment = disposition == StreamDisposition.Attachment
                 });
 
                 // Send the package.

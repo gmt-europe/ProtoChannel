@@ -15,8 +15,9 @@ namespace ProtoChannel
         public Stream Stream { get; private set; }
         public bool IsCompleted { get; private set; }
         public bool IsRequested { get; set; }
+        public StreamDisposition Disposition { get; private set; }
 
-        public PendingReceiveStream(long length, string streamName, string contentType, int associationId, Stream stream)
+        public PendingReceiveStream(long length, string streamName, string contentType, StreamDisposition disposition, int associationId, Stream stream)
             : base(length, streamName, contentType, associationId)
         {
             Require.NotNull(stream, "stream");
@@ -25,6 +26,7 @@ namespace ProtoChannel
             // of the stream.
 
             Stream = stream;
+            Disposition = disposition;
         }
 
         public IAsyncResult GetAsyncResult(AsyncCallback callback, object asyncState)
@@ -80,7 +82,7 @@ namespace ProtoChannel
             result.Stream.Position = 0;
 
             return new ProtoStream(
-                result.Length, result.StreamName, result.ContentType, result.Stream
+                result.Length, result.StreamName, result.ContentType, result.Disposition, result.Stream
             );
         }
     }

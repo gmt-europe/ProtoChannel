@@ -157,16 +157,26 @@ namespace ProtoChannel
 
         public int SendStream(Stream stream, string streamName, string contentType)
         {
+            return SendStream(stream, streamName, contentType, StreamDisposition.Attachment);
+        }
+
+        public int SendStream(Stream stream, string streamName, string contentType, StreamDisposition disposition)
+        {
             VerifyState();
 
-            return SendStream(stream, streamName, contentType, null);
+            return SendStream(stream, streamName, contentType, disposition, null);
         }
 
         internal int SendStream(Stream stream, string streamName, string contentType, int? associationId)
         {
+            return SendStream(stream, streamName, contentType, StreamDisposition.Attachment, associationId);
+        }
+
+        internal int SendStream(Stream stream, string streamName, string contentType, StreamDisposition disposition, int? associationId)
+        {
             VerifyState();
 
-            return _connection.SendStream(stream, streamName, contentType, associationId);
+            return _connection.SendStream(stream, streamName, contentType, disposition, associationId);
         }
 
         public ProtoStream GetStream(int streamId)

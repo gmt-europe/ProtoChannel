@@ -18,15 +18,18 @@ namespace ProtoChannel
 
         public bool RegisterStream(int associationId, Messages.StartStream message)
         {
-            var protoStream = new ProtoStream(message.Length, message.StreamName, message.ContentType, null);
-
-            var stream = _streamManager.GetStream(protoStream);
+            var stream = _streamManager.GetStream(message.Length);
 
             if (stream == null)
                 return false;
 
             var pendingStream = new PendingReceiveStream(
-                message.Length, message.StreamName, message.ContentType, associationId, stream
+                message.Length,
+                message.StreamName,
+                message.ContentType,
+                message.Attachment ? StreamDisposition.Attachment : StreamDisposition.Inline,
+                associationId,
+                stream
             );
 
             _streams.Add(pendingStream.AssociationId, pendingStream);

@@ -39,7 +39,7 @@
             this.channel.close();
 
             expect(this.response instanceof OneWayPing).toBeTruthy();
-            expect(this.response.payload).toEqual('Received stream: Upload.txt, 9, text/plain');
+            expect(this.response.payload).toEqual('Received stream: Upload.txt, 9, text/plain, Attachment');
         });
     });
 

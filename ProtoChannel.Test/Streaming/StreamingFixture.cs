@@ -14,13 +14,29 @@ namespace ProtoChannel.Test.Streaming
         [Test]
         public void RequestStream()
         {
+            RequestStream(StreamDisposition.Attachment);
+        }
+
+        [Test]
+        public void RequestInlineStream()
+        {
+            RequestStream(StreamDisposition.Inline);
+        }
+
+        public void RequestStream(StreamDisposition disposition)
+        {
             using (var host = new ProtoHost<ServerService>(new IPEndPoint(IPAddress.Loopback, 0)))
             using (var client = new ClientService(host.LocalEndPoint))
             {
-                var response = client.StreamRequest(new StreamRequest());
+                var response = client.StreamRequest(new StreamRequest
+                {
+                    Attachment = disposition == StreamDisposition.Attachment
+                });
 
                 using (var protoStream = client.EndGetStream(client.BeginGetStream((int)response.StreamId, null, null)))
                 {
+                    Assert.AreEqual(protoStream.Disposition, disposition);
+
                     using (var stream = protoStream.DetachStream())
                     using (var reader = new StreamReader(stream))
                     {
@@ -32,6 +48,17 @@ namespace ProtoChannel.Test.Streaming
 
         [Test]
         public void SendStream()
+        {
+            SendStream(StreamDisposition.Attachment);
+        }
+
+        [Test]
+        public void SendInlineStream()
+        {
+            SendStream(StreamDisposition.Inline);
+        }
+
+        private void SendStream(StreamDisposition disposition)
         {
             var callback = new ClientCallbackService();
 
@@ -46,12 +73,14 @@ namespace ProtoChannel.Test.Streaming
                 int streamId = client.SendStream(
                     new MemoryStream(Encoding.UTF8.GetBytes("Payload")),
                     "Payload.txt",
-                    "text/plain"
+                    "text/plain",
+                    disposition
                 );
 
                 client.StreamUpload(new StreamResponse { StreamId = (uint)streamId });
 
                 Assert.True(callback.CallbackReceivedEvent.WaitOne(TimeSpan.FromSeconds(1)));
+                Assert.True(callback.OneWayPingPayload.Contains(disposition.ToString()));
             }
         }
 

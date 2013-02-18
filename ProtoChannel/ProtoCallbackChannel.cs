@@ -14,6 +14,11 @@ namespace ProtoChannel
             return Connection.SendStream(stream, streamName, contentType);
         }
 
+        public int SendStream(Stream stream, string streamName, string contentType, StreamDisposition disposition)
+        {
+            return Connection.SendStream(stream, streamName, contentType, disposition);
+        }
+
         public ProtoStream GetStream(int streamId)
         {
             return EndGetStream(BeginGetStream(streamId, null, null));
