@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>ProtoChannel</id>
+    <version>$version$</version>
+    <authors>GMT Europe B.V.</authors>
+    <description>.NET TCP/IP protocol based on Protobuf.Net with support for asynchronous AJAX communication.</description>
+    <projectUrl>https://github.com/gmt-europe/ProtoChannel</projectUrl>
+    <licenseUrl>http://www.gnu.org/licenses/lgpl-3.0.html</licenseUrl>
+    <dependencies>
+      <dependency id="Common.Logging" />
+      <dependency id="protobuf-net" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\ProtoChannel\bin\Release\ProtoChannel-2.dll" target="Lib\Net20" />
+    <file src="..\ProtoChannel\bin\Release\ProtoChannel-4.dll" target="Lib\Net40" />
+    <file src="..\ProtoChannel\bin\Release\ProtoChannel-MD.dll" target="Lib\MonoAndroid" />
+    <file src="..\ProtoChannel.CodeGenerator\bin\Release\*.exe" target="Tools" />
+  </files>
+</package>

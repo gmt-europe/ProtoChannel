@@ -436,6 +436,7 @@ ProtoRegistry.registerType(Pong, 2);
 StreamRequest = Class.create(ProtoMessage, {
     initialize: function ($super, values) {
         this.length = -1;
+        this.attachment = false;
 
         $super(3, values);
     },
@@ -446,6 +447,9 @@ StreamRequest = Class.create(ProtoMessage, {
         if (this.length !== -1) {
             message[1] = this.length;
         }
+        if (this.attachment !== false) {
+            message[2] = this.attachment;
+        }
 
         return message;
     },
@@ -454,6 +458,10 @@ StreamRequest = Class.create(ProtoMessage, {
         if (message[1] !== undefined) {
             this.lengthProvided = true;
             this.length = message[1];
+        }
+        if (message[2] !== undefined) {
+            this.attachmentProvided = true;
+            this.attachment = message[2];
         }
     }
 });

@@ -48,6 +48,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IStatistics.cs" />
+    <Compile Include="ListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="ProtoService\ClientCallbackService.cs" />
     <Compile Include="ProtoService\ServerCallbackService.cs" />
     <Compile Include="TestClientSettings.cs" />
