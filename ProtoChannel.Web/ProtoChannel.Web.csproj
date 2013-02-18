@@ -58,6 +58,7 @@
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\Libraries\JSON\Newtonsoft.Json.dll</HintPath>
+      <Aliases>JSON</Aliases>
     </Reference>
     <Reference Include="protobuf-net, Version=2.0.0.480, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

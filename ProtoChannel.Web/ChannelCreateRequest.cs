@@ -1,11 +1,13 @@
-﻿using System;
+﻿extern alias JSON;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using Newtonsoft.Json;
+using JSON::Newtonsoft.Json;
 
 namespace ProtoChannel.Web
 {
