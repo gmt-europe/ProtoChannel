@@ -77,6 +77,7 @@
     <Compile Include="IProtoConnection.cs" />
     <Compile Include="IProtoMessageDispatcher.cs" />
     <Compile Include="IStreamManager.cs" />
+    <Compile Include="DummyLogging.cs" />
     <Compile Include="MemoryStreamManager.cs" />
     <Compile Include="MessageKind.cs" />
     <Compile Include="Messages\Error.cs" />

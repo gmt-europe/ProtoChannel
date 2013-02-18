@@ -70,6 +70,7 @@
     <Compile Include="CloseMode.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Client.cs" />
+    <Compile Include="DummyLogging.cs" />
     <Compile Include="HybridStreamManager.cs" />
     <Compile Include="IProtoConnection.cs" />
     <Compile Include="IProtoMessageDispatcher.cs" />
