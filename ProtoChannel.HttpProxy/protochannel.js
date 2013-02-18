@@ -268,13 +268,10 @@ ProtoChannel = Class.create({
         return aid;
     },
 
-    getStreamUrl: function (aid, disposition) {
+    getStreamUrl: function (aid) {
         this._verifyNotClosed();
 
-        if (disposition === undefined)
-            disposition = 'inline';
-
-        var args = { CID: this._cid, disposition: disposition };
+        var args = { CID: this._cid };
 
         if (aid !== undefined)
             args.AID = aid;
