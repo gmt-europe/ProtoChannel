@@ -13,6 +13,7 @@ namespace ProtoChannel
         public int StreamId { get; private set; }
         public long Transferred { get; private set; }
         public StreamTransferEventType EventType { get; private set; }
+        public StreamType StreamType { get; private set; }
 
         internal StreamTransferEventArgs(PendingStream stream, StreamTransferEventType eventType)
         {
@@ -25,6 +26,7 @@ namespace ProtoChannel
             StreamId = stream.AssociationId;
             Transferred = stream.Position;
             EventType = eventType;
+            StreamType = stream is PendingSendStream ? StreamType.Send : StreamType.Receive;
         }
     }
 
