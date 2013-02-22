@@ -24,9 +24,24 @@ namespace ProtoChannel
             ContentType = stream.ContentType;
             Disposition = stream.Disposition;
             StreamId = stream.AssociationId;
-            Transferred = stream.Position;
             EventType = eventType;
             StreamType = stream is PendingSendStream ? StreamType.Send : StreamType.Receive;
+
+            switch (eventType)
+            {
+                case StreamTransferEventType.Start:
+                    Transferred = 0;
+                    break;
+
+                case StreamTransferEventType.End:
+                    Transferred = Length;
+                    break;
+
+                default:
+                    if (!stream.IsDisposed)
+                        Transferred = stream.Position;
+                    break;
+            }
         }
     }
 
