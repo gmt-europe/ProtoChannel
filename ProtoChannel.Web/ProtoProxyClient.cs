@@ -19,6 +19,7 @@ namespace ProtoChannel.Web
         private uint _nextCallbackAssociationId;
         private readonly Dictionary<uint, AsyncResultImpl<object>> _pendingCallbacks = new Dictionary<uint, AsyncResultImpl<object>>();
         private DateTime _lastInteraction;
+        private bool _disposing;
 
         public string Key { get; private set; }
 
@@ -32,7 +33,9 @@ namespace ProtoChannel.Web
 
             _host = host;
             Key = key;
+
             Client = client;
+            Client.Disposed += (s, e) => Dispose();
 
             _lastInteraction = DateTime.Now;
         }
@@ -223,8 +226,10 @@ namespace ProtoChannel.Web
         {
             lock (_syncRoot)
             {
-                if (!_disposed)
+                if (!_disposed && !_disposing)
                 {
+                    _disposing = true;
+
                     _host.RemoveClient(this);
 
                     DetachDownstream();

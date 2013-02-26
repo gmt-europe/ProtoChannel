@@ -63,7 +63,7 @@ namespace ProtoChannel.Web
                 var client = FindClient(context);
 
                 if (client == null)
-                    return new InvalidRequest(context, asyncCallback, extraData, "Invalid CID query string parameter");
+                    return new InvalidRequest(context, asyncCallback, extraData, "No connection");
 
                 return new ChannelDownstreamRequest(context, asyncCallback, extraData, client);
             }
@@ -88,7 +88,7 @@ namespace ProtoChannel.Web
             var client = FindClient(context);
 
             if (client == null)
-                return new InvalidRequest(context, asyncCallback, extraData, "Invalid CID query string parameter");
+                return new InvalidRequest(context, asyncCallback, extraData, "No connection");
 
             return new ChannelUpstreamRequest(context, asyncCallback, extraData, client);
         }
@@ -128,7 +128,7 @@ namespace ProtoChannel.Web
             var client = FindClient(context);
 
             if (client == null)
-                return new InvalidRequest(context, asyncCallback, extraData, "Invalid CID query string parameter");
+                return new InvalidRequest(context, asyncCallback, extraData, "No connection");
 
             switch (context.Request.HttpMethod)
             {
