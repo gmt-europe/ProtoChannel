@@ -18,7 +18,7 @@ namespace ProtoChannel
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(ProtoConnection));
 
-        private static readonly byte[] FrameSpacing = new byte[3];
+        private static readonly byte[] FrameSpacing = new byte[4];
         private static readonly RuntimeTypeModel _typeModel = CreateTypeModel();
 
         private static RuntimeTypeModel CreateTypeModel()
@@ -71,14 +71,14 @@ namespace ProtoChannel
             {
                 // Is the header in the buffer?
 
-                if (ReadAvailable < 3)
+                if (ReadAvailable < 4)
                     return false;
 
                 byte[] buffer = new byte[4];
 
                 buffer[0] = 0;
 
-                Read(buffer, 1, buffer.Length - 1);
+                Read(buffer, 0, buffer.Length);
 
                 uint header = BitConverterEx.ToNetworkUInt32(buffer, 0);
 
@@ -149,19 +149,19 @@ namespace ProtoChannel
         {
             // We need at least three bytes for a valid message.
 
-            if (package.Length < 3)
+            if (package.Length < 4)
             {
                 SendError(ProtocolError.InvalidPackageLength);
                 return;
             }
 
-            uint length = package.Length - 3;
+            uint length = package.Length - 4;
 
             byte[] buffer = new byte[4];
 
             buffer[0] = 0;
 
-            Read(buffer, 1, buffer.Length - 1);
+            Read(buffer, 0, buffer.Length);
 
             uint header = BitConverterEx.ToNetworkUInt32(buffer, 0);
 
@@ -355,7 +355,7 @@ namespace ProtoChannel
 
             byte[] buffer = BitConverterEx.GetNetworkBytes(header);
 
-            Write(buffer, 1, buffer.Length - 1);
+            Write(buffer, 0, buffer.Length);
 
             // Write the association ID.
 
@@ -395,7 +395,7 @@ namespace ProtoChannel
 
         private void ProcessStreamPackage(PendingPackage package)
         {
-            if (package.Length < 3)
+            if (package.Length < 4)
             {
                 SendError(ProtocolError.InvalidPackageLength);
                 return;
@@ -407,7 +407,7 @@ namespace ProtoChannel
 
             buffer[0] = 0;
 
-            Read(buffer, 1, buffer.Length - 1);
+            Read(buffer, 0, buffer.Length);
 
             uint header = BitConverterEx.ToNetworkUInt32(buffer, 0);
 
@@ -421,7 +421,7 @@ namespace ProtoChannel
             switch ((StreamPackageType)streamPackageTypeNumber)
             {
                 case StreamPackageType.StartStream:
-                    ProcessStartStreamPackage(associationId, (int)package.Length - 3);
+                    ProcessStartStreamPackage(associationId, (int)package.Length - 4);
                     break;
 
                 case StreamPackageType.AcceptStream:
@@ -433,7 +433,7 @@ namespace ProtoChannel
                     break;
 
                 case StreamPackageType.StreamData:
-                    ProcessStreamDataPackage(associationId, (int)package.Length - 3);
+                    ProcessStreamDataPackage(associationId, (int)package.Length - 4);
                     break;
 
                 case StreamPackageType.EndStream:
@@ -473,7 +473,7 @@ namespace ProtoChannel
 
             // Write the header.
 
-            Write(buffer, 1, buffer.Length - 1);
+            Write(buffer, 0, buffer.Length);
 
             // And send the package.
 
@@ -549,13 +549,13 @@ namespace ProtoChannel
 
             WritePosition = packageStart;
 
-            long messageLength = position - packageStart - 3;
+            long messageLength = position - packageStart - 4;
 
             uint messageHeader = (uint)messageLength << 3 | (uint)packageType;
 
             var buffer = BitConverterEx.GetNetworkBytes(messageHeader);
 
-            Write(buffer, 1, buffer.Length - 1);
+            Write(buffer, 0, buffer.Length);
 
             WritePosition = position;
 
@@ -640,7 +640,7 @@ namespace ProtoChannel
 
             var buffer = BitConverterEx.GetNetworkBytes(header);
 
-            Write(buffer, 1, buffer.Length - 1);
+            Write(buffer, 0, buffer.Length);
         }
 
         protected void SendError(ProtocolError error)
@@ -688,7 +688,7 @@ namespace ProtoChannel
 
                 var buffer = BitConverterEx.GetNetworkBytes(header);
 
-                Write(buffer, 1, buffer.Length - 1);
+                Write(buffer, 0, buffer.Length);
 
                 // Write the details of the request.
 
@@ -753,7 +753,7 @@ namespace ProtoChannel
 
                 var buffer = BitConverterEx.GetNetworkBytes(header);
 
-                Write(buffer, 1, buffer.Length - 1);
+                Write(buffer, 0, buffer.Length);
 
                 // Write the association ID.
 
@@ -806,7 +806,7 @@ namespace ProtoChannel
 
                 var buffer = BitConverterEx.GetNetworkBytes(header);
 
-                Write(buffer, 1, buffer.Length - 1);
+                Write(buffer, 0, buffer.Length);
 
                 // Write the message.
 
