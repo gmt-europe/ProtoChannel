@@ -8,8 +8,8 @@
     <projectUrl>https://github.com/gmt-europe/ProtoChannel</projectUrl>
     <licenseUrl>http://www.gnu.org/licenses/lgpl-3.0.html</licenseUrl>
     <dependencies>
-      <dependency id="Common.Logging" />
-      <dependency id="protobuf-net" />
+      <dependency id="Common.Logging" version="2.0.0" />
+      <dependency id="protobuf-net" version="2.0.0.621" />
     </dependencies>
   </metadata>
   <files>
