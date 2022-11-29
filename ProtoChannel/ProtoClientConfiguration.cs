@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.Security;
 using System.Reflection;
+using System.Security.Authentication;
 using System.Text;
 
 namespace ProtoChannel
@@ -18,6 +19,7 @@ namespace ProtoChannel
         private IStreamManager _streamManager;
         private object _callbackObject;
         private TimeSpan? _keepAlive = TimeSpan.FromSeconds(30);
+        private SslProtocols _securityProtocol = SslProtocols.Tls;
 
         public ProtoClientConfiguration()
         {
@@ -33,6 +35,17 @@ namespace ProtoChannel
                 VerifyNotFrozen();
 
                 _secure = value;
+            }
+        }
+
+        public SslProtocols SecurityProtocol
+        {
+            get { return _securityProtocol; }
+            set
+            {
+                VerifyNotFrozen();
+
+                _securityProtocol = value;
             }
         }
 

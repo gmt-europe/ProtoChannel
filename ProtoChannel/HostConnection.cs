@@ -37,6 +37,7 @@ namespace ProtoChannel
                         _host.Configuration.Certificate,
                         _host.Configuration.ValidationCallback,
                         AuthenticateAsServerCallback,
+                        _host.Configuration.SecurityProtocol,
                         null
                     );
                 }

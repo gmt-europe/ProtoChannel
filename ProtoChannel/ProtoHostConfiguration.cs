@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.Security;
 using System.Reflection;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
@@ -20,6 +21,7 @@ namespace ProtoChannel
         private int _maximumProtocolNumber;
         private Assembly _serviceAssembly;
         private IStreamManager _streamManager;
+        private SslProtocols _securityProtocol = SslProtocols.Tls;
 
         public ProtoHostConfiguration()
         {
@@ -35,6 +37,17 @@ namespace ProtoChannel
                 VerifyNotFrozen();
 
                 _secure = value;
+            }
+        }
+
+        public SslProtocols SecurityProtocol
+        {
+            get { return _securityProtocol; }
+            set
+            {
+                VerifyNotFrozen();
+
+                _securityProtocol = value;
             }
         }
 

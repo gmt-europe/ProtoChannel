@@ -38,5 +38,27 @@ namespace ProtoChannel.Test.ChannelSetup
             {
             }
         }
+
+        [Test]
+        public void SecureConnectWithTls12Server()
+        {
+            var hostConfig = new ProtoHostConfiguration
+            {
+                Secure = true,
+                Certificate = GetCertificate(),
+                SecurityProtocol = (System.Security.Authentication.SslProtocols)3072 // This is TLS1.2
+            };
+ 
+            var clientConfig = new ProtoClientConfiguration
+            {
+                Secure = true,
+                SecurityProtocol = unchecked((System.Security.Authentication.SslProtocols)0xffffffff) // Configure the client to support any TLS version
+            };
+
+            using (var host = new ProtoHost<ServerService>(new IPEndPoint(IPAddress.Loopback, 0), hostConfig))
+            using (new ClientService(host.LocalEndPoint, clientConfig))
+            {
+            }
+        }
     }
 }

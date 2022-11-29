@@ -62,7 +62,7 @@ namespace ProtoChannel
             _stream = _tcpClient.GetStream();
         }
 
-        protected void AuthenticateAsClient(RemoteCertificateValidationCallback validationCallback, string targetHost)
+        protected void AuthenticateAsClient(RemoteCertificateValidationCallback validationCallback, string targetHost, SslProtocols securityProtocol)
         {
             Require.NotNull(targetHost, "targetHost");
 
@@ -76,7 +76,7 @@ namespace ProtoChannel
                 _sslStream.AuthenticateAsClient(
                     targetHost,
                     null,
-                    SslProtocols.Tls,
+                    securityProtocol,
                     false /* checkCertificateRevocation */
                 );
 
@@ -84,7 +84,7 @@ namespace ProtoChannel
             }
         }
 
-        protected void BeginAuthenticateAsServer(X509Certificate certificate, RemoteCertificateValidationCallback validationCallback, AsyncCallback callback, object asyncState)
+        protected void BeginAuthenticateAsServer(X509Certificate certificate, RemoteCertificateValidationCallback validationCallback, AsyncCallback callback, SslProtocols securityProtocol, object asyncState)
         {
             Require.NotNull(certificate, "certificate");
 
@@ -100,7 +100,7 @@ namespace ProtoChannel
                 _sslStream.BeginAuthenticateAsServer(
                     certificate,
                     false /* clientCertificateRequired */,
-                    SslProtocols.Tls,
+                    securityProtocol,
                     false /* checkCertificateRevocation */,
                     callback,
                     asyncState

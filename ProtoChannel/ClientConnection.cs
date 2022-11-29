@@ -33,7 +33,8 @@ namespace ProtoChannel
             {
                 AuthenticateAsClient(
                     _client.Configuration.ValidationCallback,
-                    _hostname
+                    _hostname,
+                    _client.Configuration.SecurityProtocol
                 );
             }
 
